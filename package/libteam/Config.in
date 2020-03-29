@@ -1,0 +1,13 @@
+config BR2_PACKAGE_LIBTEAM
+	bool "libteam"
+	select BR2_PACKAGE_JANSSON
+	select BR2_PACKAGE_LIBDAEMON
+	select BR2_PACKAGE_LIBNL
+	select BR2_PACKAGE_LIBNL_TOOLS
+	help
+	  The purpose of the Team driver is to provide a mechanism to
+	  team multiple NICs (ports) into one logical one (teamdev) at
+	  L2 layer. The process is called "channel bonding", "Ethernet
+	  bonding", "channel teaming", "link aggregation", etc.
+
+	  https://github.com/jpirko/libteam
