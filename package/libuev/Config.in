@@ -1,0 +1,9 @@
+config BR2_PACKAGE_LIBUEV
+	bool "libuev"
+	help
+	  libuEv is small event loop wraping the Linux epoll() family
+	  of APIs, similar to the more established libevent and libev.
+	  The µ in the name refers both to its limited feature set and
+	  the size of the library.
+
+	  https://github.com/troglobit/libuev
