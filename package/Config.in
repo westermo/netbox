@@ -1,3 +1,4 @@
+source "$BR2_EXTERNAL_NETBOX_PATH/package/finit/Config.in"
 source "$BR2_EXTERNAL_NETBOX_PATH/package/libteam/Config.in"
 source "$BR2_EXTERNAL_NETBOX_PATH/package/libuev/Config.in"
 source "$BR2_EXTERNAL_NETBOX_PATH/package/mdio-tools/Config.in"

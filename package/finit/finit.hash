@@ -1,0 +1,5 @@
+# From https://github.com/troglobit/finit/releases/download/3.2-rc2/finit-3.2-rc2.tar.xz.md5
+md5 3ac4f3107709d923c43f1c8ac8ca7ebe  finit-3.2-rc2.tar.xz
+# Locally calculated
+sha256 14d8fc3410030a28abd7087ea77c660b1ba9046246e2feb97c2058f01988026a  finit-3.2-rc2.tar.xz
+sha256 fac5c4da8bf13877085d178ed8732f68c759ad3f85e56a938d0f52833959d0ae  LICENSE

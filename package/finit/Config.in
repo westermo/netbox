@@ -1,0 +1,10 @@
+config BR2_PACKAGE_FINIT
+	bool "finit"
+	depends on BR2_USE_MMU # fork()
+	select BR2_PACKAGE_LIBITE
+	select BR2_PACKAGE_LIBUEV
+	help
+	  The original Asus EeePC fastinit clone, on steroids.  With process
+	  supervision, plugin support, and more!
+
+	  https://github.com/troglobit/finit
