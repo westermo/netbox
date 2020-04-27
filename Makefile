@@ -1,4 +1,7 @@
-export BR2_EXTERNAL=$(CURDIR)
+export BR2_EXTERNAL          = $(CURDIR)
+export BR2_EXTERNAL_NAME     = NetBox
+export BR2_EXTERNAL_ID       = netbox
+export BR2_EXTERNAL_VERSION := $(shell $(BR2_EXTERNAL)/bin/mkversion)
 
 ARCH ?= $(shell uname -m)
 O    ?= $(CURDIR)/output

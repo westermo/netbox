@@ -1,0 +1,24 @@
+#!/bin/sh
+WC=$1
+[ "$WC" != "" ] || WC="."
+
+# Only show branch if not 'master', releases from master are considered
+# mainline/official and need no further caveats.
+git_branch_name()
+{
+        branch=`git branch 2>/dev/null |grep \* |sed 's/\* \(.\+\)/\1/'`
+        if [ -n "$branch" -a "$branch" != "master" ] ; then
+                echo "$branch/";
+        fi
+}
+
+VERSION=`git describe --tags --dirty`
+
+# Are we are building on a tag, if so, do not print branchname.  Check
+# if top commit is the tag, to support -betaXX etc.
+git describe --tags | grep "[0-9]\+\.[0-9]\+\.[0-9]\+-\{0,1\}[^-]*$" > /dev/null
+if [ $? -eq 0 ]; then
+    printf $VERSION
+else
+    printf "$(git_branch_name)"$VERSION
+fi
