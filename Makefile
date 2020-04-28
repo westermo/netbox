@@ -1,5 +1,7 @@
 export BR2_EXTERNAL          = $(CURDIR)
 export BR2_EXTERNAL_NAME     = NetBox
+export BR2_EXTERNAL_DESC     = $(BR2_EXTERNAL_NAME) - The Networking Toolbox
+export BR2_EXTERNAL_HOME     = https://github.com/westermo/netbox/
 export BR2_EXTERNAL_ID       = netbox
 export BR2_EXTERNAL_VERSION := $(shell $(BR2_EXTERNAL)/bin/mkversion)
 
