@@ -24,9 +24,9 @@ be able to easily match what container image works on a Westermo device:
 | Architecture | Platform Code Name |
 |--------------|--------------------|
 | powerpc      | Coronet            |
-| x86_64       | Dagger             |
-| arm          | Envoy              |
-| aarch64      | Zero               |
+| arm          | Dagger             |
+| aarch64      | Envoy              |
+| x86_64       | Zero               |
 
 
 Building
