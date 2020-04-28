@@ -1,5 +1,8 @@
 #!/bin/sh
-rc=0
+# Source .config in case we're building from distclean
+. $BR2_EXTERNAL/output/.config
+
+err=0
 plf=`echo $BR2_DEFCONFIG | sed 's/.*_\(.*\)_defconfig.*$/\1/'`
 
 if [ -n "$RELEASE" ]; then
@@ -10,7 +13,7 @@ if [ -n "$RELEASE" ]; then
        echo "==============================================================================="
        echo "WARNING: Release verision '$RELEASE' does not match tag '$ver'!"
        echo "==============================================================================="
-       rc=1
+       err=1
     fi
 else
     img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$plf.img
@@ -26,4 +29,4 @@ if [ -n "$TFTPDIR" ]; then
     scp -B $img $TFTPDIR
 fi
 
-exit $rc
+exit $err
