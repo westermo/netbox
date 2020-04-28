@@ -15,6 +15,20 @@ its core.  Proprietary applications may use NetBox as NetBox use Buildroot,
 see the [App-Demo][] project for an example of this.
 
 
+Platforms
+---------
+
+The NetBox project follows the Westermo product platform naming.  This to
+be able to easily match what container image works on a Westermo device:
+
+| Architecture | Platform Code Name |
+|--------------|--------------------|
+| powerpc      | Coronet            |
+| x86_64       | Dagger             |
+| arm          | Envoy              |
+| aarch64      | Zero               |
+
+
 Building
 --------
 
@@ -31,10 +45,10 @@ git submodule update --init
 
 Second, select your target `_defconfig`, see the `configs/` directory,
 or use `make list-defconfigs` to see all Buildroot and NetBox configs
-available.  We select the x86-64 NetBox defconfig:
+available.  We select the Zero (x86-64) NetBox defconfig:
 
 ```
-make netbox_x86_64_defconfig
+make netbox_zero_defconfig
 ```
 
 Third, type make and fetch a cup of coffee because the first time you
