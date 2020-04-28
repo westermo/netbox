@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Source .config for BR2_DEFCONFIG to figure out platform name
+. $BR2_CONFIG 2>/dev/null
+
 TARGET_DIR=$1
 
 # Used for matching host and guest

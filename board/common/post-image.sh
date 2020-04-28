@@ -1,6 +1,7 @@
 #!/bin/sh
-# Source .config in case we're building from distclean
-. $BR2_EXTERNAL/output/.config
+
+# Source .config for BR2_DEFCONFIG to figure out platform name
+. $BR2_CONFIG 2>/dev/null
 
 err=0
 plf=`echo $BR2_DEFCONFIG | sed 's/.*_\(.*\)_defconfig.*$/\1/'`

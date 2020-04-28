@@ -38,12 +38,12 @@ VERSION=`git describe --tags --dirty 2>/dev/null`
 
 # Are we are building an official release from master, do not print branchname.
 # Check if top commit is the tag, to support -betaXX etc.
-git describe --tags 2>/dev/null | grep "[0-9]\+\.[0-9]\+\.[0-9]\+-\{0,1\}[^-]*$" >/dev/null
+git describe --tags 2>/dev/null | grep "[0-9]\+\.[0-9]\+-r[0-9]\+" >/dev/null
 if [ $? -eq 0 -a -n "$RELEASE" ]; then
     print_version $VERSION
 else
     if [ -z "$VERSION" ]; then
-	VERSION=`git describe --all --dirty --long |sed 's/heads\/\(.*\)/\1/'`
+	VERSION=`git describe --dirty --long |sed 's/heads\/\(.*\)/\1/'`
 	print_version $VERSION
     else
 	print_version "$(git_branch_name)"$VERSION
