@@ -1,0 +1,12 @@
+config BR2_PACKAGE_WATCHDOGD
+        bool "watchdogd - Advanced Watchdog Daemon"
+        depends on BR2_USE_MMU # fork()
+	select BR2_PACKAGE_LIBCONFUSE
+	select BR2_PACKAGE_LIBITE
+	select BR2_PACKAGE_LIBUEV
+        help
+          Extended version of uClinux-dist watchdogd.  Monitors loadavg,
+ 	  file descriptors and memory leaks, and capable of supervising
+ 	  your processes main loop using an instrumentation API.
+
+	  https://github.com/troglobit/watchdogd/
