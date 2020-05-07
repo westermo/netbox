@@ -3,6 +3,9 @@
 # Source .config for BR2_DEFCONFIG to figure out platform name
 . $BR2_CONFIG 2>/dev/null
 
+# Figure out identity for os-release
+. $BR2_EXTERNAL_NETBOX_PATH/board/common/ident.rc
+
 TARGET_DIR=$1
 
 # Used for matching host and guest

@@ -3,6 +3,9 @@
 # Source .config for BR2_DEFCONFIG to figure out platform name
 . $BR2_CONFIG 2>/dev/null
 
+# Figure out identity for os-release
+. $BR2_EXTERNAL_NETBOX_PATH/board/common/ident.rc
+
 err=0
 plf=`echo $BR2_DEFCONFIG | sed 's/.*_\(.*\)_defconfig.*$/\1/'`
 
