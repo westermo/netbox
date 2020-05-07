@@ -46,7 +46,7 @@ else
 	VERSION=`git describe --dirty --long |sed 's/heads\/\(.*\)/\1/'`
 	print_version $VERSION
     else
-	print_version "$(git_branch_name)"$VERSION
+	print_version "${git_branch_name}"$VERSION
     fi
 fi
 
