@@ -26,3 +26,15 @@ echo "VARIANT_ID=${platform}"               >>$TARGET_DIR/etc/os-release
 echo "HOME_URL=${BR2_EXTERNAL_HOME}"        >>$TARGET_DIR/etc/os-release
 
 printf "$BR2_EXTERNAL_NAME $BR2_EXTERNAL_VERSION -- `date +"%b %e %H:%M %Z %Y"`\n" > $TARGET_DIR/etc/version
+
+if [ "$NETBOX_PLAT" != "app" ]; then
+    kernel=$(basename $TARGET_DIR/boot/*Image)
+
+    for board in $(find $TARGET_DIR/boot -mindepth 1 -type d); do
+	if [ -f $board/kernel ]; then
+	    continue
+	fi
+
+	ln -s ../$kernel $board/kernel
+    done
+fi

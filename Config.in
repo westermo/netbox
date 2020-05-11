@@ -1,1 +1,34 @@
+choice
+	bool "platform"
+	default NETBOX_PLAT_APP
+	help
+	  Select the platform to build against.
+
+config NETBOX_PLAT_APP
+	bool "Application (LXC)"
+	help
+	  Container image.
+
+config NETBOX_PLAT_CORONET
+	bool "Coronet"
+	help
+	  Mainly for products from the third generation of Vipers from
+	  Westermo.
+
+config NETBOX_PLAT_ZERO
+	bool "Zero"
+	help
+	  Internal x86_64 build.
+endchoice
+
+config NETBOX_PLAT
+	string
+	default "app" if NETBOX_PLAT_APP
+	default "coronet" if NETBOX_PLAT_CORONET
+	default "zero" if NETBOX_PLAT_ZERO
+
+menu "Packages"
+
 source "$BR2_EXTERNAL_NETBOX_PATH/package/Config.in"
+
+endmenu

@@ -1,0 +1,9 @@
+config BR2_PACKAGE_WESTERMO_DTS
+	bool "westermo-dts"
+	default y if NETBOX_PLAT_CORONET
+	depends on BR2_LINUX_KERNEL
+	select BR2_PACKAGE_HOST_DTC
+	help
+	  Devicetrees for switches and routers from Westermo.
+
+	  https://www.westermo.com/products/ethernet-switches

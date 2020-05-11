@@ -1,0 +1,21 @@
+&fm1mac4 {
+	status = "okay";
+};
+
+&mdio0 {
+	switch@4 {
+		ports {
+			port@0 {
+				reg = <0x0>;
+				label = "cpu0";
+				ethernet = <&fm1mac4>;
+				phy-mode = "rgmii-id";
+
+				fixed-link {
+					speed = <1000>;
+					full-duplex;
+				};
+			};
+		};
+	};
+};

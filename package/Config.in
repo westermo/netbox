@@ -1,2 +1,2 @@
 source "$BR2_EXTERNAL_NETBOX_PATH/package/libteam/Config.in"
-
+source "$BR2_EXTERNAL_NETBOX_PATH/package/westermo-dts/Config.in"
