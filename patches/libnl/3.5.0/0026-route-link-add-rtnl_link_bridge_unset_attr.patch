@@ -1,0 +1,86 @@
+From 774617a234ee7a279d4e1ff58a31a1623c37d5eb Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Mon, 13 Nov 2017 12:51:14 +0100
+Subject: [PATCH 26/38] route/link: add rtnl_link_bridge_unset_attr()
+Organization: Westermo Network Technologies AB
+
+This allows to unset the following bridge attributes:
+- BRIDGE_ATTR_PORT_STATE
+- BRIDGE_ATTR_PRIORITY
+- BRIDGE_ATTR_COST
+
+This function is useful in cases where we do not want
+to set above mentioned attributes.
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/netlink/route/link/bridge.h |  1 +
+ lib/route/link/bridge.c             | 28 ++++++++++++++++++++++++++++
+ libnl-route-3.sym                   |  1 +
+ 3 files changed, 30 insertions(+)
+
+diff --git a/include/netlink/route/link/bridge.h b/include/netlink/route/link/bridge.h
+index 6184143..5cddf6f 100644
+--- a/include/netlink/route/link/bridge.h
++++ b/include/netlink/route/link/bridge.h
+@@ -85,6 +85,7 @@ extern int      rtnl_link_bridge_vlan_get_sid(struct rtnl_link *link, unsigned i
+ extern int	rtnl_link_bridge_unset_flags(struct rtnl_link *, unsigned int);
+ extern int	rtnl_link_bridge_set_flags(struct rtnl_link *, unsigned int);
+ extern int	rtnl_link_bridge_get_flags(struct rtnl_link *);
++extern int      rtnl_link_bridge_unset_attr(struct rtnl_link *link, unsigned int attr);
+ 
+ extern int	rtnl_link_bridge_set_self(struct rtnl_link *);
+ 
+diff --git a/lib/route/link/bridge.c b/lib/route/link/bridge.c
+index ab88d8b..3ae9de3 100644
+--- a/lib/route/link/bridge.c
++++ b/lib/route/link/bridge.c
+@@ -1143,6 +1143,34 @@ int rtnl_link_bridge_get_flags(struct rtnl_link *link)
+ 	return bd->b_flags;
+ }
+ 
++/**
++ * Unset bridge attributes
++ * @arg link		Link object of type bridge
++ * @arg attr		Bridging attributes to unset
++ *
++ * Valid attributes are:
++ *   - BRIDGE_ATTR_PORT_STATE
++ *   - BRIDGE_ATTR_PRIORITY
++ *   - BRIDGE_ATTR_COST
++ *
++ * @see rtnl_link_bridge_set_cost()
++ * @see rtnl_link_bridge_set_priority()
++ * @see rtnl_link_bridge_set_port_state()
++ *
++ * @return 0 on success or a negative error code.
++ * @retval -NLE_OPNOTSUPP Link is not a bridge
++ */
++int rtnl_link_bridge_unset_attr(struct rtnl_link *link, unsigned int attr)
++{
++        struct bridge_data *bd = bridge_data(link);
++
++	IS_BRIDGE_LINK_ASSERT(link);
++
++	bd->ce_mask &= ~attr;
++
++	return 0;
++}
++
+ /**
+  * Set link change type to self
+  * @arg link		Link Object of type bridge
+diff --git a/libnl-route-3.sym b/libnl-route-3.sym
+index 0831a8f..1073107 100644
+--- a/libnl-route-3.sym
++++ b/libnl-route-3.sym
+@@ -1248,4 +1248,5 @@ global:
+ 	rtnl_neigh_get_updated;
+ 	rtnl_link_bridge_vlan_set_sid;
+ 	rtnl_link_bridge_vlan_get_sid;
++	rtnl_link_bridge_unset_attr;
+ } libnl_3_4;
+-- 
+2.25.1
+

@@ -1,0 +1,41 @@
+From 50d9b396ae2dd476b0b1aabb90f22332d81d5590 Mon Sep 17 00:00:00 2001
+From: Joachim Nilsson <troglobit@gmail.com>
+Date: Fri, 18 Dec 2015 10:45:44 +0100
+Subject: [PATCH 05/38] route/neigh: Add support for RTM_LCKNEIGH messages from
+ locked bridge ports
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/linux-private/linux/rtnetlink.h | 2 ++
+ lib/route/neigh.c                       | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/include/linux-private/linux/rtnetlink.h b/include/linux-private/linux/rtnetlink.h
+index 8c1d600..3bd2b17 100644
+--- a/include/linux-private/linux/rtnetlink.h
++++ b/include/linux-private/linux/rtnetlink.h
+@@ -54,6 +54,8 @@ enum {
+ #define RTM_DELNEIGH	RTM_DELNEIGH
+ 	RTM_GETNEIGH,
+ #define RTM_GETNEIGH	RTM_GETNEIGH
++	RTM_LCKNEIGH,
++#define RTM_LCKNEIGH	RTM_LCKNEIGH
+ 
+ 	RTM_NEWRULE	= 32,
+ #define RTM_NEWRULE	RTM_NEWRULE
+diff --git a/lib/route/neigh.c b/lib/route/neigh.c
+index ca4f2b6..8ad55b7 100644
+--- a/lib/route/neigh.c
++++ b/lib/route/neigh.c
+@@ -1102,6 +1102,7 @@ static struct nl_cache_ops rtnl_neigh_ops = {
+ 					{ RTM_NEWNEIGH, NL_ACT_NEW, "new" },
+ 					{ RTM_DELNEIGH, NL_ACT_DEL, "del" },
+ 					{ RTM_GETNEIGH, NL_ACT_GET, "get" },
++					{ RTM_LCKNEIGH, NL_ACT_GET, "lck" },
+ 					END_OF_MSGTYPES_LIST,
+ 				  },
+ 	.co_protocol		= NETLINK_ROUTE,
+-- 
+2.25.1
+

@@ -1,0 +1,131 @@
+From 202ce46b290f81a2df14081f5910bbb1e2fbdcea Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Mon, 8 Feb 2016 11:15:12 +0100
+Subject: [PATCH 09/38] route/cls: allow fetching of classifiers from cache
+Organization: Westermo Network Technologies AB
+
+API:
+	rtnl_cls_get()
+	rtnl_cls_get_by_kind()
+
+These functions search for classifiers in classifier cache.
+
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/netlink/route/classifier.h |  4 ++
+ lib/route/cls.c                    | 70 ++++++++++++++++++++++++++++++
+ libnl-route-3.sym                  |  2 +
+ 3 files changed, 76 insertions(+)
+
+diff --git a/include/netlink/route/classifier.h b/include/netlink/route/classifier.h
+index 18832ad..0aa2e99 100644
+--- a/include/netlink/route/classifier.h
++++ b/include/netlink/route/classifier.h
+@@ -26,6 +26,10 @@ extern void		rtnl_cls_put(struct rtnl_cls *);
+ 
+ extern int		rtnl_cls_alloc_cache(struct nl_sock *, int, uint32_t,
+ 					     struct nl_cache **);
++extern struct rtnl_cls *rtnl_cls_get(struct nl_cache *cache, int ifindex,
++				     uint32_t parent, uint32_t handle);
++extern struct rtnl_cls *rtnl_cls_get_by_prio(struct nl_cache *cache, int ifindex,
++					     uint32_t parent, uint16_t prio);
+ 
+ extern void 		rtnl_cls_cache_set_tc_params(struct nl_cache *, int, uint32_t);
+ 
+diff --git a/lib/route/cls.c b/lib/route/cls.c
+index fa87cd4..1802ad6 100644
+--- a/lib/route/cls.c
++++ b/lib/route/cls.c
+@@ -364,6 +364,76 @@ void rtnl_cls_cache_set_tc_params(struct nl_cache *cache,
+ 	cache->c_iarg2 = parent;
+ }
+ 
++/**
++ * Search classifier by interface index, parent and handle
++ * @arg cache           Classifier cache
++ * @arg ifindex         Interface index
++ * @arg parent          Parent
++ * @arg handle          Handle
++ *
++ * Searches a classifier cache previously allocated with rtnl_cls_alloc_cache()
++ * and searches for a classifier matching the interface index, parent
++ * and handle.
++ *
++ * The reference counter is incremented before returning the classifier,
++ * therefore the reference must be given back with rtnl_cls_put() after usage.
++ *
++ * @return Classifier or NULL if no match was found.
++ */
++struct rtnl_cls *rtnl_cls_get(struct nl_cache *cache, int ifindex, uint32_t parent,
++			      uint32_t handle)
++{
++	struct rtnl_cls *cls;
++
++	if (cache->c_ops != &rtnl_cls_ops)
++		return NULL;
++
++	nl_list_for_each_entry(cls, &cache->c_items, ce_list) {
++		if ((cls->c_parent == parent) && (cls->c_ifindex == ifindex)
++		    && (cls->c_handle == handle)) {
++			nl_object_get((struct nl_object *) cls);
++			return cls;
++		}
++	}
++
++	return NULL;
++}
++
++/**
++ * Search classifier by interface index, parent and priority
++ * @arg cache           Classifier cache
++ * @arg ifindex         Interface index
++ * @arg parent          Parent
++ * @arg prio            Priority
++ *
++ * Searches a classifier cache previously allocated with rtnl_cls_alloc_cache()
++ * and searches for a classifier matching the interface index, parent
++ * and prio.
++ *
++ * The reference counter is incremented before returning the classifier,
++ * therefore the reference must be given back with rtnl_cls_put() after usage.
++ *
++ * @return Classifier or NULL if no match was found.
++ */
++struct rtnl_cls *rtnl_cls_get_by_prio(struct nl_cache *cache, int ifindex,
++				      uint32_t parent, uint16_t prio)
++{
++	struct rtnl_cls *cls;
++
++	if (cache->c_ops != &rtnl_cls_ops)
++		return NULL;
++
++	nl_list_for_each_entry(cls, &cache->c_items, ce_list) {
++		if ((cls->c_parent == parent) && (cls->c_ifindex == ifindex)
++		    && (cls->c_prio == prio)) {
++			nl_object_get((struct nl_object *) cls);
++			return cls;
++		}
++	}
++
++	return NULL;
++}
++
+ /** @} */
+ 
+ static void cls_dump_line(struct rtnl_tc *tc, struct nl_dump_params *p)
+diff --git a/libnl-route-3.sym b/libnl-route-3.sym
+index d3a50c7..6eba948 100644
+--- a/libnl-route-3.sym
++++ b/libnl-route-3.sym
+@@ -911,6 +911,8 @@ global:
+ 	rtnl_police_get_overhead;
+ 	rtnl_police_set_linklayer;
+ 	rtnl_police_get_linklayer;
++	rtnl_cls_get;
++	rtnl_cls_get_by_prio;
+ } libnl_3_2_26;
+ 
+ libnl_3_2_28 {
+-- 
+2.25.1
+

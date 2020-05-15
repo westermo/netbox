@@ -1,0 +1,29 @@
+From 60f70964223a6a5ab3d350887ced1f23a24d7988 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Wed, 23 Mar 2016 10:45:23 +0100
+Subject: [PATCH 12/38] linux headers update
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/linux-private/linux/rtnetlink.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/include/linux-private/linux/rtnetlink.h b/include/linux-private/linux/rtnetlink.h
+index 3bd2b17..8b2567c 100644
+--- a/include/linux-private/linux/rtnetlink.h
++++ b/include/linux-private/linux/rtnetlink.h
+@@ -713,6 +713,9 @@ struct tcamsg {
+ 	unsigned char	tca_family;
+ 	unsigned char	tca__pad1;
+ 	unsigned short	tca__pad2;
++	int             tca_ifindex;
++	__u32           tca_parent;
++	char            tca_kind[32];
+ };
+ 
+ enum {
+-- 
+2.25.1
+

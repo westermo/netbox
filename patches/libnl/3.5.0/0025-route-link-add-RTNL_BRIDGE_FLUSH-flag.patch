@@ -1,0 +1,45 @@
+From 91e375f1bc3400d37caf8bd24aa5704c19382551 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Mon, 13 Nov 2017 12:49:25 +0100
+Subject: [PATCH 25/38] route/link: add RTNL_BRIDGE_FLUSH flag
+Organization: Westermo Network Technologies AB
+
+Send this flag with the rest of protocol info
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/netlink/route/link/bridge.h | 1 +
+ lib/route/link/bridge.c             | 4 ++++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/include/netlink/route/link/bridge.h b/include/netlink/route/link/bridge.h
+index 01542d3..6184143 100644
+--- a/include/netlink/route/link/bridge.h
++++ b/include/netlink/route/link/bridge.h
+@@ -44,6 +44,7 @@ enum rtnl_link_bridge_flags {
+ 	RTNL_BRIDGE_UNICAST_FLOOD	= 0x0010,
+ 	RTNL_BRIDGE_LEARNING		= 0x0020,
+ 	RTNL_BRIDGE_LEARNING_SYNC	= 0x0040,
++	RTNL_BRIDGE_FLUSH	        = 0x0080,
+ };
+ 
+ #define RTNL_BRIDGE_HWMODE_VEB BRIDGE_MODE_VEB
+diff --git a/lib/route/link/bridge.c b/lib/route/link/bridge.c
+index 130346f..ab88d8b 100644
+--- a/lib/route/link/bridge.c
++++ b/lib/route/link/bridge.c
+@@ -301,6 +301,10 @@ static int bridge_fill_pi(struct rtnl_link *link, struct nl_msg *msg,
+ 			NLA_PUT_U8(msg, IFLA_BRPORT_LEARNING_SYNC,
+ 			           bd->b_flags & RTNL_BRIDGE_LEARNING_SYNC);
+ 		}
++		if (bd->b_flags_mask & RTNL_BRIDGE_FLUSH) {
++		        NLA_PUT_U8(msg, IFLA_BRPORT_FLUSH,
++			           bd->b_flags & RTNL_BRIDGE_FLUSH);
++		}
+ 	}
+ 
+ 	if (bd->ce_mask & BRIDGE_ATTR_COST)
+-- 
+2.25.1
+

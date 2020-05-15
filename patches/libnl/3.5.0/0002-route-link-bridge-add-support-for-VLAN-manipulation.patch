@@ -1,0 +1,551 @@
+From d9be02a113bb38f7ad938dc0d2c87cf29fd225cf Mon Sep 17 00:00:00 2001
+From: Tobias Waldekranz <tobias@waldekranz.com>
+Date: Mon, 13 Apr 2015 16:36:31 +0200
+Subject: [PATCH 02/38] route/link/bridge: add support for VLAN manipulation
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/netlink/route/link/bridge.h |  15 ++
+ lib/route/link.c                    |   4 -
+ lib/route/link/bridge.c             | 393 ++++++++++++++++++++++++++--
+ libnl-route-3.sym                   |   7 +
+ 4 files changed, 397 insertions(+), 22 deletions(-)
+
+diff --git a/include/netlink/route/link/bridge.h b/include/netlink/route/link/bridge.h
+index f2e16e3..ffd2354 100644
+--- a/include/netlink/route/link/bridge.h
++++ b/include/netlink/route/link/bridge.h
+@@ -12,6 +12,8 @@
+ #ifndef NETLINK_LINK_BRIDGE_H_
+ #define NETLINK_LINK_BRIDGE_H_
+ 
++#include <linux/if_bridge.h>
++
+ #include <netlink/netlink.h>
+ #include <netlink/route/link.h>
+ 
+@@ -62,6 +64,19 @@ extern int	rtnl_link_bridge_get_priority(struct rtnl_link *);
+ extern int	rtnl_link_bridge_set_cost(struct rtnl_link *, uint32_t);
+ extern int	rtnl_link_bridge_get_cost(struct rtnl_link *, uint32_t *);
+ 
++extern int 	rtnl_link_bridge_vlan_flush(struct rtnl_link *link);
++extern int	rtnl_link_bridge_vlan_del(struct rtnl_link *link, int vid);
++extern int	rtnl_link_bridge_vlan_add(struct rtnl_link *link,
++			      struct bridge_vlan_info *vlan);
++extern int	rtnl_link_bridge_vlan_get(struct rtnl_link *link, int vid,
++			      struct bridge_vlan_info *vlan);
++extern int      rtnl_link_bridge_vlan_get_pvid(struct rtnl_link *link,
++                                               struct bridge_vlan_info *vlan);
++extern int	rtnl_link_bridge_vlan_foreach(struct rtnl_link *link,
++					      int (*cb)(struct rtnl_link *,
++							const struct bridge_vlan_info *, void *),
++					      void *arg);
++
+ extern int	rtnl_link_bridge_unset_flags(struct rtnl_link *, unsigned int);
+ extern int	rtnl_link_bridge_set_flags(struct rtnl_link *, unsigned int);
+ extern int	rtnl_link_bridge_get_flags(struct rtnl_link *);
+diff --git a/lib/route/link.c b/lib/route/link.c
+index 6ec19c1..a53ff00 100644
+--- a/lib/route/link.c
++++ b/lib/route/link.c
+@@ -145,8 +145,6 @@ static int af_clone(struct rtnl_link *link, struct rtnl_link_af_ops *ops,
+ static int af_fill_bridge(struct rtnl_link *link, struct rtnl_link_af_ops *ops,
+ 			  void *data, void *arg)
+ {
+-	struct nl_msg *msg = arg;
+-	struct nlattr *af_attr;
+ 	int err;
+ 
+ 	if (!ops->ao_fill_af)
+@@ -796,7 +794,6 @@ static int af_parse_bridge(struct rtnl_link *link, struct nlattr *af_spec)
+ 
+ 	af_ops = af_lookup_and_alloc(link, link->l_family);
+ 	if (af_ops && af_ops->ao_parse_af) {
+-		char *af_data = link->l_af_data[link->l_family];
+ 		err = af_ops->ao_parse_af(link, af_spec,
+ 					  link->l_af_data[link->l_family]);
+ 		if (err < 0)
+@@ -1380,7 +1377,6 @@ static int __rtnl_link_build_get_request(int ifindex, const char *name,
+ 
+ 	if (nlmsg_append(msg, &ifi, sizeof(ifi), NLMSG_ALIGNTO) < 0)
+ 		goto nla_put_failure;
+-	}
+ 
+ 	if (name)
+ 		NLA_PUT_STRING(msg, IFLA_IFNAME, name);
+diff --git a/lib/route/link/bridge.c b/lib/route/link/bridge.c
+index 2d95faf..fe7272d 100644
+--- a/lib/route/link/bridge.c
++++ b/lib/route/link/bridge.c
+@@ -24,6 +24,8 @@
+ #include <netlink/route/link/bridge.h>
+ #include <netlink-private/route/link/api.h>
+ #include <linux/if_bridge.h>
++#include <linux/if_vlan.h>
++#include <linux/rtnetlink.h>
+ 
+ #define VLAN_VID_MASK           0x0fff /* VLAN Identifier */
+ 
+@@ -38,8 +40,32 @@
+ 
+ #define PRIV_FLAG_NEW_ATTRS		(1 << 0)
+ 
++
++static int vlan_field_get(uint32_t *f, int vid)
++{
++	return !!(f[vid / 32] & (1 << (vid & 0x1f)));
++}
++
++static void vlan_field_set(uint32_t *f, int vid)
++{
++	f[vid/ 32] |= 1 << (vid & 0x1f);
++}
++
++static void vlan_field_clear(uint32_t *f, int vid)
++{
++	f[vid / 32] &= ~(1 << (vid & 0x1f));
++}
++
++static void vlan_field_flush(uint32_t *f)
++{
++  bzero(f, RTNL_LINK_BRIDGE_VLAN_BITMAP_MAX);
++}
++
+ struct bridge_data
+ {
++	uint16_t		b_af_flags;
++	uint16_t		b_mode;
++
+ 	uint8_t			b_port_state;
+ 	uint8_t			b_priv_flags; /* internal flags */
+ 	uint16_t		b_hwmode;
+@@ -127,13 +153,15 @@ static void check_flag(struct rtnl_link *link, struct nlattr *attrs[],
+ 		rtnl_link_bridge_set_flags(link, flag);
+ }
+ 
++#include <execinfo.h>
++
+ static int bridge_parse_protinfo(struct rtnl_link *link, struct nlattr *attr,
+ 				 void *data)
+ {
+ 	struct bridge_data *bd = data;
+ 	struct nlattr *br_attrs[IFLA_BRPORT_MAX+1];
+ 	int err;
+-
++	
+ 	/* Backwards compatibility */
+ 	if (!nla_is_nested(attr)) {
+ 		if (nla_len(attr) < 1)
+@@ -239,23 +267,6 @@ static int bridge_parse_af_full(struct rtnl_link *link, struct nlattr *attr_full
+ 	return 0;
+ }
+ 
+-static int bridge_fill_af(struct rtnl_link *link, struct nl_msg *msg,
+-		   void *data)
+-{
+-	struct bridge_data *bd = data;
+-
+-	if ((bd->ce_mask & BRIDGE_ATTR_SELF)||(bd->ce_mask & BRIDGE_ATTR_HWMODE))
+-		NLA_PUT_U16(msg, IFLA_BRIDGE_FLAGS, BRIDGE_FLAGS_SELF);
+-
+-	if (bd->ce_mask & BRIDGE_ATTR_HWMODE)
+-		NLA_PUT_U16(msg, IFLA_BRIDGE_MODE, bd->b_hwmode);
+-
+-	return 0;
+-
+-nla_put_failure:
+-	return -NLE_MSGSIZE;
+-}
+-
+ static int bridge_fill_pi(struct rtnl_link *link, struct nl_msg *msg,
+ 		   void *data)
+ {
+@@ -392,6 +403,158 @@ static void rtnl_link_bridge_dump_vlans(struct nl_dump_params *p,
+ 	dump_bitmap(p, bd->vlan_info.untagged_bitmap);
+ }
+ 
++static void __parse_vlan(struct rtnl_link_bridge_vlan *bv, int vid, int flags)
++{
++	vlan_field_set(bv->vlan_bitmap, vid);
++
++	if (flags & BRIDGE_VLAN_INFO_UNTAGGED)
++		vlan_field_set(bv->untagged_bitmap, vid);
++}
++
++static int __parse_vlans(struct nlattr *af_spec, struct bridge_data *bd)
++{
++	struct bridge_vlan_info *vlan;
++	struct nlattr *attr;
++	int rem, range_start = 0;
++
++	nla_for_each_nested(attr, af_spec, rem) {
++		if (nla_type(attr) != IFLA_BRIDGE_VLAN_INFO)
++			continue;
++		if (nla_len(attr) != sizeof(*vlan))
++			return -EINVAL;
++		vlan = nla_data(attr);
++
++		if (vlan->flags & BRIDGE_VLAN_INFO_PVID)
++			bd->vlan_info.pvid = vlan->vid;
++
++		if (vlan->flags & BRIDGE_VLAN_INFO_RANGE_BEGIN) {
++			range_start = vlan->vid;
++			continue;
++		} else if (vlan->flags & BRIDGE_VLAN_INFO_RANGE_END) {
++			int i;
++			
++			for (i = range_start; i <= vlan->vid; i++)
++				__parse_vlan(&bd->vlan_info, i, vlan->flags);
++		} else {
++			__parse_vlan(&bd->vlan_info, vlan->vid, vlan->flags);
++		}
++	}
++
++	return 0;
++}
++
++static struct nla_policy br_af_attrs_policy[IFLA_BRIDGE_MAX+1] = {
++	[IFLA_BRIDGE_FLAGS]		= { .type = NLA_U16 },
++	[IFLA_BRIDGE_MODE]		= { .type = NLA_U16 },
++	[IFLA_BRIDGE_VLAN_INFO]		= { .type = NLA_UNSPEC },
++};
++
++static int bridge_parse_af(struct rtnl_link *link, struct nlattr *af_spec,
++			   void *data)
++{
++	struct bridge_data *bd = data;
++	struct nlattr *attrs[IFLA_BRIDGE_MAX+1];
++	int err;
++	
++	err = nla_parse_nested(attrs, IFLA_BRIDGE_MAX, af_spec,
++			       br_af_attrs_policy);
++	if (err < 0)
++		return err;
++
++	if (attrs[IFLA_BRIDGE_FLAGS])
++		bd->b_af_flags = nla_get_u16(attrs[IFLA_BRIDGE_FLAGS]);
++
++	if (attrs[IFLA_BRIDGE_MODE])
++		bd->b_mode = nla_get_u16(attrs[IFLA_BRIDGE_MODE]);
++
++	rtnl_link_bridge_vlan_flush(link);
++	err = __parse_vlans(af_spec, bd);
++	if (err)
++		return err;
++
++	return 0;
++}
++
++static int __fill_vlan(struct rtnl_link_bridge_vlan *bv, struct nl_msg *msg,
++			int vid, int flags)
++{
++	struct bridge_vlan_info vlan = {
++		.vid = vid,
++		.flags = flags,
++	};
++
++	if (vid == bv->pvid)
++		vlan.flags |= BRIDGE_VLAN_INFO_PVID;
++
++	if (vlan_field_get(bv->untagged_bitmap, vid))
++		vlan.flags |= BRIDGE_VLAN_INFO_UNTAGGED;
++
++	/* printf("WKZ vid:%d %s%s%s%s\n", vid, */
++	/*        (vlan.flags & BRIDGE_VLAN_INFO_PVID) ? "pvid " : "", */
++	/*        (vlan.flags & BRIDGE_VLAN_INFO_UNTAGGED) ? "untagged " : "", */
++	/*        (vlan.flags & BRIDGE_VLAN_INFO_RANGE_BEGIN) ? "range-begin" : "", */
++	/*        (vlan.flags & BRIDGE_VLAN_INFO_RANGE_END) ? "range-end" : ""); */
++	       
++	return nla_put(msg, IFLA_BRIDGE_VLAN_INFO, sizeof(vlan), &vlan);
++}
++
++static int __fill_vlans(struct rtnl_link_bridge_vlan *bv, struct nl_msg *msg)
++{
++	int err, open, close, untagged;
++
++	for (open = 0; open < RTNL_LINK_BRIDGE_VLAN_BITMAP_MAX; open++) {
++		if (!vlan_field_get(bv->vlan_bitmap, open))
++			continue;
++		
++		close = open + 1;
++		untagged = vlan_field_get(bv->untagged_bitmap, open);
++
++		if (open == bv->pvid)
++			goto pvid;
++		
++		while (close < RTNL_LINK_BRIDGE_VLAN_BITMAP_MAX && close != bv->pvid &&
++		       vlan_field_get(bv->vlan_bitmap, close) &&
++		       vlan_field_get(bv->untagged_bitmap, close) == untagged)
++			close++;
++
++		if (close - open > 1) {
++			err = __fill_vlan(bv, msg, open, (close - open > 2) ?
++					  BRIDGE_VLAN_INFO_RANGE_BEGIN : 0);
++			if (err)
++				return err;
++		}
++
++	pvid:
++		err = __fill_vlan(bv, msg, close - 1, (close - open > 2) ?
++				  BRIDGE_VLAN_INFO_RANGE_END : 0);
++		if (err)
++			return err;
++		
++		open = close - 1;
++	}
++
++	return 0;
++}
++
++static int bridge_fill_af(struct rtnl_link *link, struct nl_msg *msg, void *data)
++{
++	struct bridge_data *bd = data;
++
++	if ((bd->ce_mask & BRIDGE_ATTR_SELF)||(bd->ce_mask & BRIDGE_ATTR_HWMODE))
++		NLA_PUT_U16(msg, IFLA_BRIDGE_FLAGS, BRIDGE_FLAGS_SELF);
++
++	if (bd->ce_mask & BRIDGE_ATTR_HWMODE)
++		NLA_PUT_U16(msg, IFLA_BRIDGE_MODE, bd->b_hwmode);
++
++	if (!(bd->ce_mask & BRIDGE_ATTR_PORT_VLAN))
++		return 0;
++
++	return __fill_vlans(&bd->vlan_info, msg);
++
++ nla_put_failure:
++	return -NLE_MSGSIZE;
++}
++
+ static void bridge_dump_details(struct rtnl_link *link,
+ 				struct nl_dump_params *p, void *data)
+ {
+@@ -679,6 +842,199 @@ int rtnl_link_bridge_get_cost(struct rtnl_link *link, uint32_t *cost)
+ 	return 0;
+ }
+ 
++/**
++ * Remove all VLANs from a port
++ * @arg link		Link object of type bridge
++ *
++ * @see rtnl_link_bridge_vlan_del()
++ *
++ * @return 0 on success, negative error code otherwise
++ * @retval -NLE_OPNOTSUPP Link is not a bridge
++ */
++int rtnl_link_bridge_vlan_flush(struct rtnl_link *link)
++{
++	struct bridge_data *bd = bridge_data(link);
++
++	IS_BRIDGE_LINK_ASSERT(link);
++
++	vlan_field_flush(bd->vlan_info.vlan_bitmap);
++	vlan_field_flush(bd->vlan_info.untagged_bitmap);	
++	bd->vlan_info.pvid = 0;
++
++	bd->ce_mask |= BRIDGE_ATTR_PORT_VLAN;
++	return 0;
++}
++
++/**
++ * Remove a VLAN from a port
++ * @arg link		Link object of type bridge
++ * @arg vid		VID of VLAN to remove
++ *
++ * @see rtnl_link_bridge_vlan_get()
++ * @see rtnl_link_bridge_vlan_add()
++ * @see rtnl_link_bridge_vlan_flush()
++ *
++ * @return 0 on success, negative error code otherwise
++ * @retval -NLE_OPNOTSUPP Link is not a bridge
++ * @retval -NLE_RANGE `vid` is out of range
++ */
++int rtnl_link_bridge_vlan_del(struct rtnl_link *link, int vid)
++{
++	struct bridge_data *bd = bridge_data(link);
++
++	IS_BRIDGE_LINK_ASSERT(link);
++
++	if (!vid || vid >= RTNL_LINK_BRIDGE_VLAN_BITMAP_MAX)
++		return -NLE_INVAL;
++
++	vlan_field_clear(bd->vlan_info.vlan_bitmap, vid);
++	vlan_field_clear(bd->vlan_info.untagged_bitmap, vid);
++	
++	if (vid == bd->vlan_info.pvid)
++		bd->vlan_info.pvid = 0;
++
++	bd->ce_mask |= BRIDGE_ATTR_PORT_VLAN;
++	return 0;
++}
++
++/**
++ * Add a VLAN to a port
++ * @arg link		Link object of type bridge
++ * @arg vlan		VLAN to add
++ *
++ * @see rtnl_link_bridge_vlan_get()
++ * @see rtnl_link_bridge_vlan_del()
++ *
++ * @return 0 on success, negative error code otherwise
++ * @retval -NLE_OPNOTSUPP Link is not a bridge
++ * @retval -NLE_INVAL `vlan` is not a valid pointer
++ * @retval -NLE_RANGE The VLAN VID is out of range
++ */
++int rtnl_link_bridge_vlan_add(struct rtnl_link *link,
++			      struct bridge_vlan_info *vlan)
++{
++	struct bridge_data *bd = bridge_data(link);
++
++	IS_BRIDGE_LINK_ASSERT(link);
++
++	if (!vlan)
++		return -NLE_INVAL;
++
++	if (!vlan->vid || vlan->vid >= RTNL_LINK_BRIDGE_VLAN_BITMAP_MAX)
++		return -NLE_RANGE;
++
++	vlan_field_set(bd->vlan_info.vlan_bitmap, vlan->vid);
++	
++	if (bd->vlan_info.pvid == vlan->vid)
++		bd->vlan_info.pvid = 0;
++	
++	if (vlan->flags & BRIDGE_VLAN_INFO_PVID)
++		bd->vlan_info.pvid = vlan->vid;
++
++	if (vlan->flags & BRIDGE_VLAN_INFO_UNTAGGED)
++		vlan_field_set(bd->vlan_info.untagged_bitmap, vlan->vid);
++
++	bd->ce_mask |= BRIDGE_ATTR_PORT_VLAN;
++	return 0;
++}
++
++/**
++ * Get a port's VLAN information
++ * @arg link		Link object of type bridge
++ * @arg vid		VID of VLAN
++ * @arg vlan		Returned VLAN info
++ *
++ * @see rtnl_link_bridge_vlan_add()
++ * @see rtnl_link_bridge_vlan_del()
++ *
++ * @return 0 on success, negative error code otherwise
++ * @retval -NLE_OPNOTSUPP Link is not a bridge
++ * @retval -NLE_RANGE `vid` is out of range
++ * @retval -NLE_INVAL `vlan` is not a valid pointer
++ * @retval -NLE_NODEV Link is not a member of VLAN `vid`
++ */
++int rtnl_link_bridge_vlan_get(struct rtnl_link *link, int vid,
++			      struct bridge_vlan_info *vlan)
++{
++	struct bridge_data *bd = bridge_data(link);
++	
++	IS_BRIDGE_LINK_ASSERT(link);
++
++	if (!vid || vid >= RTNL_LINK_BRIDGE_VLAN_BITMAP_MAX)
++		return -NLE_RANGE;
++	
++	if (!vlan)
++		return -NLE_INVAL;
++
++	if (!vlan_field_get(bd->vlan_info.vlan_bitmap, vid))
++		return -NLE_NODEV;
++
++	vlan->vid = vid;
++	vlan->flags = 0;
++	
++	if (vid == bd->vlan_info.pvid)
++		vlan->flags |= BRIDGE_VLAN_INFO_PVID;
++
++	if (vlan_field_get(bd->vlan_info.untagged_bitmap, vid))
++		vlan->flags |= BRIDGE_VLAN_INFO_UNTAGGED;
++
++	return 0;
++}
++
++/**
++ * Get a port's PVID
++ * @arg link		Link object of type bridge
++ * @arg vlan		Returned VLAN info
++ *
++ * @return 0 on success, negative error code otherwise
++ * @retval -NLE_NODEV port has no PVID
++ */
++int rtnl_link_bridge_vlan_get_pvid(struct rtnl_link *link, struct bridge_vlan_info *vlan)
++{
++	struct bridge_data *bd = bridge_data(link);
++	struct bridge_vlan_info tmp;
++	int vid;
++
++	IS_BRIDGE_LINK_ASSERT(link);
++
++	for (vid = 0; vid < RTNL_LINK_BRIDGE_VLAN_BITMAP_MAX; vid++) {
++		if (!vlan_field_get(bd->vlan_info.vlan_bitmap, vid))
++			continue;
++
++		rtnl_link_bridge_vlan_get(link, vid, &tmp);
++		if (tmp.flags & BRIDGE_VLAN_INFO_PVID) {
++			memcpy (vlan, &tmp, sizeof(*vlan));
++			return 0;
++		}
++	}
++
++	return -NLE_NODEV;
++}
++
++int rtnl_link_bridge_vlan_foreach(struct rtnl_link *link,
++				  int (*cb)(struct rtnl_link *,
++					    const struct bridge_vlan_info *, void *),
++				  void *arg)
++{
++	struct bridge_data *bd = bridge_data(link);
++	struct bridge_vlan_info vlan;
++	int err, vid;
++
++	IS_BRIDGE_LINK_ASSERT(link);
++
++	for (vid = 0; vid < RTNL_LINK_BRIDGE_VLAN_BITMAP_MAX; vid++) {
++		if (!vlan_field_get(bd->vlan_info.vlan_bitmap, vid))
++			continue;
++
++		rtnl_link_bridge_vlan_get(link, vid, &vlan);
++		err = cb(link, &vlan, arg);
++		if (err)
++			return err;
++	}
++
++	return 0;
++}
++
+ /**
+  * Unset flags
+  * @arg link		Link object of type bridge
+@@ -968,6 +1324,7 @@ static struct rtnl_link_af_ops bridge_ops = {
+ 	.ao_clone			= &bridge_clone,
+ 	.ao_free			= &bridge_free,
+ 	.ao_parse_protinfo		= &bridge_parse_protinfo,
++	.ao_parse_af			= &bridge_parse_af,
+ 	.ao_dump[NL_DUMP_DETAILS]	= &bridge_dump_details,
+ 	.ao_compare			= &bridge_compare,
+ 	.ao_parse_af_full		= &bridge_parse_af_full,
+diff --git a/libnl-route-3.sym b/libnl-route-3.sym
+index f4e2c13..fadc967 100644
+--- a/libnl-route-3.sym
++++ b/libnl-route-3.sym
+@@ -884,6 +884,13 @@ global:
+ 	rtnl_link_ipvlan_get_mode;
+ 	rtnl_link_set_link_netnsid;
+ 	rtnl_link_delete_af;
++        rtnl_link_bridge_vlan_foreach;
++        rtnl_link_bridge_vlan_get;
++        rtnl_link_bridge_vlan_add;
++        rtnl_link_bridge_vlan_del;
++        rtnl_link_bridge_vlan_flush;
++	rtnl_link_bridge_vlan_get_pvid;
++        rtnl_link_build_add_request;
+ } libnl_3_2_26;
+ 
+ libnl_3_2_28 {
+-- 
+2.25.1
+

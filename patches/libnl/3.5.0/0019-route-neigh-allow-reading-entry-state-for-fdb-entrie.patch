@@ -1,0 +1,103 @@
+From b79778c352b1269f32d951bee89767c8831418dd Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Mon, 16 May 2016 14:46:49 +0200
+Subject: [PATCH 19/38] route/neigh: allow reading entry state for fdb entries
+Organization: Westermo Network Technologies AB
+
+Now entry state will be parsed every time fdb_dump is requested.
+Entry state for each FDB entry can be obtained with
+rtnl_neigh_get_entry_state()
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/netlink-private/types.h   |  1 +
+ include/netlink/route/neighbour.h |  1 +
+ lib/route/neigh.c                 | 15 +++++++++++++++
+ libnl-route-3.sym                 |  1 +
+ 4 files changed, 18 insertions(+)
+
+diff --git a/include/netlink-private/types.h b/include/netlink-private/types.h
+index bf04cdd..6a89b83 100644
+--- a/include/netlink-private/types.h
++++ b/include/netlink-private/types.h
+@@ -263,6 +263,7 @@ struct rtnl_neigh
+ 	uint32_t                n_flag_mask;
+ 	uint32_t		n_master;
+ 	uint16_t	n_vlan;
++	uint16_t        entry_state;
+ };
+ 
+ /* Multicast router port info
+diff --git a/include/netlink/route/neighbour.h b/include/netlink/route/neighbour.h
+index 0f17b66..609684f 100644
+--- a/include/netlink/route/neighbour.h
++++ b/include/netlink/route/neighbour.h
+@@ -54,6 +54,7 @@ extern void			rtnl_neigh_set_state(struct rtnl_neigh *, int);
+ extern int			rtnl_neigh_get_state(struct rtnl_neigh *);
+ extern void			rtnl_neigh_unset_state(struct rtnl_neigh *,
+ 						       int);
++extern int                      rtnl_neigh_get_entry_state(struct rtnl_neigh *neigh);
+ 
+ extern void			rtnl_neigh_set_flags(struct rtnl_neigh *,
+ 						     unsigned int);
+diff --git a/lib/route/neigh.c b/lib/route/neigh.c
+index 8ad55b7..16b8bb8 100644
+--- a/lib/route/neigh.c
++++ b/lib/route/neigh.c
+@@ -171,6 +171,7 @@
+ #define NEIGH_ATTR_PROBES       0x100
+ #define NEIGH_ATTR_MASTER       0x200
+ #define NEIGH_ATTR_VLAN         0x400
++#define NEIGH_ATTR_ENTRY_STATE  0X800
+ 
+ static struct nl_cache_ops rtnl_neigh_ops;
+ static struct nl_object_ops neigh_obj_ops;
+@@ -306,6 +307,7 @@ static const struct trans_tbl neigh_attrs[] = {
+ 	__ADD(NEIGH_ATTR_PROBES, probes),
+ 	__ADD(NEIGH_ATTR_MASTER, master),
+ 	__ADD(NEIGH_ATTR_VLAN, vlan),
++	__ADD(NEIGH_ATTR_ENTRY_STATE, entry_state),
+ };
+ 
+ static char *neigh_attrs2str(int attrs, char *buf, size_t len)
+@@ -423,6 +425,11 @@ int rtnl_neigh_parse(struct nlmsghdr *n, struct rtnl_neigh **result)
+ 		neigh->ce_mask |= NEIGH_ATTR_VLAN;
+ 	}
+ 
++	if (tb[NDA_ENTRY_STATE]) {
++		neigh->entry_state = nla_get_u16(tb[NDA_ENTRY_STATE]);
++		neigh->ce_mask |= NEIGH_ATTR_ENTRY_STATE;
++	}
++
+ 	/*
+ 	 * Get the bridge index for AF_BRIDGE family entries
+ 	 */
+@@ -933,6 +940,14 @@ int rtnl_neigh_get_state(struct rtnl_neigh *neigh)
+ 		return -1;
+ }
+ 
++int rtnl_neigh_get_entry_state(struct rtnl_neigh *neigh)
++{
++	if (neigh->ce_mask & NEIGH_ATTR_ENTRY_STATE)
++		return neigh->entry_state;
++	else
++		return -1;
++}
++
+ void rtnl_neigh_unset_state(struct rtnl_neigh *neigh, int state)
+ {
+ 	neigh->n_state_mask |= state;
+diff --git a/libnl-route-3.sym b/libnl-route-3.sym
+index ad5a94a..0e9b05d 100644
+--- a/libnl-route-3.sym
++++ b/libnl-route-3.sym
+@@ -1244,4 +1244,5 @@ global:
+ 	rtnl_nat_get_flags;
+ 	rtnl_nat_set_action;
+ 	rtnl_nat_get_action;
++	rtnl_neigh_get_entry_state;
+ } libnl_3_4;
+-- 
+2.25.1
+

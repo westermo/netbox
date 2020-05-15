@@ -1,0 +1,45 @@
+From 077bdbba8012f03b03fa698d59937d3d482e05c5 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Fri, 3 Nov 2017 08:29:50 +0100
+Subject: [PATCH 17/38] route: fix bug in rntl_act_next()
+Organization: Westermo Network Technologies AB
+
+Before returning next action in the list use rtnl_act_get()
+The user is responsible to run then rntl_act_put()
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ lib/route/act.c | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/lib/route/act.c b/lib/route/act.c
+index a0aff7f..664a21f 100644
+--- a/lib/route/act.c
++++ b/lib/route/act.c
+@@ -30,11 +30,18 @@ static struct nl_cache_ops rtnl_act_ops;
+ 
+ struct rtnl_act * rtnl_act_next(struct rtnl_act *act)
+ {
+-    if (act == NULL) {
+-        return NULL;
+-    }
++        struct rtnl_act *next;
+ 
+-    return act->a_next;
++	if (act == NULL)
++	        return NULL;
++
++	if (act->a_next != NULL) {
++	        next = act->a_next;
++		rtnl_act_get(next);
++		return next;
++	}
++
++	return NULL;
+ }
+ 
+ int rtnl_act_append(struct rtnl_act **head, struct rtnl_act *new)
+-- 
+2.25.1
+

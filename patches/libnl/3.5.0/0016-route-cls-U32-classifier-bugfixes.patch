@@ -1,0 +1,66 @@
+From a5a65aae2a98bc39c3d91bbd3063cd116167b46b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Magnus=20=C3=96berg?= <magnus.oberg@westermo.se>
+Date: Mon, 25 Apr 2016 16:08:29 +0200
+Subject: [PATCH 16/38] route/cls: U32 classifier bugfixes
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Organization: Westermo Network Technologies AB
+
+1) Fix u32_clone() so it makes proper cloning of action.
+Do not do raw memcpy. It was causing double freeing of memory and
+reference count errors.
+For now, only the first action in the action chain is included
+in the clone. This may need to be fixed also.
+
+2) Fix rtnl_u32_get_action() so it no longer does a raw memcpy
+of the action object. Instead the reference counter is increased
+to keep the original object alive. The action returned by this
+function must be "put" after use.
+
+Signed-off-by: Magnus Öberg <magnus.oberg@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ lib/route/cls/u32.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/lib/route/cls/u32.c b/lib/route/cls/u32.c
+index f06bc24..375ec2a 100644
+--- a/lib/route/cls/u32.c
++++ b/lib/route/cls/u32.c
+@@ -197,6 +197,24 @@ static int u32_clone(void *_dst, void *_src)
+ 			return -NLE_NOMEM;
+ 
+ 		memcpy(dst->cu_act, src->cu_act, sizeof(struct rtnl_act));
++
++		/* action nl list next and prev pointers must be updated */
++		nl_init_list_head(&dst->cu_act->ce_list);
++
++		if (src->cu_act->c_opts && !(dst->cu_act->c_opts = nl_data_clone(src->cu_act->c_opts)))
++			return -NLE_NOMEM;
++
++		if (src->cu_act->c_xstats && !(dst->cu_act->c_xstats = nl_data_clone(src->cu_act->c_xstats)))
++			return -NLE_NOMEM;
++
++		if (src->cu_act->c_subdata && !(dst->cu_act->c_subdata = nl_data_clone(src->cu_act->c_subdata)))
++			return -NLE_NOMEM;
++
++		if (dst->cu_act->c_link) {
++			nl_object_get(OBJ_CAST(dst->cu_act->c_link));
++		}
++
++		dst->cu_act->a_next = NULL;   /* Only clone first in chain */
+ 	}
+ 
+ 	if (src->cu_police && !(dst->cu_police = nl_data_clone(src->cu_police)))
+@@ -553,6 +571,7 @@ struct rtnl_act* rtnl_u32_get_action(struct rtnl_cls *cls)
+     if (!(u->cu_mask & U32_ATTR_ACTION))
+         return NULL;
+ 
++    rtnl_act_get(u->cu_act);
+     return u->cu_act;
+ }
+ 
+-- 
+2.25.1
+

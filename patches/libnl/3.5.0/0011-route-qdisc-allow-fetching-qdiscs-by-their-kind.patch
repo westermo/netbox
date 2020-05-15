@@ -1,0 +1,91 @@
+From bd79ad407549fbe157f91670124282415123cf85 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Wed, 2 Mar 2016 09:59:07 +0100
+Subject: [PATCH 11/38] route/qdisc: allow fetching qdiscs by their kind
+Organization: Westermo Network Technologies AB
+
+API:
+	rtnl_qdisc_get_by_kind()
+
+This function allows getting qdisc based on
+its kind, i.e. tbf, htb, cbq, etc.
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/netlink/route/qdisc.h |  2 ++
+ lib/route/qdisc.c             | 32 ++++++++++++++++++++++++++++++++
+ libnl-route-3.sym             |  1 +
+ 3 files changed, 35 insertions(+)
+
+diff --git a/include/netlink/route/qdisc.h b/include/netlink/route/qdisc.h
+index 10b85c5..5081a6a 100644
+--- a/include/netlink/route/qdisc.h
++++ b/include/netlink/route/qdisc.h
+@@ -33,6 +33,8 @@ extern struct rtnl_qdisc *
+ 
+ extern struct rtnl_qdisc *
+ 		rtnl_qdisc_get_by_parent(struct nl_cache *, int, uint32_t);
++extern struct rtnl_qdisc *rtnl_qdisc_get_by_kind(struct nl_cache *cache,
++						  int ifindex, char *kind);
+ 
+ extern int	rtnl_qdisc_build_add_request(struct rtnl_qdisc *, int,
+ 					     struct nl_msg **);
+diff --git a/lib/route/qdisc.c b/lib/route/qdisc.c
+index 7413cf7..e3ed0e2 100644
+--- a/lib/route/qdisc.c
++++ b/lib/route/qdisc.c
+@@ -403,6 +403,38 @@ struct rtnl_qdisc *rtnl_qdisc_get_by_parent(struct nl_cache *cache,
+ 	return NULL;
+ }
+ 
++/**
++ * Search qdisc by kind
++ * @arg cache		Qdisc cache
++ * @arg ifindex		Interface index
++ * @arg kind		Qdisc kind (tbf, htb, cbq, etc)
++ *
++ * Searches a qdisc cache previously allocated with rtnl_qdisc_alloc_cache()
++ * and searches for a qdisc matching the interface index and kind.
++ *
++ * The reference counter is incremented before returning the qdisc, therefore
++ * the reference must be given back with rtnl_qdisc_put() after usage.
++ *
++ * @return pointer to qdisc inside the cache or NULL if no match was found.
++ */
++struct rtnl_qdisc *rtnl_qdisc_get_by_kind(struct nl_cache *cache,
++					    int ifindex, char *kind)
++{
++	struct rtnl_qdisc *q;
++
++	if (cache->c_ops != &rtnl_qdisc_ops)
++		return NULL;
++
++	nl_list_for_each_entry(q, &cache->c_items, ce_list) {
++		if (!strncmp(q->q_kind, kind, TCKINDSIZ) && q->q_ifindex == ifindex) {
++			nl_object_get((struct nl_object *) q);
++			return q;
++		}
++	}
++
++	return NULL;
++}
++
+ /**
+  * Search qdisc by interface index and handle
+  * @arg cache		Qdisc cache
+diff --git a/libnl-route-3.sym b/libnl-route-3.sym
+index 6eba948..fee2387 100644
+--- a/libnl-route-3.sym
++++ b/libnl-route-3.sym
+@@ -913,6 +913,7 @@ global:
+ 	rtnl_police_get_linklayer;
+ 	rtnl_cls_get;
+ 	rtnl_cls_get_by_prio;
++	rtnl_qdisc_get_by_kind;
+ } libnl_3_2_26;
+ 
+ libnl_3_2_28 {
+-- 
+2.25.1
+

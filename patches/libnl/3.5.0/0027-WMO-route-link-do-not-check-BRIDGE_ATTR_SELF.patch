@@ -1,0 +1,31 @@
+From 34ae39796fdcae6dcc018b7d41fb3475f4532939 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Mon, 13 Nov 2017 14:06:51 +0100
+Subject: [PATCH 27/38] [WMO]route/link: do not check BRIDGE_ATTR_SELF
+Organization: Westermo Network Technologies AB
+
+since we do not set it in userspace. I have not yet figured out a way
+to set this flag sccessfully.
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ lib/route/link/bridge.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/route/link/bridge.c b/lib/route/link/bridge.c
+index 3ae9de3..f1b20ae 100644
+--- a/lib/route/link/bridge.c
++++ b/lib/route/link/bridge.c
+@@ -552,7 +552,7 @@ static int bridge_fill_af(struct rtnl_link *link, struct nl_msg *msg, void *data
+ {
+ 	struct bridge_data *bd = data;
+ 
+-	if ((bd->ce_mask & BRIDGE_ATTR_SELF)||(bd->ce_mask & BRIDGE_ATTR_HWMODE))
++	if (rtnl_link_get_master(link) == rtnl_link_get_ifindex(link))
+ 		NLA_PUT_U16(msg, IFLA_BRIDGE_FLAGS, BRIDGE_FLAGS_SELF);
+ 
+ 	if (bd->ce_mask & BRIDGE_ATTR_HWMODE)
+-- 
+2.25.1
+

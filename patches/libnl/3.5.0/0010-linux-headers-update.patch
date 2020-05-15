@@ -1,0 +1,31 @@
+From a93d826b1b6b92f024a53626b226b7df5a87c38d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Mattias=20Walstr=C3=B6m?= <mattias.walstrom@westermo.se>
+Date: Tue, 23 Feb 2016 08:45:04 +0100
+Subject: [PATCH 10/38] linux headers update
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Mattias Walström <mattias.walstrom@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/linux-private/linux/if_bridge.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/linux-private/linux/if_bridge.h b/include/linux-private/linux/if_bridge.h
+index 7dd5d99..2e80dc2 100644
+--- a/include/linux-private/linux/if_bridge.h
++++ b/include/linux-private/linux/if_bridge.h
+@@ -45,6 +45,8 @@
+ #define BRCTL_SET_PORT_PRIORITY 16
+ #define BRCTL_SET_PATH_COST 17
+ #define BRCTL_GET_FDB_ENTRIES 18
++#define BRCTL_SET_STP_PORT_DIS 19
++#define BRCTL_SET_STP_PORT_ENA 20
+ 
+ #define BR_STATE_DISABLED 0
+ #define BR_STATE_LISTENING 1
+-- 
+2.25.1
+

@@ -1,0 +1,145 @@
+From 47d2944cc9e6939251e3c9b63496441a41399d6b Mon Sep 17 00:00:00 2001
+From: Tobias Waldekranz <tobias@waldekranz.com>
+Date: Fri, 6 Nov 2015 10:12:17 +0100
+Subject: [PATCH 04/38] route/addr: add support for setting/getting address
+ alias
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/linux-private/linux/if_addr.h |  1 +
+ include/netlink-private/types.h       |  1 +
+ include/netlink/route/addr.h          |  3 +++
+ lib/route/addr.c                      | 32 ++++++++++++++++++++++++++-
+ libnl-route-3.sym                     |  2 ++
+ 5 files changed, 38 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux-private/linux/if_addr.h b/include/linux-private/linux/if_addr.h
+index a924606..18e4291 100644
+--- a/include/linux-private/linux/if_addr.h
++++ b/include/linux-private/linux/if_addr.h
+@@ -34,6 +34,7 @@ enum {
+ 	IFA_MULTICAST,
+ 	IFA_FLAGS,
+ 	IFA_RT_PRIORITY,  /* u32, priority/metric for prefix route */
++	IFA_ALIAS,
+ 	__IFA_MAX,
+ };
+ 
+diff --git a/include/netlink-private/types.h b/include/netlink-private/types.h
+index 97af3e5..1a18f80 100644
+--- a/include/netlink-private/types.h
++++ b/include/netlink-private/types.h
+@@ -299,6 +299,7 @@ struct rtnl_addr
+ 
+ 	struct rtnl_addr_cacheinfo a_cacheinfo;
+ 
++	char a_alias[IFNAMSIZ];
+ 	char a_label[IFNAMSIZ];
+ 	uint32_t a_flag_mask;
+ 	struct rtnl_link *a_link;
+diff --git a/include/netlink/route/addr.h b/include/netlink/route/addr.h
+index 56c12e7..e01c466 100644
+--- a/include/netlink/route/addr.h
++++ b/include/netlink/route/addr.h
+@@ -45,6 +45,9 @@ extern int	rtnl_addr_delete(struct nl_sock *,
+ extern char *	rtnl_addr_flags2str(int, char *, size_t);
+ extern int	rtnl_addr_str2flags(const char *);
+ 
++extern int	rtnl_addr_set_alias(struct rtnl_addr *, const char *);
++extern char *	rtnl_addr_get_alias(struct rtnl_addr *);
++
+ extern int	rtnl_addr_set_label(struct rtnl_addr *, const char *);
+ extern char *	rtnl_addr_get_label(struct rtnl_addr *);
+ 
+diff --git a/lib/route/addr.c b/lib/route/addr.c
+index f65e7e9..45cf94f 100644
+--- a/lib/route/addr.c
++++ b/lib/route/addr.c
+@@ -128,6 +128,7 @@
+ #define ADDR_ATTR_BROADCAST	0x0200
+ #define ADDR_ATTR_MULTICAST	0x0400
+ #define ADDR_ATTR_ANYCAST	0x0800
++#define ADDR_ATTR_ALIAS		0x1000
+ 
+ static struct nl_cache_ops rtnl_addr_ops;
+ static struct nl_object_ops addr_obj_ops;
+@@ -189,6 +190,8 @@ static int addr_clone(struct nl_object *_dst, struct nl_object *_src)
+ }
+ 
+ static struct nla_policy addr_policy[IFA_MAX+1] = {
++	[IFA_ALIAS]	= { .type = NLA_STRING,
++			    .maxlen = IFNAMSIZ },
+ 	[IFA_LABEL]	= { .type = NLA_STRING,
+ 			    .maxlen = IFNAMSIZ },
+ 	[IFA_CACHEINFO]	= { .minlen = sizeof(struct ifa_cacheinfo) },
+@@ -225,11 +228,16 @@ static int addr_msg_parser(struct nl_cache_ops *ops, struct sockaddr_nl *who,
+ 	addr->ce_mask = (ADDR_ATTR_FAMILY | ADDR_ATTR_PREFIXLEN |
+ 			 ADDR_ATTR_FLAGS | ADDR_ATTR_SCOPE | ADDR_ATTR_IFINDEX);
+ 
++	if (tb[IFA_ALIAS]) {
++		nla_strlcpy(addr->a_alias, tb[IFA_ALIAS], IFNAMSIZ);
++		addr->ce_mask |= ADDR_ATTR_ALIAS;
++	}
++
+ 	if (tb[IFA_LABEL]) {
+ 		nla_strlcpy(addr->a_label, tb[IFA_LABEL], IFNAMSIZ);
+ 		addr->ce_mask |= ADDR_ATTR_LABEL;
+ 	}
+-
++	
+ 	/* IPv6 only */
+ 	if (tb[IFA_CACHEINFO]) {
+ 		struct ifa_cacheinfo *ca;
+@@ -655,6 +663,9 @@ static int build_addr_msg(struct rtnl_addr *tmpl, int cmd, int flags,
+ 	else if (tmpl->ce_mask & ADDR_ATTR_LOCAL)
+ 		NLA_PUT_ADDR(msg, IFA_ADDRESS, tmpl->a_local);
+ 
++	if (tmpl->ce_mask & ADDR_ATTR_ALIAS)
++		NLA_PUT_STRING(msg, IFA_ALIAS, tmpl->a_alias);
++
+ 	if (tmpl->ce_mask & ADDR_ATTR_LABEL)
+ 		NLA_PUT_STRING(msg, IFA_LABEL, tmpl->a_label);
+ 
+@@ -840,6 +851,25 @@ int rtnl_addr_delete(struct nl_sock *sk, struct rtnl_addr *addr, int flags)
+  * @{
+  */
+ 
++int rtnl_addr_set_alias(struct rtnl_addr *addr, const char *alias)
++{
++	if (strlen(alias) > sizeof(addr->a_alias) - 1)
++		return -NLE_RANGE;
++
++	strcpy(addr->a_alias, alias);
++	addr->ce_mask |= ADDR_ATTR_ALIAS;
++
++	return 0;
++}
++
++char *rtnl_addr_get_alias(struct rtnl_addr *addr)
++{
++	if (addr->ce_mask & ADDR_ATTR_ALIAS)
++		return addr->a_alias;
++	else
++		return NULL;
++}
++
+ int rtnl_addr_set_label(struct rtnl_addr *addr, const char *label)
+ {
+ 	if (strlen(label) > sizeof(addr->a_label) - 1)
+diff --git a/libnl-route-3.sym b/libnl-route-3.sym
+index 765c663..b257c01 100644
+--- a/libnl-route-3.sym
++++ b/libnl-route-3.sym
+@@ -875,6 +875,8 @@ global:
+ 
+ libnl_3_2_27 {
+ global:
++	rtnl_addr_get_alias;
++	rtnl_addr_set_alias;
+ 	rtnl_link_get_link_netnsid;
+ 	rtnl_link_ipvlan_alloc;
+ 	rtnl_link_is_ipvlan;
+-- 
+2.25.1
+

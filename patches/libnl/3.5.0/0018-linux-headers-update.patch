@@ -1,0 +1,27 @@
+From 86cb3b4f300603c812866b35f73735d2396bbbe5 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Mon, 16 May 2016 14:41:43 +0200
+Subject: [PATCH 18/38] linux headers update.
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/linux-private/linux/neighbour.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/linux-private/linux/neighbour.h b/include/linux-private/linux/neighbour.h
+index 904db61..a2febdb 100644
+--- a/include/linux-private/linux/neighbour.h
++++ b/include/linux-private/linux/neighbour.h
+@@ -28,6 +28,7 @@ enum {
+ 	NDA_MASTER,
+ 	NDA_LINK_NETNSID,
+ 	NDA_SRC_VNI,
++	NDA_ENTRY_STATE,
+ 	__NDA_MAX
+ };
+ 
+-- 
+2.25.1
+

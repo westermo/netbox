@@ -1,0 +1,35 @@
+From 08b0e20a124f146e8d035680af82c737a2b4c838 Mon Sep 17 00:00:00 2001
+From: Jan Slomski <jan.slomski@westermo.se>
+Date: Wed, 21 Mar 2018 10:23:57 +0100
+Subject: [PATCH 28/38] route/link: Check for null pointer in macvlan
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ lib/route/link/macvlan.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/lib/route/link/macvlan.c b/lib/route/link/macvlan.c
+index a23fe6d..9f4b044 100644
+--- a/lib/route/link/macvlan.c
++++ b/lib/route/link/macvlan.c
+@@ -150,10 +150,12 @@ static void macvlan_free(struct rtnl_link *link)
+ 
+ 	mvi = link->l_info;
+ 
+-	for (i = 0; i < mvi->mvi_maccount; i++)
+-		nl_addr_put(mvi->mvi_macaddr[i]);
+-	free(mvi->mvi_macaddr);
+-	free(mvi);
++	if (mvi != NULL) {
++		for (i = 0; i < mvi->mvi_maccount; i++)
++			nl_addr_put(mvi->mvi_macaddr[i]);
++		free(mvi->mvi_macaddr);
++		free(mvi);
++	}
+ 
+ 	link->l_info = NULL;
+ }
+-- 
+2.25.1
+

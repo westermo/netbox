@@ -1,0 +1,83 @@
+From 54997a22aef2f14df2119e8e303f4486fd942815 Mon Sep 17 00:00:00 2001
+From: Tobias Waldekranz <tobias@waldekranz.com>
+Date: Wed, 27 Jan 2016 13:22:31 +0100
+Subject: [PATCH 08/38] route/route: support FIB lookups using rtnl
+Organization: Westermo Network Technologies AB
+
+Using the flnl_* family of functions to perform FIB lookups is rather
+limited. In particular, there seems to be no way of resolving the
+nexthop. By hooking into RTM_GETROUTE, a regular rtnl route object is
+returned instead.
+
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/netlink/route/route.h |  3 +++
+ lib/route/route.c             | 27 +++++++++++++++++++++++++++
+ libnl-route-3.sym             |  1 +
+ 3 files changed, 31 insertions(+)
+
+diff --git a/include/netlink/route/route.h b/include/netlink/route/route.h
+index 824dae3..79230ac 100644
+--- a/include/netlink/route/route.h
++++ b/include/netlink/route/route.h
+@@ -58,6 +58,9 @@ extern void	rtnl_route_get(struct rtnl_route *);
+ extern int	rtnl_route_parse(struct nlmsghdr *, struct rtnl_route **);
+ extern int	rtnl_route_build_msg(struct nl_msg *, struct rtnl_route *);
+ 
++extern int	rtnl_route_lookup(struct nl_sock *sk, struct nl_addr *dst,
++				  struct rtnl_route **result);
++
+ extern int	rtnl_route_build_add_request(struct rtnl_route *, int,
+ 					     struct nl_msg **);
+ extern int	rtnl_route_add(struct nl_sock *, struct rtnl_route *, int);
+diff --git a/lib/route/route.c b/lib/route/route.c
+index 0900b77..ff74a9f 100644
+--- a/lib/route/route.c
++++ b/lib/route/route.c
+@@ -131,6 +131,33 @@ int rtnl_route_build_add_request(struct rtnl_route *tmpl, int flags,
+ 			       result);
+ }
+ 
++int rtnl_route_lookup(struct nl_sock *sk, struct nl_addr *dst,
++		      struct rtnl_route **result)
++{
++	struct nl_msg *msg;
++	struct rtnl_route *tmpl;
++	struct nl_object *obj;
++	int err;
++
++	tmpl = rtnl_route_alloc();
++	rtnl_route_set_dst(tmpl, dst);
++	err = build_route_msg(tmpl, RTM_GETROUTE, 0, &msg);
++	rtnl_route_put(tmpl);
++	if (err < 0)
++		return err;
++
++	err = nl_send_auto(sk, msg);
++	nlmsg_free(msg);
++	if (err < 0)
++		return err;
++
++	if ((err = nl_pickup(sk, route_msg_parser, &obj)) < 0)
++		return err;
++
++	*result = (struct rtnl_route *)obj;
++	return wait_for_ack(sk);
++}
++
+ int rtnl_route_add(struct nl_sock *sk, struct rtnl_route *route, int flags)
+ {
+ 	struct nl_msg *msg;
+diff --git a/libnl-route-3.sym b/libnl-route-3.sym
+index 768fab1..d3a50c7 100644
+--- a/libnl-route-3.sym
++++ b/libnl-route-3.sym
+@@ -1224,4 +1224,5 @@ global:
+ 	rtnl_vlan_set_protocol;
+ 	rtnl_vlan_set_vlan_id;
+ 	rtnl_vlan_set_vlan_prio;
++	rtnl_route_lookup;
+ } libnl_3_4;
+-- 
+2.25.1
+

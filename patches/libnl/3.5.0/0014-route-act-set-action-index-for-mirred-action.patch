@@ -1,0 +1,47 @@
+From e2ef8a1b34edf80a5e6fba70f2ddb39c74af79e4 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Wed, 23 Mar 2016 14:45:08 +0100
+Subject: [PATCH 14/38] route/act: set action index for 'mirred' action
+Organization: Westermo Network Technologies AB
+
+This is compulsory otherwise linux kernel will complain.
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ lib/route/act/mirred.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/lib/route/act/mirred.c b/lib/route/act/mirred.c
+index b674fb8..6350103 100644
+--- a/lib/route/act/mirred.c
++++ b/lib/route/act/mirred.c
+@@ -23,6 +23,7 @@
+ #include <netlink/utils.h>
+ #include <netlink-private/route/tc-api.h>
+ #include <netlink/route/act/mirred.h>
++#include <netlink/route/tc.h>
+ 
+ static struct nla_policy mirred_policy[TCA_MIRRED_MAX + 1] = {
+ 	[TCA_MIRRED_PARMS]      = { .minlen = sizeof(struct tc_mirred) },
+@@ -42,6 +43,7 @@ static int mirred_msg_parser(struct rtnl_tc *tc, void *data)
+ 		return -NLE_MISSING_ATTR;
+ 
+ 	nla_memcpy(&u->m_parm, tb[TCA_MIRRED_PARMS], sizeof(u->m_parm));
++	rtnl_tc_set_act_index(tc, u->m_parm.index);
+ 	return 0;
+ }
+ 
+@@ -116,6 +118,9 @@ static int mirred_msg_fill(struct rtnl_tc *tc, void *data, struct nl_msg *msg)
+ 	if (!u)
+ 		return 0;
+ 
++	if (tc->ce_mask & TCA_ATTR_ACT_INDEX)
++		u->m_parm.index = rtnl_tc_get_act_index(tc);
++
+ 	NLA_PUT(msg, TCA_MIRRED_PARMS, sizeof(u->m_parm), &u->m_parm);
+ 	return 0;
+ 
+-- 
+2.25.1
+

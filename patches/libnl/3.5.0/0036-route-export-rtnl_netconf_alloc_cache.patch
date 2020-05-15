@@ -1,0 +1,27 @@
+From 33b07c1bec13c6881bdc49c4fb781f353cbfd92f Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Fri, 10 Apr 2020 07:32:25 +0200
+Subject: [PATCH 36/38] route: export 'rtnl_netconf_alloc_cache()'
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ libnl-route-3.sym | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/libnl-route-3.sym b/libnl-route-3.sym
+index b6ef7e8..9a328c2 100644
+--- a/libnl-route-3.sym
++++ b/libnl-route-3.sym
+@@ -1070,6 +1070,7 @@ global:
+ 	rtnl_link_inet6_get_flags;
+ 	rtnl_link_inet6_set_flags;
+ 	rtnl_link_inet6_str2flags;
++	rtnl_netconf_alloc_cache;
+ 	rtnl_netconf_get_all;
+ 	rtnl_netconf_get_by_idx;
+ 	rtnl_netconf_get_default;
+-- 
+2.25.1
+

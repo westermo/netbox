@@ -1,0 +1,44 @@
+From 9284009ee567a6addbfd6c55e8db242533db9d9e Mon Sep 17 00:00:00 2001
+From: Joachim Nilsson <troglobit@gmail.com>
+Date: Tue, 12 Jan 2016 17:29:29 +0100
+Subject: [PATCH 37/38] route/neigh: Pass struct ifinfomsg to kernel for
+ RTM_GETNEIGH
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ lib/route/neigh.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/lib/route/neigh.c b/lib/route/neigh.c
+index 9774f83..ff1db96 100644
+--- a/lib/route/neigh.c
++++ b/lib/route/neigh.c
+@@ -460,14 +460,22 @@ errout:
+ 	return err;
+ }
+ 
++/* Cannot use use nl_rtgen_request() since the kernel rtnl_fdb_dump()
++ * expects a struct ifinfomsg size payload.
++ *
++ * XXX: Add support for appending br_idx, as U32 IFLA_MASTER, to nlmsg
++ *      to cache only neigh entries from a given bridge.
++ * XXX: Also add support for caching entries from a given brport, send
++ *      as .ifi_index.
++ */
+ static int neigh_request_update(struct nl_cache *c, struct nl_sock *h)
+ {
+ 	int family = c->c_iarg1;
++	struct ifinfomsg hdr = {.ifi_family = family};
+ 
+ 	if (family == AF_UNSPEC) {
+-		return nl_rtgen_request(h, RTM_GETNEIGH, family, NLM_F_DUMP);
++		return nl_send_simple(h, RTM_GETNEIGH, NLM_F_DUMP, &hdr, sizeof(hdr));
+ 	} else if (family == AF_BRIDGE) {
+-		struct ifinfomsg hdr = {.ifi_family = family};
+ 		struct nl_msg *msg;
+ 		int err;
+ 
+-- 
+2.25.1
+

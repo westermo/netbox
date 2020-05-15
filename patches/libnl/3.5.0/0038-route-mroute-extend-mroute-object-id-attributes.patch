@@ -1,0 +1,30 @@
+From cae33001ba6dde44a88413f1331abc62daf4d4ec Mon Sep 17 00:00:00 2001
+From: Lucian Banu <Lucian.Banu@enea.com>
+Date: Wed, 13 May 2020 16:05:56 +0200
+Subject: [PATCH 38/38] route/mroute: extend mroute object id attributes
+Organization: Westermo Network Technologies AB
+
+THis results in more extensive mroute object comparison
+
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ lib/route/mroute.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/lib/route/mroute.c b/lib/route/mroute.c
+index e87bf97..5ec0f4e 100644
+--- a/lib/route/mroute.c
++++ b/lib/route/mroute.c
+@@ -593,7 +593,8 @@ struct nl_object_ops mroute_obj_ops = {
+ 	.oo_attrs2str		= route_attrs2str,
+ 	.oo_id_attrs		= (ROUTE_ATTR_FAMILY | ROUTE_ATTR_TABLE |
+ 				   ROUTE_ATTR_DST | ROUTE_ATTR_IIF |
+-				   ROUTE_ATTR_TYPE | ROUTE_ATTR_FLAGS),
++				   ROUTE_ATTR_TYPE | ROUTE_ATTR_FLAGS |
++				   ROUTE_ATTR_MULTIPATH | ROUTE_ATTR_SRC),
+ 	.oo_id_attrs_get	= route_id_attrs_get,
+ };
+ 
+-- 
+2.25.1
+

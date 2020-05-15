@@ -1,0 +1,184 @@
+From dc1f5223c684f520a070c3fd113560a896572dc7 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Thu, 29 Nov 2018 14:53:16 +0100
+Subject: [PATCH 33/38] route: prepare for multicast routing support
+Organization: Westermo Network Technologies AB
+
+1) Move attribute defines to header file, since they
+can be shared between unicast and multicast routing;
+
+2) Make some of the static functions external,
+for the same reason.
+
+3) Account for RTNL_FAMILY_IPMR when setting
+route family and guessing scope.
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/netlink/route/route.h | 28 +++++++++++++++++++++++++
+ lib/route/route_obj.c         | 39 ++++++++++-------------------------
+ 2 files changed, 39 insertions(+), 28 deletions(-)
+
+diff --git a/include/netlink/route/route.h b/include/netlink/route/route.h
+index 79230ac..cb7bf5a 100644
+--- a/include/netlink/route/route.h
++++ b/include/netlink/route/route.h
+@@ -24,6 +24,28 @@
+ extern "C" {
+ #endif
+ 
++/** @cond SKIP */
++#define ROUTE_ATTR_FAMILY    0x000001
++#define ROUTE_ATTR_TOS       0x000002
++#define ROUTE_ATTR_TABLE     0x000004
++#define ROUTE_ATTR_PROTOCOL  0x000008
++#define ROUTE_ATTR_SCOPE     0x000010
++#define ROUTE_ATTR_TYPE      0x000020
++#define ROUTE_ATTR_FLAGS     0x000040
++#define ROUTE_ATTR_DST       0x000080
++#define ROUTE_ATTR_SRC       0x000100
++#define ROUTE_ATTR_IIF       0x000200
++#define ROUTE_ATTR_OIF       0x000400
++#define ROUTE_ATTR_GATEWAY   0x000800
++#define ROUTE_ATTR_PRIO      0x001000
++#define ROUTE_ATTR_PREF_SRC  0x002000
++#define ROUTE_ATTR_METRICS   0x004000
++#define ROUTE_ATTR_MULTIPATH 0x008000
++#define ROUTE_ATTR_REALMS    0x010000
++#define ROUTE_ATTR_CACHEINFO 0x020000
++#define ROUTE_ATTR_TTL_PROPAGATE 0x040000
++/** @endcond */
++
+ /**
+  * @ingroup route
+  * When passed to rtnl_route_alloc_cache() the cache will
+@@ -126,6 +148,12 @@ extern int	rtnl_route_read_protocol_names(const char *);
+ 
+ extern char *	rtnl_route_metric2str(int, char *, size_t);
+ extern int	rtnl_route_str2metric(const char *);
++extern int      rtnl_route_parse_multipath(struct rtnl_route *route, struct nlattr *attr);
++extern int      rtnl_route_put_via(struct nl_msg *msg, struct nl_addr *addr);
++extern uint32_t route_id_attrs_get(struct nl_object *obj);
++extern char *   route_attrs2str(int attrs, char *buf, size_t len);
++extern void     route_dump_line(struct nl_object *a, struct nl_dump_params *p);
++extern void     route_dump_details(struct nl_object *a, struct nl_dump_params *p);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/lib/route/route_obj.c b/lib/route/route_obj.c
+index bacabe8..8066f9d 100644
+--- a/lib/route/route_obj.c
++++ b/lib/route/route_obj.c
+@@ -45,27 +45,6 @@
+ #include <netlink/route/nexthop.h>
+ #include <linux/in_route.h>
+ 
+-/** @cond SKIP */
+-#define ROUTE_ATTR_FAMILY    0x000001
+-#define ROUTE_ATTR_TOS       0x000002
+-#define ROUTE_ATTR_TABLE     0x000004
+-#define ROUTE_ATTR_PROTOCOL  0x000008
+-#define ROUTE_ATTR_SCOPE     0x000010
+-#define ROUTE_ATTR_TYPE      0x000020
+-#define ROUTE_ATTR_FLAGS     0x000040
+-#define ROUTE_ATTR_DST       0x000080
+-#define ROUTE_ATTR_SRC       0x000100
+-#define ROUTE_ATTR_IIF       0x000200
+-#define ROUTE_ATTR_OIF       0x000400
+-#define ROUTE_ATTR_GATEWAY   0x000800
+-#define ROUTE_ATTR_PRIO      0x001000
+-#define ROUTE_ATTR_PREF_SRC  0x002000
+-#define ROUTE_ATTR_METRICS   0x004000
+-#define ROUTE_ATTR_MULTIPATH 0x008000
+-#define ROUTE_ATTR_REALMS    0x010000
+-#define ROUTE_ATTR_CACHEINFO 0x020000
+-#define ROUTE_ATTR_TTL_PROPAGATE 0x040000
+-/** @endcond */
+ 
+ static void route_constructor(struct nl_object *c)
+ {
+@@ -132,7 +111,7 @@ static int route_clone(struct nl_object *_dst, struct nl_object *_src)
+ 	return 0;
+ }
+ 
+-static void route_dump_line(struct nl_object *a, struct nl_dump_params *p)
++void route_dump_line(struct nl_object *a, struct nl_dump_params *p)
+ {
+ 	struct rtnl_route *r = (struct rtnl_route *) a;
+ 	int cache = 0, flags;
+@@ -209,7 +188,7 @@ static void route_dump_line(struct nl_object *a, struct nl_dump_params *p)
+ 	nl_dump(p, "\n");
+ }
+ 
+-static void route_dump_details(struct nl_object *a, struct nl_dump_params *p)
++void route_dump_details(struct nl_object *a, struct nl_dump_params *p)
+ {
+ 	struct rtnl_route *r = (struct rtnl_route *) a;
+ 	struct nl_cache *link_cache;
+@@ -353,7 +332,7 @@ static void route_keygen(struct nl_object *obj, uint32_t *hashkey,
+ 	return;
+ }
+ 
+-static uint32_t route_id_attrs_get(struct nl_object *obj)
++uint32_t route_id_attrs_get(struct nl_object *obj)
+ {
+ 	struct rtnl_route *route = (struct rtnl_route *)obj;
+ 	struct nl_object_ops *ops = obj->ce_ops;
+@@ -591,7 +570,7 @@ static const struct trans_tbl route_attrs[] = {
+ 	__ADD(ROUTE_ATTR_TTL_PROPAGATE, ttl_propagate),
+ };
+ 
+-static char *route_attrs2str(int attrs, char *buf, size_t len)
++char *route_attrs2str(int attrs, char *buf, size_t len)
+ {
+ 	return __flags2str(attrs, buf, len, route_attrs,
+ 			   ARRAY_SIZE(route_attrs));
+@@ -686,6 +665,7 @@ int rtnl_route_set_family(struct rtnl_route *route, uint8_t family)
+ 	case AF_INET6:
+ 	case AF_DECnet:
+ 	case AF_MPLS:
++	case RTNL_FAMILY_IPMR:
+ 		route->rt_family = family;
+ 		route->ce_mask |= ROUTE_ATTR_FAMILY;
+ 		return 0;
+@@ -964,6 +944,9 @@ int rtnl_route_guess_scope(struct rtnl_route *route)
+ 	if (route->rt_family == AF_MPLS)
+ 		return RT_SCOPE_UNIVERSE;
+ 
++	if (route->rt_family == RTNL_FAMILY_IPMR)
++		return RT_SCOPE_UNIVERSE;
++
+ 	if (!nl_list_empty(&route->rt_nexthops)) {
+ 		struct rtnl_nexthop *nh;
+ 
+@@ -990,7 +973,7 @@ static struct nl_addr *rtnl_route_parse_via(struct nlattr *nla)
+ 	return nl_addr_build(via->rtvia_family, via->rtvia_addr, alen);
+ }
+ 
+-static int rtnl_route_put_via(struct nl_msg *msg, struct nl_addr *addr)
++int rtnl_route_put_via(struct nl_msg *msg, struct nl_addr *addr)
+ {
+ 	unsigned int alen = nl_addr_get_len(addr);
+ 	struct nlattr *nla;
+@@ -1020,7 +1003,7 @@ static struct nla_policy route_policy[RTA_MAX+1] = {
+ 	[RTA_ENCAP_TYPE] = { .type = NLA_U16 },
+ };
+ 
+-static int parse_multipath(struct rtnl_route *route, struct nlattr *attr)
++int rtnl_route_parse_multipath(struct rtnl_route *route, struct nlattr *attr)
+ {
+ 	struct rtnl_nexthop *nh = NULL;
+ 	struct rtnexthop *rtnh = nla_data(attr);
+@@ -1221,7 +1204,7 @@ int rtnl_route_parse(struct nlmsghdr *nlh, struct rtnl_route **result)
+ 	}
+ 
+ 	if (tb[RTA_MULTIPATH])
+-		if ((err = parse_multipath(route, tb[RTA_MULTIPATH])) < 0)
++		if ((err = rtnl_route_parse_multipath(route, tb[RTA_MULTIPATH])) < 0)
+ 			goto errout;
+ 
+ 	if (tb[RTA_CACHEINFO]) {
+-- 
+2.25.1
+

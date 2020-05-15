@@ -1,0 +1,206 @@
+From d55e565e470997c2cd44dd19a92176c340766415 Mon Sep 17 00:00:00 2001
+From: Jonas Johansson <jonas.johansson@westermo.se>
+Date: Tue, 21 Apr 2015 09:00:58 +0200
+Subject: [PATCH 03/38] route/link: add support for team device
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Jonas Johansson <jonas.johansson@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ Makefile.am                       |   2 +
+ include/netlink/route/link/team.h |  32 +++++++++
+ lib/route/link/team.c             | 109 ++++++++++++++++++++++++++++++
+ libnl-route-3.sym                 |   2 +
+ 4 files changed, 145 insertions(+)
+ create mode 100644 include/netlink/route/link/team.h
+ create mode 100644 lib/route/link/team.c
+
+diff --git a/Makefile.am b/Makefile.am
+index b2e8737..0ba439e 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -155,6 +155,7 @@ libnlinclude_netlink_route_link_HEADERS = \
+ 	include/netlink/route/link/ipgre.h \
+ 	include/netlink/route/link/ipip.h \
+ 	include/netlink/route/link/ipvlan.h \
++	include/netlink/route/link/team.h \
+ 	include/netlink/route/link/ipvti.h \
+ 	include/netlink/route/link/macsec.h \
+ 	include/netlink/route/link/macvlan.h \
+@@ -403,6 +404,7 @@ lib_libnl_route_3_la_SOURCES = \
+ 	lib/route/link/ipgre.c \
+ 	lib/route/link/ipip.c \
+ 	lib/route/link/ipvlan.c \
++	lib/route/link/team.c \
+ 	lib/route/link/ipvti.c \
+ 	lib/route/link/macsec.c \
+ 	lib/route/link/macvlan.c \
+diff --git a/include/netlink/route/link/team.h b/include/netlink/route/link/team.h
+new file mode 100644
+index 0000000..099afbc
+--- /dev/null
++++ b/include/netlink/route/link/team.h
+@@ -0,0 +1,32 @@
++/*
++ * netlink/route/link/team.h		Team Interface
++ *
++ *	This library is free software; you can redistribute it and/or
++ *	modify it under the terms of the GNU Lesser General Public
++ *	License as published by the Free Software Foundation version 2.1
++ *	of the License.
++ *
++ * Copyright (c) 2015 Jonas Johansson <jonasj76@gmail.com>
++ */
++
++#ifndef NETLINK_LINK_TEAM_H_
++#define NETLINK_LINK_TEAM_H_
++
++#include <netlink/netlink.h>
++#include <netlink/route/link.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++extern struct rtnl_link *rtnl_link_team_alloc(void);
++
++extern int	rtnl_link_team_add(struct nl_sock *, const char *,
++				   struct rtnl_link *);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
++
+diff --git a/lib/route/link/team.c b/lib/route/link/team.c
+new file mode 100644
+index 0000000..5e35be2
+--- /dev/null
++++ b/lib/route/link/team.c
+@@ -0,0 +1,109 @@
++/*
++ * lib/route/link/team.c	Team Link Module
++ *
++ *	This library is free software; you can redistribute it and/or
++ *	modify it under the terms of the GNU Lesser General Public
++ *	License as published by the Free Software Foundation version 2.1
++ *	of the License.
++ *
++ * Copyright (c) 2015 Jonas Johansson <jonasj76@gmail.com>
++ */
++
++/**
++ * @ingroup link
++ * @defgroup team Team
++ *
++ * @details
++ * \b Link Type Name: "team"
++ *
++ * @route_doc{link_team, Team Documentation}
++ * @{
++ */
++
++#include <netlink-private/netlink.h>
++#include <netlink/netlink.h>
++#include <netlink-private/route/link/api.h>
++#include <netlink/route/link/team.h>
++
++/**
++ * Allocate link object of type team
++ *
++ * @return Allocated link object or NULL.
++ */
++struct rtnl_link *rtnl_link_team_alloc(void)
++{
++	struct rtnl_link *link;
++	int err;
++
++	if (!(link = rtnl_link_alloc()))
++		return NULL;
++
++	if ((err = rtnl_link_set_type(link, "team")) < 0) {
++		rtnl_link_put(link);
++		return NULL;
++	}
++
++	return link;
++}
++
++/**
++ * Create a new kernel team device
++ * @arg sock		netlink socket
++ * @arg name		name of team device or NULL
++ * @arg opts		team options (currently unused)
++ *
++ * Creates a new team device in the kernel. If no name is
++ * provided, the kernel will automatically pick a name of the
++ * form "type%d" (e.g. team0, vlan1, etc.)
++ *
++ * The \a opts argument is currently unused. In the future, it
++ * may be used to carry additional team options to be set
++ * when creating the team device.
++ *
++ * @note When letting the kernel assign a name, it will become
++ *       difficult to retrieve the interface afterwards because
++ *       you have to guess the name the kernel has chosen. It is
++ *       therefore not recommended to not provide a device name.
++ *
++ * @see rtnl_link_team_enslave()
++ * @see rtnl_link_team_release()
++ *
++ * @return 0 on success or a negative error code
++ */
++int rtnl_link_team_add(struct nl_sock *sock, const char *name,
++		       struct rtnl_link *opts)
++{
++	struct rtnl_link *link;
++	int err;
++
++	if (!(link = rtnl_link_team_alloc()))
++		return -NLE_NOMEM;
++
++	if (!name && opts)
++		name = rtnl_link_get_name(opts);
++
++	if (name)
++		rtnl_link_set_name(link, name);
++
++	err = rtnl_link_add(sock, link, NLM_F_CREATE);
++
++	rtnl_link_put(link);
++
++	return err;
++}
++
++static struct rtnl_link_info_ops team_info_ops = {
++	.io_name		= "team",
++};
++
++static void __init team_init(void)
++{
++	rtnl_link_register_info(&team_info_ops);
++}
++
++static void __exit team_exit(void)
++{
++	rtnl_link_unregister_info(&team_info_ops);
++}
++
++/** @} */
+diff --git a/libnl-route-3.sym b/libnl-route-3.sym
+index fadc967..765c663 100644
+--- a/libnl-route-3.sym
++++ b/libnl-route-3.sym
+@@ -891,6 +891,8 @@ global:
+         rtnl_link_bridge_vlan_flush;
+ 	rtnl_link_bridge_vlan_get_pvid;
+         rtnl_link_build_add_request;
++	rtnl_link_team_alloc;
++        rtnl_link_team_add;
+ } libnl_3_2_26;
+ 
+ libnl_3_2_28 {
+-- 
+2.25.1
+
