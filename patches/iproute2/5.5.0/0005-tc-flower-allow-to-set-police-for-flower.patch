@@ -1,0 +1,58 @@
+From c471861eb5b4e9018bef7286c28b3dba284602c0 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Fri, 9 Mar 2018 14:44:23 +0100
+Subject: [PATCH 5/5] tc:flower: allow to set 'police' for flower
+Organization: Westermo Network Technologies AB
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ include/uapi/linux/pkt_cls.h |  1 +
+ tc/f_flower.c                | 12 ++++++++++++
+ 2 files changed, 13 insertions(+)
+
+diff --git a/include/uapi/linux/pkt_cls.h b/include/uapi/linux/pkt_cls.h
+index 449a6397..17347158 100644
+--- a/include/uapi/linux/pkt_cls.h
++++ b/include/uapi/linux/pkt_cls.h
+@@ -524,6 +524,7 @@ enum {
+ 	TCA_FLOWER_KEY_IP_TOS_MASK,	/* u8 */
+ 	TCA_FLOWER_KEY_IP_TTL,		/* u8 */
+ 	TCA_FLOWER_KEY_IP_TTL_MASK,	/* u8 */
++	TCA_FLOWER_POLICE,
+ 
+ 	TCA_FLOWER_KEY_CVLAN_ID,	/* be16 */
+ 	TCA_FLOWER_KEY_CVLAN_PRIO,	/* u8   */
+diff --git a/tc/f_flower.c b/tc/f_flower.c
+index 8f248db5..d3126b48 100644
+--- a/tc/f_flower.c
++++ b/tc/f_flower.c
+@@ -1515,6 +1515,13 @@ static int flower_parse_opt(struct filter_util *qu, char *handle,
+ 				return -1;
+ 			}
+ 			continue;
++		} else if (matches(*argv, "police") == 0) {
++			NEXT_ARG();
++			if (parse_police(&argc, &argv, TCA_FLOWER_POLICE, n)) {
++				fprintf(stderr, "Illegal \"police\"\n");
++				return -1;
++			}
++			continue;
+ 		} else if (strcmp(*argv, "help") == 0) {
+ 			explain();
+ 			return -1;
+@@ -2300,6 +2307,11 @@ static int flower_print_opt(struct filter_util *qu, FILE *f,
+ 	if (tb[TCA_FLOWER_ACT])
+ 		tc_print_action(f, tb[TCA_FLOWER_ACT], 0);
+ 
++	if (tb[TCA_FLOWER_POLICE]) {
++	        fprintf(f, "\n");
++		tc_print_police(f, tb[TCA_FLOWER_POLICE]);
++	}
++
+ 	return 0;
+ }
+ 
+-- 
+2.25.1
+

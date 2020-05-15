@@ -1,0 +1,39 @@
+From cc5f744cb8bb8ca64e980f8157e7e4f2e7345685 Mon Sep 17 00:00:00 2001
+From: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Date: Tue, 29 Aug 2017 11:45:27 +0200
+Subject: [PATCH 1/5] make: integration patch
+Organization: Westermo Network Technologies AB
+
+Build only essentials plus misc
+
+Signed-off-by: Volodymyr Bendiuga <volodymyr.bendiuga@westermo.se>
+Signed-off-by: Joachim Nilsson <troglobit@gmail.com>
+---
+ Makefile | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 0b79b1f1..22d0b80c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -43,8 +43,6 @@ DEFINES+=-DCONFDIR=\"$(CONFDIR)\" \
+ #options for mpls
+ ADDLIB+=mpls_ntop.o mpls_pton.o
+ 
+-CC := gcc
+-HOSTCC ?= $(CC)
+ DEFINES += -D_GNU_SOURCE
+ # Turn on transparent support for LFS
+ DEFINES += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+@@ -55,7 +53,7 @@ WFLAGS += -Wmissing-declarations -Wold-style-definition -Wformat=2
+ CFLAGS := $(WFLAGS) $(CCOPTS) -I../include -I../include/uapi $(DEFINES) $(CFLAGS)
+ YACCFLAGS = -d -t -v
+ 
+-SUBDIRS=lib ip tc bridge misc netem genl tipc devlink rdma man
++SUBDIRS=lib ip tc bridge misc
+ 
+ LIBNETLINK=../lib/libutil.a ../lib/libnetlink.a
+ LDLIBS += $(LIBNETLINK)
+-- 
+2.25.1
+

@@ -1,5 +1,6 @@
 BR2_x86_64=y
 BR2_ENABLE_DEBUG=y
+BR2_GLOBAL_PATCH_DIR="$(BR2_EXTERNAL_NETBOX_PATH)/patches"
 BR2_TOOLCHAIN_EXTERNAL=y
 BR2_TOOLCHAIN_EXTERNAL_DOWNLOAD=y
 BR2_TOOLCHAIN_EXTERNAL_URL="https://github.com/myrootfs/crosstool-ng/releases/download/troglobit%2F7.3.0-1/$(ARCH)-unknown-linux-gnu-7.3.0-1.tar.xz"
