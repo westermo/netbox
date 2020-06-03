@@ -1,0 +1,434 @@
+/*
+ * T1024 Coronet Device Tree Source, based on T1023 RDB
+ *
+ * Copyright 2014       Freescale Semiconductor Inc.
+ * Copyright 2015-2017  Westermo Teleindustri AB
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *	 notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *	 notice, this list of conditions and the following disclaimer in the
+ *	 documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Freescale Semiconductor nor the
+ *	 names of its contributors may be used to endorse or promote products
+ *	 derived from this software without specific prior written permission.
+ *
+ *
+ * ALTERNATIVELY, this software may be distributed under the terms of the
+ * GNU General Public License ("GPL") as published by the Free Software
+ * Foundation, either version 2 of that License or (at your option) any
+ * later version.
+ *
+ * THIS SOFTWARE IS PROVIDED BY Freescale Semiconductor "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL Freescale Semiconductor BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+#include <t102xsi-pre.dtsi>
+
+/ {
+	family = "Viper";
+	model = "wmo,Coronet";
+	compatible = "wmo,coronet", "fsl,T1023RDB";
+	#address-cells = <2>;
+	#size-cells = <2>;
+	interrupt-parent = <&mpic>;
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		bman_fbpr: bman-fbpr {
+			size = <0 0x1000000>;
+			alignment = <0 0x1000000>;
+		};
+
+		qman_fqd: qman-fqd {
+			size = <0 0x400000>;
+			alignment = <0 0x400000>;
+		};
+
+		qman_pfdr: qman-pfdr {
+			size = <0 0x2000000>;
+			alignment = <0 0x2000000>;
+		};
+	};
+
+	ifc: localbus@ffe124000 {
+		reg = <0xf 0xfe124000 0 0x2000>;
+		ranges = <0 0 0xf 0xe8000000 0x08000000
+			  1 0 0xf 0xff800000 0x00010000>;
+
+		nor@0,0 {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			compatible = "cfi-flash";
+			reg = <0x0 0x0 0x8000000>;
+			bank-width = <2>;
+			device-width = <1>;
+
+			partition@0 {
+				/* Primary image 56MB */
+				reg = <0x00000000 0x3800000>;
+				label = "Linux_main";
+			};
+
+			partition@3800000 {
+				/* Secondary image 56MB */
+				reg = <0x3800000 0x3800000>;
+				label = "Linux_backup";
+			};
+
+			partition@7000000 {
+				/* WeOS Config 15MB */
+				reg = <0x7000000 0xf00000>;
+				label = "Config";
+			};
+
+			partition@7F00000 {
+				/* 512KB for Barebox Configuration */
+				label = "BareboxEnv";
+				reg = <0x07F00000 0x00080000>;
+			};
+
+			partition@7F80000 {
+				/* This location must not be altered  */
+				/* 512KB for u-boot Bootloader Image */
+				reg = <0x07F80000 0x00080000>;
+				label = "Barebox";
+			};
+		};
+	};
+
+	memory: memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x0 0x0 0x1fff0000>; /* 512MB.*/
+	};
+
+	/* Following is to change from 36bit addresses to 32bit */
+	dcsr: dcsr@f00000000 {
+		ranges = <0x00000000 0xf 0x00000000 0x01072000>;
+	};
+
+	bportals: bman-portals@ff4000000 {
+		ranges = <0x0 0xf 0xf4000000 0x2000000>;
+	};
+
+	qportals: qman-portals@ff6000000 {
+		ranges = <0x0 0xf 0xf6000000 0x2000000>;
+	};
+
+	soc: soc@ffe000000 {
+		ranges = <0x00000000 0xf 0xfe000000 0x1000000>;
+		reg = <0xf 0xfe000000 0 0x00001000>;
+
+		tmu@f0000 {
+			compatible = "fsl,qoriq-tmu";
+			reg = <0xf0000 0x1000>;
+
+			fsl,tmu-range = <0x000b0000 0x000a0026 0x00080048 0x00030061>;
+			fsl,tmu-calibration = <
+			/* 12 points @ 0 C */
+			0x00000000 0x0000000f
+			0x00000001 0x00000017
+			0x00000002 0x0000001e
+			0x00000003 0x00000026
+			0x00000004 0x0000002e
+			0x00000005 0x00000035
+			0x00000006 0x0000003d
+			0x00000007 0x00000044
+			0x00000008 0x0000004c
+			0x00000009 0x00000053
+			0x0000000a 0x0000005b
+			0x0000000b 0x00000064
+
+			/* 11 points @ 38 C */
+			0x00010000 0x0000000d
+			0x00010001 0x00000013
+			0x00010002 0x00000024
+			0x00010003 0x0000002b
+			0x00010004 0x00000034
+			0x00010005 0x00000039
+			0x00010006 0x00000042
+			0x00010007 0x0000004c
+			0x00010008 0x00000051
+			0x00010009 0x0000005a
+			0x0001000a 0x00000063
+
+			/* 9 points @ 72 C */
+			0x00020000 0x00000025
+			0x00020001 0x00000028
+			0x00020002 0x0000002d
+			0x00020003 0x00000031
+			0x00020004 0x00000036
+			0x00020005 0x0000003a
+			0x00020006 0x00000040
+			0x00020007 0x00000050
+			0x00020008 0x00000059
+
+			/* 4 points @ 97 C */
+			0x00030000 0x00000002
+			0x00030001 0x0000000d
+			0x00030002 0x00000019
+			0x00030003 0x00000024>;
+		};
+
+		thermal-zones {
+		};
+
+		spi@110000 {
+			status = "disabled";
+		};
+
+		i2c1: i2c@118000 {
+			jc42@18 {
+				compatible = "jc42,jc42";
+				reg = <0x18>;
+			};
+
+			rcw: eeprom@50 {
+				compatible = "at24,24c02";
+				read-only;
+				reg = <0x50>;
+			};
+		};
+
+		i2c2: i2c@118100 {
+			jc42@18 {
+				compatible = "jc42,jc42";
+				reg = <0x18>;
+			};
+
+			i2cleds: max7314@20 {
+				compatible = "maxim,max7313";
+				reg = <0x20>;
+				gpio-controller;
+				#gpio-cells = <2>;
+			};
+
+			nct72d@4d {
+				compatible = "onnn,nct1008";
+				reg = <0x4d>;
+				interrupt-parent = <&gpio2>;
+				interrupts = <9 IRQ_TYPE_LEVEL_LOW>;
+			};
+
+			idmem_cpu0: eeprom@50 {
+				compatible = "at24,24c02";
+				read-only;
+				reg = <0x50>;
+			};
+
+			rtc68: rtc@68 {
+				compatible = "mc,pcf8523";
+				reg = <0x68>;
+			};
+
+			idmem_power: eeprom@57 {
+				compatible = "at24,24c02";
+				read-only;
+				reg = <0x57>;
+			};
+		};
+
+		fman: fman@400000 {
+			fm1mac1: ethernet@e0000 {
+				status = "disabled";
+				device_type = "network";
+				phy-connection-type = "sgmii";
+				fixed-link {
+					speed = <1000>;
+					full-duplex;
+				};
+			};
+
+			fm1mac2: ethernet@e2000 {
+				status = "disabled";
+			};
+
+			fm1mac3: ethernet@e4000 {
+				status = "disabled";
+			};
+
+			fm1mac4: ethernet@e6000 {
+				status = "disabled";
+				device_type = "network";
+				phy-connection-type = "rgmii";
+				fixed-link {
+					speed = <1000>;
+					full-duplex;
+				};
+			};
+
+
+			mdio0: mdio@fc000 {
+			};
+
+			mdio1: mdio@fd000 {
+				status = "disabled";
+			};
+		};
+
+		watchdog:watchdog {
+			compatible = "linux,wdt-gpio";
+			hw_algo = "toggle";
+			hw_margin_ms = <500>;
+			timeout-sec = <60>;
+			always-running;
+		};
+
+		gpio_leds: gpio-leds {
+			compatible = "gpio-leds";
+
+			on_green: on-green {
+				label = "viper:green:on";
+				gpios = <&i2cleds 0 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+			on_red: on-red {
+				label = "viper:red:on";
+				gpios = <&i2cleds 1 GPIO_ACTIVE_LOW>;
+				default-state = "on";
+			};
+			rstp_green: rstp-green {
+				label = "viper:green:rstp";
+				gpios = <&i2cleds 2 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+			rstp_red: rstp-red {
+				label = "viper:red:rstp";
+				gpios = <&i2cleds 3 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+			frnt_green: frnt-green {
+				label = "viper:green:frnt";
+				gpios = <&i2cleds 4 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+			frnt_red: frnt-red {
+				label = "viper:red:frnt";
+				gpios = <&i2cleds 5 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+
+			bypass2_green: bypass2-green {
+				label = "bypass2:green";
+				gpios = <&i2cleds 6 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+			bypass2_red: bypass2-red {
+				label = "bypass2:red";
+				gpios = <&i2cleds 7 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+
+			gnss_green: gnss-green {
+				label = "gnss:green";
+				gpios = <&i2cleds 8 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+			gnss_red: gnss-red {
+				label = "gnss:red";
+				gpios = <&i2cleds 9 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+
+			bypass1_green: bypass1-green {
+				label = "bypass1:green";
+				gpios = <&i2cleds 10 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+			bypass1_red: bypass1-red {
+				label = "bypass1:red";
+				gpios = <&i2cleds 11 GPIO_ACTIVE_LOW>;
+				default-state = "off";
+			};
+		};
+
+		gpio-helper {
+			compatible = "gpio-of-helper";
+			status = "okay";
+			pinctrl-names = "default";
+
+			relay_status_1: relay_status_1   {
+				gpio-name = "relay-status-1";
+				input;
+			};
+
+			relay_status_2: relay_status_2   {
+				gpio-name = "relay-status-2";
+				input;
+			};
+
+			gnss_locked: gnss_locked   {
+				gpio-name = "gnss-locked";
+				input;
+			};
+			gps_antenna_power: gps_antenna_power   {
+				gpio-name = "gps-antenna-power";
+				output;
+				init-low;
+			};
+		};
+
+		dc1: dc1 {
+			compatible = "gpio-charger";
+			charger-type = "mains";
+		};
+
+		dc2: dc2 {
+			compatible = "gpio-charger";
+			charger-type = "mains";
+		};
+
+		usb@211000 {
+			status = "disabled";
+		};
+
+		sdhc@114000 {
+			status = "disabled";
+		};
+		sata@220000 {
+			status = "disabled";
+		};
+	};
+
+	pci0: pcie@ffe240000 {
+		reg = <0xf 0xfe240000 0 0x10000>;
+		status = "disabled";
+		ranges = <0x02000000 0 0xe0000000 0xc 0x10000000 0 0x10000000
+			  0x01000000 0 0x00000000 0xf 0xf8010000 0 0x00010000>;
+	};
+
+	pci1: pcie@ffe250000 {
+		reg = <0xf 0xfe250000 0 0x10000>;
+		status = "disabled";
+		ranges = <0x02000000 0 0xe0000000 0xc 0x10000000 0 0x10000000
+			  0x01000000 0 0x00000000 0xf 0xf8010000 0 0x00010000>;
+	};
+
+	pci2: pcie@ffe260000 {
+		reg = <0xf 0xfe260000 0 0x10000>;
+		status = "disabled";
+		ranges = <0x02000000 0 0xe0000000 0xc 0x20000000 0 0x10000000
+			  0x01000000 0 0x00000000 0xf 0xf8020000 0 0x00010000>;
+	};
+
+	chosen: chosen {
+	};
+};
+
+#include <t1023si-post.dtsi>
+#include <coronet/t1023-post.dtsi>

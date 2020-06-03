@@ -1,0 +1,52 @@
+#include <common/mv6.h>
+
+#include "base.dtsi"
+#include "tbn-chan0-rgmii.dtsi"
+
+&mdio0 {
+	peridot: switch@4 {
+		compatible = "marvell,mv88e6190";
+		reg = <0x4>;
+
+		dsa,member = <0 0>;
+		dsa,num_tx_queues = <8>;
+
+		interrupts = <2 1 0 0>;
+		interrupt-parent = <&mpic>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+
+		ports {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+
+			mv6_port(1, "ethX3", &phy1, "gmii");
+			mv6_port(2, "ethX4", &phy2, "gmii");
+			mv6_port(3, "ethX8", &phy3, "gmii");
+			mv6_port(4, "ethX6", &phy4, "gmii");
+			mv6_port(5, "ethX7", &phy5, "gmii");
+			mv6_port(6, "ethX5", &phy6, "gmii");
+			mv6_port(7, "ethX2", &phy7, "gmii");
+			mv6_port(8, "ethX1", &phy8, "gmii");
+		};
+
+		mdio {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			interrupt-parent = <&peridot>;
+
+			phy1: mv6_phy(1);
+			phy2: mv6_phy(2);
+			phy3: mv6_phy(3);
+			phy4: mv6_phy(4);
+			phy5: mv6_phy(5);
+			phy6: mv6_phy(6);
+			phy7: mv6_phy(7);
+			phy8: mv6_phy(8);
+		};
+	};
+};
+
+&watchdog {
+	gpios = <&gpio1 8 0>;
+};

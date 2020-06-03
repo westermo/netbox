@@ -1,0 +1,21 @@
+&fm1mac1 {
+	status = "okay";
+};
+
+&mdio0 {
+	switch@4 {
+		ports {
+			port@9 {
+				reg = <0x9>;
+				label = "cpu0";
+				ethernet = <&fm1mac1>;
+				phy-mode = "2500base-x";
+
+				fixed-link {
+					speed = <2500>;
+					full-duplex;
+				};
+			};
+		};
+	};
+};
