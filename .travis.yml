@@ -1,0 +1,6 @@
+language: c
+sudo: false
+
+script:
+  - make netbox_app_coronet_defconfig
+  - make -j9
