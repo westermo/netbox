@@ -1,31 +1,53 @@
 choice
-	bool "platform"
-	default NETBOX_PLAT_APP
+	bool "type"
+	default NETBOX_TYPE_APP
 	help
-	  Select the platform to build against.
+	  Select the NetBox type to build.
 
-config NETBOX_PLAT_APP
+config NETBOX_TYPE_APP
 	bool "Application (LXC)"
 	help
-	  Container image.
+	  Application container image for the chosen CPU platform.
 
-config NETBOX_PLAT_CORONET
-	bool "Coronet"
+config NETBOX_TYPE_OS
+	bool "Operating System (kernel + userland)"
 	help
-	  Mainly for products from the third generation of Vipers from
-	  Westermo.
-
-config NETBOX_PLAT_ZERO
-	bool "Zero"
-	help
-	  Internal x86_64 build.
+	  Complete operating system, including kernel and userland,
+	  for the chosen CPU platform.
+	  .
+	  This is the same as the application build, with the kernel,
+	  and optionally a (second) stage bootloader.
 endchoice
 
-config NETBOX_PLAT
+config NETBOX_TYPE
 	string
-	default "app" if NETBOX_PLAT_APP
-	default "coronet" if NETBOX_PLAT_CORONET
-	default "zero" if NETBOX_PLAT_ZERO
+	default "app" if NETBOX_TYPE_APP
+	default "os"  if NETBOX_TYPE_OS
+
+config NETBOX_META_PACKAGE
+	bool "NetBox meta package"
+	select BR2_PACKAGE_LIBNL
+	select BR2_PACKAGE_DNSMASQ
+	select BR2_PACKAGE_DROPBEAR
+	select BR2_PACKAGE_ETHTOOL
+	select BR2_PACKAGE_INADYN
+	select BR2_PACKAGE_IPROUTE2
+	select BR2_PACKAGE_NFTABLES
+	select BR2_PACKAGE_QUAGGA
+	select BR2_PACKAGE_QUAGGA_ZEBRA
+	select BR2_PACKAGE_QUAGGA_ISISD
+	select BR2_PACKAGE_QUAGGA_OSPFD
+	select BR2_PACKAGE_QUAGGA_OSPF6D
+	select BR2_PACKAGE_QUAGGA_RIPD
+	select BR2_PACKAGE_QUAGGA_RIPNGD
+	select BR2_PACKAGE_QUAGGA_VTYSH
+	select BR2_PACKAGE_SMCROUTE
+	select BR2_PACKAGE_SOCAT
+	help
+	  This selects all packages that comprise NetBox.
+	  .
+	  Unchecking this makes the build system revert back to its
+	  default extended Buildroot state.
 
 menu "Packages"
 

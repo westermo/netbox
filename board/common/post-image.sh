@@ -1,6 +1,4 @@
 #!/bin/sh
-
-# Source .config for NETBOX_PLAT
 . $BR2_CONFIG 2>/dev/null
 
 # Figure out identity for os-release
@@ -11,7 +9,7 @@ imagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/image.sh
 err=0
 if [ -n "$RELEASE" ]; then
     ver=`$BR2_EXTERNAL/bin/mkversion -f $BR2_EXTERNAL`
-    img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_PLAT-$ver.img
+    img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_TYPE-$NETBOX_PLAT-$ver.img
 
     if [ "$RELEASE" != "$ver" ]; then
        echo "==============================================================================="
@@ -20,7 +18,7 @@ if [ -n "$RELEASE" ]; then
        err=1
     fi
 else
-    img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_PLAT.img
+    img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_TYPE-$NETBOX_PLAT.img
 fi
 
 $imagesh $BINARIES_DIR/rootfs.squashfs $img
