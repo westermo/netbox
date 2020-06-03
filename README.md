@@ -29,6 +29,15 @@ be able to easily match what container image works on a Westermo device:
 | x86_64       | Zero               |
 
 
+Flavor
+------
+
+In addition to various NetBox platforms there are two major *flavors*
+available.  The current first-class citizen is *apps*, but it is also
+possible to build an entire *operating system* image, including Linux
+kernel and the same userland already available to *apps*.
+
+
 Building
 --------
 
@@ -45,10 +54,10 @@ git submodule update --init
 
 Second, select your target `_defconfig`, see the `configs/` directory,
 or use `make list-defconfigs` to see all Buildroot and NetBox configs
-available.  We select the Zero (x86-64) NetBox defconfig:
+available.  We select the Zero (x86-64) NetBox app defconfig:
 
 ```
-make netbox_zero_defconfig
+make netbox_app_zero_defconfig
 ```
 
 Third, type make and fetch a cup of coffee because the first time you
