@@ -3,21 +3,3 @@ BR2_EXTERNAL_DESC=${BR2_EXTERNAL_DESC-"$BR2_EXTERNAL_NAME - The Networking Toolb
 BR2_EXTERNAL_HOME=${BR2_EXTERNAL_HOME-https://github.com/westermo/netbox/}
 BR2_EXTERNAL_ID=${BR2_EXTERNAL_ID-netbox}
 BR2_EXTERNAL_VERSION=${BR2_EXTERNAL_VERSION-`$BR2_EXTERNAL_NETBOX_PATH/bin/mkversion $BR2_EXTERNAL_NETBOX_PATH`}
-
-case $BR2_ARCH in
-    powerpc)
-	NETBOX_PLAT=coronet
-	;;
-    arm)
-	NETBOX_PLAT=dagger
-	;;
-    aarch64)
-	NETBOX_PLAT=envoy
-	;;
-    x86_64)
-	NETBOX_PLAT=zero
-	;;
-    *)
-	NETBOX_PLAT=$BR2_ARCH
-	;;
-esac

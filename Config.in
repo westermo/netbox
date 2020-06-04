@@ -1,3 +1,11 @@
+config NETBOX_PLAT
+	string
+	default "coronet" if BR2_powerpc
+	default "dagger"  if BR2_arm
+	default "envoy"   if BR2_aarch64
+	default "zero"    if BR2_x86_64
+	default BR2_ARCH
+
 choice
 	bool "type"
 	default NETBOX_TYPE_APP
