@@ -5,6 +5,7 @@
 . $BR2_EXTERNAL_NETBOX_PATH/board/common/ident.rc
 
 imagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/image.sh
+fitimagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/fitimage.sh
 
 squash=$BINARIES_DIR/rootfs.squashfs
 img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_TYPE-${NETBOX_PLAT}
@@ -24,6 +25,10 @@ if [ -n "$RELEASE" ]; then
 fi
 
 $imagesh $squash $img.img
+
+if [ "$NETBOX_IMAGE_FIT" ]; then
+    $fitimagesh $NETBOX_PLAT $squash $img.itb
+fi
 
 # Set TFTPDIR, in your .bashrc, or similar, to copy the resulting image
 # to your FTP/TFTP server directory.  Notice the use of scp, so you can

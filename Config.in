@@ -58,6 +58,22 @@ config NETBOX_META_PACKAGE
 	  Unchecking this makes the build system revert back to its
 	  default extended Buildroot state.
 
+menu "Developer"
+
+config NETBOX_IMAGE_FIT
+	bool "Build FIT image"
+	depends on NETBOX_TYPE_OS
+	help
+	  Build an FIT image with all device trees in boot/, creating a
+	  configuration for each, the default kernel and the SquashFS as
+	  a ramdisk.
+
+	  This is useful for testing NetBox on systems which do not have
+	  a bootloader capable of loading standard images, e.g. U-Boot
+	  on various evaluation/development boards.
+
+endmenu
+
 menu "Packages"
 
 source "$BR2_EXTERNAL_NETBOX_PATH/package/Config.in"
