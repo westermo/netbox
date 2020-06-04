@@ -1,5 +1,6 @@
 NetBox - Like BusyBox but for Networking
 ========================================
+[![Travis Status]][Travis]
 
 [Westermo][] NetBox is a toolbox for embedded systems based on [Buildroot][].
 
@@ -94,8 +95,10 @@ command line, but you must also have tagged the repository.
   2. Set the environment variable `RELEASE=$BR2_VERSION-rN` and run make
 
 
-[Westermo]:    https://www.westermo.com/
-[Buildroot]:   https://buildroot.org/ 
-[App-Demo]:    https://github.com/westermo/app-demo
-[myRootFS]:    https://github.com/myrootfs
-[Open Source]: https://en.wikipedia.org/wiki/Free_and_open-source_software 
+[Westermo]:      https://www.westermo.com/
+[Buildroot]:     https://buildroot.org/ 
+[App-Demo]:      https://github.com/westermo/app-demo
+[myRootFS]:      https://github.com/myrootfs
+[Open Source]:   https://en.wikipedia.org/wiki/Free_and_open-source_software 
+[Travis]:        https://travis-ci.org/westermo/netbox
+[Travis Status]: https://travis-ci.org/westermo/netbox.png?branch=master
