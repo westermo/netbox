@@ -1,6 +1,20 @@
 language: c
 sudo: false
 
+env:
+  global:
+   - TFTPDIR=~/images/
+
 script:
+  - mkdir -p ~/images/
   - make netbox_app_coronet_defconfig
   - make -j9
+  - make netbox_app_dagger_defconfig
+  - make -j9
+  - make netbox_app_zero_defconfig
+  - make -j9
+  - make netbox_os_coronet_defconfig
+  - make -j9
+  - ls -l ~/images
+  - file ~/images/*
+
