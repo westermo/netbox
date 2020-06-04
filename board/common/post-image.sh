@@ -6,11 +6,14 @@
 
 imagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/image.sh
 
+squash=$BINARIES_DIR/rootfs.squashfs
+img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_TYPE-${NETBOX_PLAT}
+
 err=0
 if [ -n "$RELEASE" ]; then
     # NOTE: Must use `-f €BR2_EXTERNAL` here to get, e.g. app-demo GIT version
     ver=`$BR2_EXTERNAL_NETBOX_PATH/bin/mkversion -f $BR2_EXTERNAL`
-    img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_TYPE-$NETBOX_PLAT-$ver.img
+    img=$img-$ver
 
     if [ "$RELEASE" != "$ver" ]; then
        echo "==============================================================================="
@@ -18,18 +21,16 @@ if [ -n "$RELEASE" ]; then
        echo "==============================================================================="
        err=1
     fi
-else
-    img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_TYPE-$NETBOX_PLAT.img
 fi
 
-$imagesh $BINARIES_DIR/rootfs.squashfs $img
+$imagesh $squash $img.img
 
 # Set TFTPDIR, in your .bashrc, or similar, to copy the resulting image
 # to your FTP/TFTP server directory.  Notice the use of scp, so you can
 # copy the image to another system.
 if [ -n "$TFTPDIR" ]; then
     echo "xfering '$img' -> '$TFTPDIR/$fn'"
-    scp -B $img $TFTPDIR
+    scp -B $img.img $TFTPDIR
 fi
 
 exit $err
