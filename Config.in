@@ -1,5 +1,6 @@
 config NETBOX_PLAT
 	string
+	default "basis"   if BR2_arm926t
 	default "coronet" if BR2_powerpc
 	default "dagger"  if BR2_arm
 	default "envoy"   if BR2_aarch64
