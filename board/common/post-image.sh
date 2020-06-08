@@ -8,7 +8,8 @@ imagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/image.sh
 
 err=0
 if [ -n "$RELEASE" ]; then
-    ver=`$BR2_EXTERNAL/bin/mkversion -f $BR2_EXTERNAL`
+    # NOTE: Must use `-f €BR2_EXTERNAL` here to get, e.g. app-demo GIT version
+    ver=`$BR2_EXTERNAL_NETBOX_PATH/bin/mkversion -f $BR2_EXTERNAL`
     img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_TYPE-$NETBOX_PLAT-$ver.img
 
     if [ "$RELEASE" != "$ver" ]; then
