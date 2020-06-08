@@ -1,0 +1,11 @@
+/dts-v1/;
+
+#include "freescale/imx8mn-ddr4-evk.dts"
+
+&usbotg1 {
+	peridot_db: mdio@1 {
+		reg = <1>;
+	};
+};
+
+#include "common/peridot-db.dtsi"

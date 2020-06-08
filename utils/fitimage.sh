@@ -32,7 +32,7 @@ case $plat in
 	;;
     envoy)
 	arch="arm64"
-	extra="-a 0x80080000"
+	extra="-a 0x80000000 -e 0x80000000"
 	;;
     zero)
 	arch="x86_64"

@@ -2,7 +2,13 @@ ifeq ($(PLAT),)
 $(error "Platform not set.")
 endif
 
-kernel-dts := $(LINUX_DIR)/arch/$(ARCH)/boot/dts
+ifeq ($(ARCH),aarch64)
+karch := arm64
+else
+karch := $(ARCH)
+endif
+
+kernel-dts := $(LINUX_DIR)/arch/$(karch)/boot/dts
 board-dts  := $(wildcard $(PLAT)/*/device-tree.dts)
 board-dtb  := $(board-dts:.dts=.dtb)
 board-deps := $(wildcard include/common/*.dtsi) \
