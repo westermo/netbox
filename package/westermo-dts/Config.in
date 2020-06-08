@@ -1,6 +1,6 @@
 config BR2_PACKAGE_WESTERMO_DTS
 	bool "westermo-dts"
-	default y if NETBOX_PLAT_CORONET
+	default y if NETBOX_TYPE_OS
 	depends on BR2_LINUX_KERNEL
 	select BR2_PACKAGE_HOST_DTC
 	help
