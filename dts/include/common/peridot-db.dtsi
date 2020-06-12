@@ -24,8 +24,20 @@
 				reg = <0x0>;
 				label = "cpu0";
 				ethernet = <&fec1>;
-				phy-mode = "rgmii-id";
-				phy-handle = <&sc0_phy0>;
+
+				/* Port0 is connected to a 1518 PHY like
+				below, but the DSA driver will not handle
+				this configuration properly. The driver
+				will configure all CPU/DSA ports as fixed
+				links; the generic DSA code will then bring
+				the link down to match phylink's
+				expectations on initial state. The port
+				will then be forced down and never come
+				up. Omitting PHY info will leave it forced
+				up which, while not Right(tm), does
+				work. */
+				/* phy-handle = <&sc0_phy0>; */
+				/* phy-mode = "rgmii"; */
 			};
 
 			port@1 {
@@ -83,7 +95,6 @@
 			#size-cells = <0>;
 			interrupt-parent = <&sc0>;
 
-			sc0_phy0: ethernet-phy@0 { reg = <0>; };
 			sc0_phy1: ethernet-phy@1 { reg = <1>; };
 			sc0_phy2: ethernet-phy@2 { reg = <2>; };
 			sc0_phy3: ethernet-phy@3 { reg = <3>; };
@@ -93,5 +104,15 @@
 			sc0_phy7: ethernet-phy@7 { reg = <7>; };
 			sc0_phy8: ethernet-phy@8 { reg = <8>; };
 		};
+
+		mdioe {
+			compatible = "marvell,mv88e6xxx-mdio-external";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			interrupt-parent = <&sc0>;
+
+			sc0_phy0: ethernet-phy@0 { reg = <0>; };
+		};
+
 	};
 };
