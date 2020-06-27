@@ -1,4 +1,5 @@
-export BR2_EXTERNAL          = $(CURDIR)
+export BR2_EXTERNAL := $(CURDIR)
+export PATH         := $(CURDIR)/bin:$(PATH)
 
 ARCH ?= $(shell uname -m)
 O    ?= $(CURDIR)/output
@@ -23,4 +24,8 @@ $(config):
 buildroot/Makefile:
 	@git submodule update --init
 
-.PHONY: all defconfig
+run:
+	@echo "Starting Qemu  ::  Ctrl-a x -- exit | Ctrl-a c -- toggle console/monitor"
+	@qemu -f $(O)/images/qemu.cfg
+
+.PHONY: all defconfig run
