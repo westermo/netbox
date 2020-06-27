@@ -52,6 +52,7 @@ config NETBOX_META_PACKAGE
 	select BR2_PACKAGE_QUAGGA_VTYSH
 	select BR2_PACKAGE_SMCROUTE
 	select BR2_PACKAGE_SOCAT
+	select BR2_PACKAGE_TCPDUMP
 	help
 	  This selects all packages that comprise NetBox.
 	  .
