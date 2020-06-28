@@ -16,7 +16,10 @@ qemucfg="${BINARIES_DIR}/qemu.cfg"
 QEMU_ARCH=""
 case $BR2_ARCH in
     powerpc)
-	QEMU_ARCH=ppc
+	QEMU_ARCH=ppc64
+	QEMU_NIC=rtl8139
+	QEMU_SCSI=virtio-scsi-pci
+	QEMU_MACH="ppce500 -smp 2 -watchdog i6300esb -cpu e5500 -rtc clock=host"
 	;;
     arm)
 	QEMU_ARCH=$BR2_ARCH
