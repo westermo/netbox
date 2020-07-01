@@ -26,7 +26,6 @@ FINIT_CONF_OPTS =				\
 	--disable-contrib			\
 	--enable-fallback-shell			\
 	--enable-progress			\
-	--enable-watchdog			\
 	--enable-inetd-chargen-plugin		\
 	--enable-inetd-echo-plugin		\
 	--enable-inetd-time-plugin		\
