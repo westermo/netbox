@@ -35,6 +35,9 @@ print_version()
 
 cd $WC
 VERSION=`git describe --tags --dirty 2>/dev/null`
+if [ x"$VERSION" = x ]; then
+    VERSION=9.99
+fi
 
 # Are we are building an official release from master, do not print branchname.
 # Check if top commit is the tag, to support -betaXX etc.
