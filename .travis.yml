@@ -8,10 +8,10 @@ env:
 script:
   - mkdir -p ~/images/
   - make netbox_app_coronet_defconfig
-  - make -j9
+  - make
   - make netbox_app_dagger_defconfig
-  - make -j9
+  - make
   - make netbox_app_zero_defconfig
-  - make -j9
+  - make || cat output/build/libite-2.2.0/config.log
   - ls -l ~/images
   - file ~/images/*
