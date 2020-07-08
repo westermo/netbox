@@ -5,13 +5,16 @@ env:
   global:
    - TFTPDIR=~/images/
 
+# - make netbox_app_coronet_defconfig
+# - make
+# - make netbox_app_dagger_defconfig
+# - make
 script:
   - mkdir -p ~/images/
-  - make netbox_app_coronet_defconfig
-  - make
-  - make netbox_app_dagger_defconfig
-  - make
   - make netbox_app_zero_defconfig
   - make || cat output/build/libite-2.2.0/config.log
+  - ls -l output/host/bin
+  - ls -l output/host/opt/ext-toolchain
+  - ls -l output/host/opt/ext-toolchain/bin
   - ls -l ~/images
   - file ~/images/*
