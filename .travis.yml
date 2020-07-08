@@ -24,3 +24,7 @@ jobs:
         - mkdir -p _build/zero; cd _build/zero
         - make O=$PWD -C /home/travis/build/westermo/netbox netbox_app_zero_defconfig
         - make O=$PWD -C /home/travis/build/westermo/netbox
+    - stage: Final
+      script:
+        - ls -l ~/images
+        - file ~/images/*
