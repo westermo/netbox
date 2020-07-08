@@ -5,15 +5,22 @@ env:
   global:
    - TFTPDIR=~/images/
 
-script:
-  - mkdir -p ~/images/
-  - make netbox_app_zero_defconfig
-  - make
-  - make clean
-  - make netbox_app_coronet_defconfig
-  - make
-  - make clean
-  - make netbox_app_dagger_defconfig
-  - make
-  - ls -l ~/images
-  - file ~/images/*
+jobs:
+  include:
+    - stage: Prepare
+      script: mkdir -p ~/images/
+    - stage: Coronet
+      script:
+        - mkdir -p _build/coronet; cd _build/coronet
+        - make O=$PWD -C /home/travis/build/westermo/netbox/buildroot netbox_app_coronet_defconfig
+        - make O=$PWD -C /home/travis/build/westermo/netbox/buildroot
+    - stage: Dagger
+      script:
+        - mkdir -p _build/dagger; cd _build/dagger
+        - make O=$PWD -C /home/travis/build/westermo/netbox/buildroot netbox_app_dagger_defconfig
+        - make O=$PWD -C /home/travis/build/westermo/netbox/buildroot
+    - stage: Zero
+      script:
+        - mkdir -p _build/zero; cd _build/zero
+        - make O=$PWD -C /home/travis/build/westermo/netbox/buildroot netbox_app_zero_defconfig
+        - make O=$PWD -C /home/travis/build/westermo/netbox/buildroot
