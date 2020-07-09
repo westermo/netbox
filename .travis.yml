@@ -14,8 +14,6 @@ addons:
 
 jobs:
   include:
-    - stage: Prepare
-      script: mkdir -p ~/images/
     - stage: Coronet
       script:
         - mkdir -p _build/coronet; cd _build/coronet
@@ -31,7 +29,3 @@ jobs:
         - mkdir -p _build/zero; cd _build/zero
         - make O=$PWD -C /home/travis/build/westermo/netbox netbox_app_zero_defconfig
         - make O=$PWD -C /home/travis/build/westermo/netbox
-    - stage: Final
-      script:
-        - ls -l ~/images
-        - file ~/images/*
