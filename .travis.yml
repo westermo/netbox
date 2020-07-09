@@ -5,6 +5,13 @@ env:
   global:
    - TFTPDIR=~/images/
 
+addons:
+  apt:
+    packages:
+      - libc6:i386
+      - libstdc++6:i386
+      - zlib1g:i386
+
 jobs:
   include:
     - stage: Prepare
