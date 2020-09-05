@@ -1,40 +1,25 @@
 #!/bin/sh
 
-DAEMON="ssdpd"
-EXEC="/usr/sbin/$DAEMON"
-PIDFILE="/var/run/$DAEMON.pid"
+NAME=ssdpd
+PIDFILE=/var/run/$NAME.pid
+DAEMON=/usr/sbin/$NAME
+CFGFILE=/etc/default/$NAME
 
-SSDPD_ARGS=""
+DAEMON_ARGS=""
 
-# shellcheck source=/dev/null
-[ -r "/etc/default/$DAEMON" ] && . "/etc/default/$DAEMON"
+# Read configuration variable file if it is present
+[ -f $CFGFILE ] && . $CFGFILE
 
 start() {
-	printf 'Starting %s: ' "$DAEMON"
-	# shellcheck disable=SC2086 # we need the word splitting
-	start-stop-daemon -S -q -p "$PIDFILE" -x "$EXEC" \
-		-- -n $SSDPD_ARGS
-	status=$?
-	if [ "$status" -eq 0 ]; then
-		echo "OK"
-	else
-		echo "FAIL"
-	fi
-	return "$status"
+	printf 'Starting %s: ' "$NAME"
+	start-stop-daemon -S -q -p $PIDFILE -x $DAEMON -- $DAEMON_ARGS
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
 }
 
 stop() {
-	printf 'Stopping %s: ' "$DAEMON"
-	start-stop-daemon -K -q -p "$PIDFILE" -x "$EXEC"
-	status=$?
-	if [ "$status" -eq 0 ]; then
-		# Give ssdpd time to send dying gasp to syslog
-		sleep 1
-		echo "OK"
-	else
-		echo "FAIL"
-	fi
-	return "$status"
+	printf 'Stopping %s: ' "$NAME"
+	start-stop-daemon -K -q -p $PIDFILE -x $DAEMON
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
 }
 
 restart() {
@@ -43,13 +28,15 @@ restart() {
 }
 
 case "$1" in
-	start|stop|restart)
-		"$1";;
-	reload)
-		restart
-		;;
-	*)
-		echo "Usage: $0 {start|stop|restart|reload}"
-		exit 1
-		;;
+    start|stop|restart)
+	"$1"
+	;;
+    reload)
+	restart
+	;;
+    *)
+	echo "Usage: $0 {start|stop|restart|reload}"
+	exit 1
 esac
+
+exit $?

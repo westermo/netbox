@@ -11,12 +11,12 @@ SSDP_RESPONDER_LICENSE = ISC
 SSDP_RESPONDER_LICENSE_FILES = LICENSE
 
 define SSDP_RESPONDER_INSTALL_INIT_SYSTEMD
-	$(INSTALL) -D -m 0644 package/ssdp-responder/ssdpd.service \
+	$(INSTALL) -D -m 0644 $(BR2_EXTERNAL_NETBOX_PATH)/package/ssdp-responder/ssdpd.service \
 		$(TARGET_DIR)/usr/lib/systemd/system/ssdpd.service
 endef
 
 define SSDP_RESPONDER_INSTALL_INIT_SYSV
-	$(INSTALL) -D -m 0755 package/ssdp-responder/S02ssdpd $(TARGET_DIR)/etc/init.d/S02ssdpd
+	$(INSTALL) -D -m 0755 $(BR2_EXTERNAL_NETBOX_PATH)/package/ssdp-responder/S02ssdpd $(TARGET_DIR)/etc/init.d/S02ssdpd
 endef
 
 $(eval $(autotools-package))
