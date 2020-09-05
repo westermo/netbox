@@ -1,43 +1,28 @@
 #!/bin/sh
 
-DAEMON="watchdogd"
-EXEC="/usr/sbin/$DAEMON"
-CTL="/usr/bin/watchdogctl"
-PIDFILE="/var/run/$DAEMON.pid"
+NAME=watchdogd
+DAEMON=/usr/sbin/$NAME
+DAEMONCTL=/usr/bin/watchdogctl
+PIDFILE=/var/run/$NAME.pid
+CFGFILE=/etc/default/$NAME
 
 # Defaults to connect to /dev/watchdogd, use /etc/default/watchdogd
-# to override WATCHDOGD_ARGS.  Note: -x is safe exit.
-WATCHDOGD_ARGS="-x"
+# to override DAEMON_ARGS.  Note: -x is safe exit.
+DAEMON_ARGS="-x"
 
-# shellcheck source=/dev/null
-[ -r "/etc/default/$DAEMON" ] && . "/etc/default/$DAEMON"
+# Read configuration variable file if it is present
+[ -f $CFGFILE ] && . $CFGFILE
 
 start() {
-	printf 'Starting %s: ' "$DAEMON"
-	# shellcheck disable=SC2086 # we need the word splitting
-	start-stop-daemon -S -q -p "$PIDFILE" -x "$EXEC" \
-		-- -n $WATCHDOGD_ARGS
-	status=$?
-	if [ "$status" -eq 0 ]; then
-		echo "OK"
-	else
-		echo "FAIL"
-	fi
-	return "$status"
+	printf 'Starting %s: ' "$NAME"
+	start-stop-daemon -S -q -p $PIDFILE -x $DAEMON -- $DAEMON_ARGS
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
 }
 
 stop() {
-	printf 'Stopping %s: ' "$DAEMON"
-	start-stop-daemon -K -q -p "$PIDFILE" -x "$EXEC"
-	status=$?
-	if [ "$status" -eq 0 ]; then
-		# Give watchdogd time to send dying gasp to syslog
-		sleep 1
-		echo "OK"
-	else
-		echo "FAIL"
-	fi
-	return "$status"
+	printf 'Stopping %s: ' "$NAME"
+	start-stop-daemon -K -q -p $PIDFILE -x $DAEMON
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
 }
 
 restart() {
@@ -46,11 +31,15 @@ restart() {
 }
 
 case "$1" in
-	start|stop|restart)
-		"$1";;
-	reload)
-		$CTL reload;;
-	*)
-		echo "Usage: $0 {start|stop|restart|reload}"
-		exit 1
+    start|stop|restart)
+	"$1"
+	;;
+    reload)
+	$DAEMONCTL reload
+	;;
+    *)
+	echo "Usage: $0 {start|stop|restart|reload}"
+	exit 1
 esac
+
+exit $?
