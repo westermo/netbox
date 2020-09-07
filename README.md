@@ -22,12 +22,12 @@ Platforms
 The NetBox project follows the Westermo product platform naming.  This to
 be able to easily match what container image works on a Westermo device:
 
-| Architecture | Platform Code Name |
-|--------------|--------------------|
-| powerpc      | Coronet            |
-| arm          | Dagger             |
-| aarch64      | Envoy              |
-| x86_64       | Zero               |
+| **Architecture** | **Platform Code Name** |
+|------------------|------------------------|
+| powerpc          | Coronet                |
+| arm              | Dagger                 |
+| aarch64          | Envoy                  |
+| x86_64           | Zero                   |
 
 
 Flavor
@@ -36,7 +36,11 @@ Flavor
 In addition to various NetBox platforms there are two major *flavors*
 available.  The current first-class citizen is *apps*, but it is also
 possible to build an entire *operating system* image, including Linux
-kernel and the same userland already available to *apps*.
+kernel and the same userland already available to *apps*.  To select
+a pre-configured NetBox flavor for a given platform:
+
+- `netbox_app_$platform`
+- `netbox_os_$platform`
 
 
 Building
@@ -55,7 +59,7 @@ git submodule update --init
 
 Second, select your target `_defconfig`, see the `configs/` directory,
 or use `make list-defconfigs` to see all Buildroot and NetBox configs
-available.  We select the Zero (x86-64) NetBox app defconfig:
+available.  We select the defconfig for Zero (x86-64) NetBox app flavor:
 
 ```
 make netbox_app_zero_defconfig
