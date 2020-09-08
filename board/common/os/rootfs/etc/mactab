@@ -1,2 +1,4 @@
 chan0   driver=fsl_dpa
 chan0   driver=fec
+chan0   driver=mvneta
+
