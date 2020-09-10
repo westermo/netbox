@@ -2,6 +2,20 @@
 
 #include "freescale/imx8mn-ddr4-evk.dts"
 
+&fec1 {
+
+	/* We're connected to a switch sending DSA tagged packets, so
+	the FEC classifier will never queue anything on the AVB
+	queues. */
+	fsl,num-rx-queues = <1>;
+
+	/* Enabling all more than one queue causes intermittent tx
+	issues detailed here:
+	https://lore.kernel.org/netdev/20200625085728.9869-1-tobias@waldekranz.com/
+	*/
+	fsl,num-tx-queues = <1>;
+};
+
 &usbotg1 {
 	peridot_db: mdio@1 {
 		reg = <1>;
