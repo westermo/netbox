@@ -9,6 +9,26 @@ die() {
 plat=$1
 squash=$2
 out=$3
+load=0
+
+case $plat in
+    coronet)
+	arch="powerpc"
+	;;
+    dagger)
+	arch="arm"
+	;;
+    envoy)
+	arch="arm64"
+	load="0x40000000"
+	;;
+    zero)
+	arch="x86_64"
+	;;
+    *)
+	arch="$plat"
+	;;
+esac
 
 workdir=$(mktemp -d)
 unsquashfs -f -d $workdir $squash boot || die "Invalid SquashFS"
@@ -23,32 +43,70 @@ dtbs=$workdir/boot/*/device-tree.dtb
 # all components up to a 4k boundary.
 truncate -s %4k $kernel $dtbs
 
-case $plat in
-    coronet)
-	arch="powerpc"
-	;;
-    dagger)
-	arch="arm"
-	;;
-    envoy)
-	arch="arm64"
-	extra="-a 0x80000000 -e 0x80000000"
-	;;
-    zero)
-	arch="x86_64"
-	;;
-    *)
-	arch="$plat"
-	;;
-esac
+for dtb in $dtbs; do
+    name=$(basename $(dirname $dtb))
 
-# add -b option prefix to each DTB.
-dtbs=$(echo $dtbs | sed -e 's/\([^ ]*\)/-b \1/g')
+    cat <<EOF >>$workdir/netbox-dtbs.itsi
+		$name {
+			description = "$name";
+			type = "flat_dt";
+			arch = "$arch";
+			data = /incbin/("$dtb");
+		};
+EOF
+    cat <<EOF >>$workdir/netbox-cfgs.itsi
+		$name {
+			description = "$name";
+			kernel = "kernel";
+			ramdisk = "ramdisk";
+			fdt = "$name";
+		};
+EOF
+done
+
+cat <<EOF >$workdir/netbox.its
+/dts-v1/;
+
+/ {
+	timestamp = <$(date +%s)>;
+	description = "Netbox ($plat)";
+	creator = "netbox";
+	#address-cells = <0x1>;
+
+	images {
+
+		kernel {
+			description = "Linux";
+			type = "kernel";
+			arch = "$arch";
+			os = "linux";
+			load = <$load>;
+			entry = <$load>;
+			compression = "none";
+			data = /incbin/("$kernel");
+		};
+
+		ramdisk {
+			description = "Netbox";
+			type = "ramdisk";
+			os = "linux";
+			arch = "$arch";
+			data = /incbin/("$squash");
+		};
+
+$(cat $workdir/netbox-dtbs.itsi)
+
+	};
+
+	configurations {
+$(cat $workdir/netbox-cfgs.itsi)
+	};
+};
+EOF
 
 mkimage \
     -E -p 0x1000 \
-    -f auto -A $arch -O linux -T kernel -C none $extra \
-    -d $kernel $dtbs -i $squash $out \
+    -f $workdir/netbox.its $out \
     || die "Unable to create FIT image"
 
 rm -rf $workdir
