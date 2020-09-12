@@ -64,6 +64,10 @@ menu "Developer"
 config NETBOX_IMAGE_FIT
 	bool "Build FIT image"
 	depends on NETBOX_TYPE_OS
+	select BR2_PACKAGE_HOST_UBOOT_TOOLS
+	select BR2_PACKAGE_HOST_UBOOT_TOOLS_FIT_SUPPORT
+	select BR2_PACKAGE_HOST_UBOOT_TOOLS_FIT_SIGNATURE_SUPPORT
+
 	help
 	  Build an FIT image with all device trees in boot/, creating a
 	  configuration for each, the default kernel and the SquashFS as
