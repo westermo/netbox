@@ -35,12 +35,13 @@ config NETBOX_TYPE
 
 config NETBOX_META_PACKAGE
 	bool "NetBox meta package"
-	select BR2_PACKAGE_LIBNL
 	select BR2_PACKAGE_DNSMASQ
 	select BR2_PACKAGE_DROPBEAR
 	select BR2_PACKAGE_ETHTOOL
+	select BR2_PACKAGE_FINIT
 	select BR2_PACKAGE_INADYN
 	select BR2_PACKAGE_IPROUTE2
+	select BR2_PACKAGE_LIBNL
 	select BR2_PACKAGE_NFTABLES
 	select BR2_PACKAGE_QUAGGA
 	select BR2_PACKAGE_QUAGGA_ZEBRA
@@ -53,6 +54,7 @@ config NETBOX_META_PACKAGE
 	select BR2_PACKAGE_SMCROUTE
 	select BR2_PACKAGE_SOCAT
 	select BR2_PACKAGE_TCPDUMP
+	select BR2_PACKAGE_WATCHDOGD
 	help
 	  This selects all packages that comprise NetBox.
 	  .
