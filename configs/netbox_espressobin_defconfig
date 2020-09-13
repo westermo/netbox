@@ -12,7 +12,7 @@ BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="5.6.11"
 BR2_LINUX_KERNEL_USE_ARCH_DEFAULT_CONFIG=y
-BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_NETBOX_PATH)/board/globalscale/espressobin/linux-extras.config"
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_NETBOX_PATH)/board/espressobin/linux-extras.config"
 
 # Device trees for v5 and v7, no ultra or MOCHAbin yet
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
@@ -38,9 +38,9 @@ BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_NETBOX_PATH)/board/com
 BR2_PACKAGE_UBOOT_TOOLS=y
 
 # Overlay common rootfs and EspressoBin specifics
-BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/os/rootfs $(BR2_EXTERNAL_NETBOX_PATH)/board/globalscale/espressobin/rootfs"
+BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/os/rootfs $(BR2_EXTERNAL_NETBOX_PATH)/board/espressobin/rootfs"
 BR2_ROOTFS_POST_IMAGE_SCRIPT="$(TOPDIR)/support/scripts/genimage.sh"
-BR2_ROOTFS_POST_SCRIPT_ARGS="-c $(BR2_EXTERNAL_NETBOX_PATH)/board/globalscale/espressobin/genimage.cfg"
+BR2_ROOTFS_POST_SCRIPT_ARGS="-c $(BR2_EXTERNAL_NETBOX_PATH)/board/espressobin/genimage.cfg"
 
 # Use Finit as PID 1 instad of BusyBox init
 BR2_INIT_NONE=y
