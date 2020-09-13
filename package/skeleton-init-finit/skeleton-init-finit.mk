@@ -34,28 +34,28 @@ define SKELETON_INIT_FINIT_SET_GENERIC_GETTY
 	grep -qxF "`cat $(SKELETON_INIT_FINIT_TMPFILE)`" $(FINIT_D)/available/getty.conf \
 		|| cat $(SKELETON_INIT_FINIT_TMPFILE) >> $(FINIT_D)/available/getty.conf
 	rm $(SKELETON_INIT_FINIT_TMPFILE)
-	ln -sf available/getty.conf $(FINIT_D)/getty.conf
+	ln -sf /etc/finit.d/available/getty.conf $(FINIT_D)/enabled/getty.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_GENERIC_GETTY
 
 # Dropbear SSH
 ifeq ($(BR2_PACKAGE_DROPBEAR),y)
 define SKELETON_INIT_FINIT_SET_DROPBEAR
-	ln -sf available/dropbear.conf $(FINIT_D)/dropbear.conf
+	ln -sf /etc/finit.d/available/dropbear.conf $(FINIT_D)/enabled/dropbear.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_DROPBEAR
 endif
 
 # BusyBox syslogd only, for now
 define SKELETON_INIT_FINIT_SET_SYSLOGD
-	ln -sf available/syslogd.conf $(FINIT_D)/syslogd.conf
+	ln -sf /etc/finit.d/available/syslogd.conf $(FINIT_D)/enabled/syslogd.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_SYSLOGD
 
 # Watchdogd
 ifeq ($(BR2_PACKAGE_WATCHDOGD),y)
 define SKELETON_INIT_FINIT_SET_WATCHDOGD
-	ln -sf available/watchdogd.conf $(FINIT_D)/watchdogd.conf
+	ln -sf /etc/finit.d/available/watchdogd.conf $(FINIT_D)/enabled/watchdogd.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_WATCHDOGD
 endif
