@@ -1,0 +1,27 @@
+&system_flash {
+	partition@0 {
+		/* 1.5M */
+		reg = <0x0000000 0x0180000>;
+		label = "Bootloader";
+	};
+	partition@180000 {
+		/* 0.5M */
+		reg = <0x0180000 0x0080000>;
+		label = "BootConfig";
+	};
+	partition@200000 {
+		/* 56M */
+		reg = <0x0200000 0x3800000>;
+		label = "Primary";
+	};
+	partition@3a00000 {
+		/* 56M */
+		reg = <0x3a00000 0x3800000>;
+		label = "Secondary";
+	};
+	partition@7200000 {
+		/* 15M */
+		reg = <0x7200000 0x0e00000>;
+		label = "Config";
+	};
+};

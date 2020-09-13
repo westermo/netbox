@@ -1,0 +1,657 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+* Copyright 2019 NXP
+*/
+
+/dts-v1/;
+
+#include <freescale/imx8mn.dtsi>
+#include <dt-bindings/leds/common.h>
+
+/* UPSTREAM */
+&aips3 {
+	flexspi: spi@30bb0000 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		compatible = "nxp,imx8mn-fspi", "nxp,imx8mm-fspi";
+		reg = <0x30bb0000 0x10000>, <0x8000000 0x10000000>;
+		reg-names = "fspi_base", "fspi_mmap";
+		interrupts = <GIC_SPI 107 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clk IMX8MN_CLK_QSPI_ROOT>, <&clk IMX8MN_CLK_QSPI_ROOT>;
+		clock-names = "fspi", "fspi_en";
+		status = "disabled";
+	};
+};
+/* END UPSTREAM */
+
+#include <common/mv6.h>
+
+/ {
+	model = "Envious";
+	compatible = "westermo,envoy", "fsl,imx8mn";
+
+	chosen {
+		stdout-path = &uart1;
+	};
+
+	memory@40000000 {
+		device_type = "memory";
+		reg = <0x0 0x40000000 0 0x20000000>;
+	};
+};
+
+&A53_0 { cpu-supply = <&buck2>; };
+&A53_1 { cpu-supply = <&buck2>; };
+&A53_2 { cpu-supply = <&buck2>; };
+&A53_3 { cpu-supply = <&buck2>; };
+
+&cpu_alert0 {
+	temperature = <95000>;
+};
+
+&cpu_crit0 {
+	temperature = <105000>;
+};
+
+&ddrc {
+	operating-points-v2 = <&ddrc_opp_table>;
+
+	ddrc_opp_table: opp-table {
+		compatible = "operating-points-v2";
+
+		opp-50M {
+			opp-hz = /bits/ 64 <50000000>;
+		};
+
+		opp-200M {
+			opp-hz = /bits/ 64 <200000000>;
+		};
+
+		opp-800M {
+			opp-hz = /bits/ 64 <800000000>;
+		};
+	};
+};
+
+&flexspi {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_flexspi0>;
+
+	system_flash: mt25ql01g@0 {
+		reg = <0>;
+		compatible = "jedec,spi-nor";
+		spi-max-frequency = <80000000>;
+		spi-tx-bus-width = <4>;
+		spi-rx-bus-width = <4>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+	};
+};
+
+&fec1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_fec1>;
+	fsl,magic-packet;
+
+	/* We're connected to a switch sending DSA tagged packets, so
+	the FEC classifier will never queue anything on the AVB
+	queues. */
+	fsl,num-rx-queues = <1>;
+
+	/* Enabling all more than one queue causes intermittent tx
+	issues detailed here:
+	https://lore.kernel.org/netdev/20200625085728.9869-1-tobias@waldekranz.com/
+	*/
+	fsl,num-tx-queues = <1>;
+
+	phy-mode = "rgmii";
+	fixed-link {
+		speed = <1000>;
+		full-duplex;
+	};
+
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		peridot: switch@4 {
+			compatible = "marvell,mv88e6190";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_peridot>;
+			interrupt-parent = <&gpio3>;
+			interrupts = <22 IRQ_TYPE_LEVEL_LOW>;
+			reg = <0x4>;
+
+			dsa,member = <0 0>;
+			dsa,num_tx_queues = <8>;
+
+			interrupt-controller;
+			#interrupt-cells = <2>;
+
+			ports {
+				#address-cells = <0x1>;
+				#size-cells = <0x0>;
+
+				port@0 {
+					reg = <0x0>;
+					label = "cpu0";
+					ethernet = <&fec1>;
+					phy-mode = "rgmii-id";
+
+					fixed-link {
+						speed = <1000>;
+						full-duplex;
+					};
+				};
+
+				mv6_port(1, "eth10", &phy1, "gmii");
+				mv6_port(2, "eth9",  &phy2, "gmii");
+				mv6_port(3, "eth8",  &phy3, "gmii");
+				mv6_port(4, "eth7",  &phy4, "gmii");
+				mv6_port(5, "eth6",  &phy5, "gmii");
+				mv6_port(6, "eth5",  &phy6, "gmii");
+				mv6_port(7, "eth4",  &phy7, "gmii");
+				mv6_port(8, "eth3",  &phy8, "gmii");
+
+				/* "SFP1" on schematic is connected to
+				 eth2 and vice versa but in the DT we
+				 map eth1<->sfp1. */
+				mv6_port_sfp( 9, "eth2", &sfp2, "1000base-x");
+				mv6_port_sfp(10, "eth1", &sfp1, "1000base-x");
+			};
+
+			mdio {
+				#address-cells = <0x1>;
+				#size-cells = <0x0>;
+				interrupt-parent = <&peridot>;
+
+				phy1: mv6_phy(1);
+				phy2: mv6_phy(2);
+				phy3: mv6_phy(3);
+				phy4: mv6_phy(4);
+				phy5: mv6_phy(5);
+				phy6: mv6_phy(6);
+				phy7: mv6_phy(7);
+				phy8: mv6_phy(8);
+			};
+		};
+	};
+};
+
+&i2c1 {
+	status = "okay";
+	clock-frequency = <400000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c1>;
+
+	temp-sensor@18 {
+		compatible = "microchip,mcp98243", "jedec,jc-42.4-temp";
+		reg = <0x18>;
+	};
+
+	pmic: pmic@25 {
+		compatible = "nxp,pca9450b";
+		reg = <0x25>;
+		pinctrl-0 = <&pinctrl_pmic>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <3 GPIO_ACTIVE_LOW>;
+
+		regulators {
+			buck1: BUCK1{
+				regulator-name = "VDD_DRAM";
+				regulator-min-microvolt = <600000>;
+				regulator-max-microvolt = <2187500>;
+				regulator-boot-on;
+				regulator-always-on;
+				regulator-ramp-delay = <3125>;
+			};
+
+			buck2: BUCK2 {
+				regulator-name = "VDD_ARM";
+				regulator-min-microvolt = <600000>;
+				regulator-max-microvolt = <2187500>;
+				regulator-boot-on;
+				regulator-always-on;
+				regulator-ramp-delay = <3125>;
+				nxp,dvs-run-voltage = <950000>;
+				nxp,dvs-standby-voltage = <850000>;
+			};
+
+			buck4: BUCK4{
+				regulator-name = "NVCC_3V3";
+				regulator-min-microvolt = <600000>;
+				regulator-max-microvolt = <3400000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
+			buck5: BUCK5{
+				regulator-name = "NVCC_1V8";
+				regulator-min-microvolt = <600000>;
+				regulator-max-microvolt = <3400000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
+			buck6: BUCK6 {
+				regulator-name = "NVCC_DRAM_1V1";
+				regulator-min-microvolt = <600000>;
+				regulator-max-microvolt = <3400000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
+			ldo1: LDO1 {
+				regulator-name = "NVCC_SNVS_1V8";
+				regulator-min-microvolt = <1600000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
+			ldo2: LDO2 {
+				regulator-name = "NVCC_SNVS_0V8";
+				regulator-min-microvolt = <800000>;
+				regulator-max-microvolt = <1150000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
+			ldo3: LDO3 {
+				regulator-name = "VDDA_1V8";
+				regulator-min-microvolt = <800000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+
+			ldo4: LDO4 {
+				regulator-name = "VDD_PHY_1V2";
+				regulator-min-microvolt = <800000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-boot-on;
+				regulator-always-on;
+			};
+		};
+	};
+
+	eeprom@50 { /* Internal to the MCP98243 */
+		compatible = "at24,24c02";
+		reg = <0x50>;
+		read-only;
+	};
+
+	rtc@68 {
+		compatible = "microcrystal,rv8523", "nxp,pcf8523";
+		reg = <0x68>;
+	};
+};
+
+&i2c2 {
+	status = "okay";
+	clock-frequency = <400000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c2>;
+};
+
+/ {
+	i2cmux {
+		compatible = "i2c-mux-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_sfpmux>;
+		i2c-parent = <&i2c2>;
+		mux-gpios = <&gpio3 3 GPIO_ACTIVE_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		sfp2_i2c: i2c@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		sfp1_i2c: i2c@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+	};
+
+	/* This is "SFP1" on the schematic, but it is connected to
+	eth2, so we call it sfp2. */
+	sfp2: sfp2 {
+		compatible = "sff,sfp";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_sfp2>;
+		maximum-power-milliwatt = <1000>;
+		i2c-bus = <&sfp2_i2c>;
+
+		tx-fault-gpios     = <&gpio3  4 GPIO_ACTIVE_HIGH>;
+		tx-disable-gpios   = <&gpio3  5 GPIO_ACTIVE_HIGH>;
+		mod-def0-gpios     = <&gpio3 10 GPIO_ACTIVE_LOW>;
+		rate-select0-gpios = <&gpio3 11 GPIO_ACTIVE_HIGH>;
+		los-gpios          = <&gpio3 12 GPIO_ACTIVE_HIGH>;
+	};
+
+	/* This is "SFP2" on the schematic, but it is connected to
+	eth1, so we call it sfp1. */
+	sfp1: sfp1 {
+		compatible = "sff,sfp";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_sfp1>;
+		maximum-power-milliwatt = <1000>;
+		i2c-bus = <&sfp1_i2c>;
+
+		tx-fault-gpios     = <&gpio3 13 GPIO_ACTIVE_HIGH>;
+		tx-disable-gpios   = <&gpio3 14 GPIO_ACTIVE_HIGH>;
+		mod-def0-gpios     = <&gpio3 15 GPIO_ACTIVE_LOW>;
+		rate-select0-gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>;
+		los-gpios          = <&gpio3 17 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+poe_i2c: &i2c3 {
+	status = "okay";
+	clock-frequency = <400000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c3>;
+};
+
+&uart1 { /* console */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1>;
+	status = "okay";
+};
+
+&usdhc1 {
+	status = "okay";
+	assigned-clocks = <&clk IMX8MN_CLK_USDHC1>;
+	assigned-clock-rates = <200000000>;
+	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+	pinctrl-0 = <&pinctrl_usdhc1>;
+	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
+	pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
+	bus-width = <4>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+};
+
+&wdog1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_wdog>;
+	fsl,ext-reset-output;
+	status = "okay";
+};
+
+&snvs_rtc {
+	/* The board uses an external RTC backed by a
+	 * supercapacitor instead. */
+	status = "disabled";
+};
+
+/ {
+	dc1: dc1 {
+		compatible = "gpio-charger";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_dc1>;
+		charger-type = "mains";
+		gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>;
+	};
+
+	dc2: dc2 {
+		compatible = "gpio-charger";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_dc2>;
+		charger-type = "mains";
+		gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>;
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_leds>;
+
+		status-red {
+			function = LED_FUNCTION_STATUS;
+			color = <LED_COLOR_ID_RED>;
+			gpios = <&gpio1 10 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+		status-green {
+			function = LED_FUNCTION_STATUS;
+			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&gpio1 11 GPIO_ACTIVE_LOW>;
+		};
+
+		ring-red {
+			function = "ring";
+			color = <LED_COLOR_ID_RED>;
+			gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+		};
+		ring-green {
+			function = "ring";
+			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
+		};
+
+		taint-red {
+			function = "taint";
+			color = <LED_COLOR_ID_RED>;
+			gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
+			default-state = "keep";
+		};
+	};
+
+};
+
+&gpio1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_io>;
+	gpio-line-names =
+	"dc1", "dc2", "", "",
+	"io-in", "io-out", "", "",
+	"", "", "led-on-red", "led-on-green",
+	"led-ring-red", "led-ring-green", "led-taint-red", "led-taint-in",
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "";
+};
+
+&gpio3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_exp>;
+	gpio-line-names =
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "",
+	"", "exp-reset", "", "",
+	"", "", "", "",
+	"", "", "", "";
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+
+	pinctrl_dc1: dc1grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_GPIO1_IO00_GPIO1_IO0	0
+		>;
+	};
+
+	pinctrl_dc2: dc2grp {
+		fsl,pins = <
+		 MX8MN_IOMUXC_GPIO1_IO01_GPIO1_IO1	0
+		>;
+	};
+
+	pinctrl_fec1: fec1grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_ENET_MDC_ENET1_MDC		0x3
+		MX8MN_IOMUXC_ENET_MDIO_ENET1_MDIO	0x3
+		MX8MN_IOMUXC_ENET_TD3_ENET1_RGMII_TD3	0x1f
+		MX8MN_IOMUXC_ENET_TD2_ENET1_RGMII_TD2	0x1f
+		MX8MN_IOMUXC_ENET_TD1_ENET1_RGMII_TD1	0x1f
+		MX8MN_IOMUXC_ENET_TD0_ENET1_RGMII_TD0	0x1f
+		MX8MN_IOMUXC_ENET_RD3_ENET1_RGMII_RD3	0x91
+		MX8MN_IOMUXC_ENET_RD2_ENET1_RGMII_RD2	0x91
+		MX8MN_IOMUXC_ENET_RD1_ENET1_RGMII_RD1	0x91
+		MX8MN_IOMUXC_ENET_RD0_ENET1_RGMII_RD0	0x91
+		MX8MN_IOMUXC_ENET_TXC_ENET1_RGMII_TXC	0x1f
+		MX8MN_IOMUXC_ENET_RXC_ENET1_RGMII_RXC	0x91
+		MX8MN_IOMUXC_ENET_RX_CTL_ENET1_RGMII_RX_CTL	0x91
+		MX8MN_IOMUXC_ENET_TX_CTL_ENET1_RGMII_TX_CTL	0x1f
+		MX8MN_IOMUXC_SAI2_RXC_GPIO4_IO22	0x19
+		>;
+	};
+
+	pinctrl_flexspi0: flexspi0grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_NAND_ALE_QSPI_A_SCLK	0x1c4
+		MX8MN_IOMUXC_NAND_CE0_B_QSPI_A_SS0_B	0x84
+
+		MX8MN_IOMUXC_NAND_DATA00_QSPI_A_DATA0	0x84
+		MX8MN_IOMUXC_NAND_DATA01_QSPI_A_DATA1	0x84
+		MX8MN_IOMUXC_NAND_DATA02_QSPI_A_DATA2	0x84
+		MX8MN_IOMUXC_NAND_DATA03_QSPI_A_DATA3	0x84
+		>;
+	};
+
+	pinctrl_i2c1: i2c1grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_I2C1_SCL_I2C1_SCL		0x400001c3
+		MX8MN_IOMUXC_I2C1_SDA_I2C1_SDA		0x400001c3
+		>;
+	};
+
+	pinctrl_i2c2: i2c2grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_ECSPI1_MISO_I2C2_SCL	0x400001c3
+		MX8MN_IOMUXC_ECSPI1_SS0_I2C2_SDA	0x400001c3
+		>;
+	};
+
+	pinctrl_i2c3: i2c3grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_I2C3_SCL_I2C3_SCL		0x400001c3
+		MX8MN_IOMUXC_I2C3_SDA_I2C3_SDA		0x400001c3
+		>;
+	};
+
+	pinctrl_io: iogrp {
+		fsl,pins = <
+		MX8MN_IOMUXC_GPIO1_IO04_GPIO1_IO4	0
+		MX8MN_IOMUXC_GPIO1_IO05_GPIO1_IO5	0
+		MX8MN_IOMUXC_GPIO1_IO15_GPIO1_IO15	0
+		>;
+	};
+
+	pinctrl_leds: ledgrp {
+		fsl,pins = <
+		MX8MN_IOMUXC_GPIO1_IO10_GPIO1_IO10	0
+		MX8MN_IOMUXC_GPIO1_IO11_GPIO1_IO11	0
+		MX8MN_IOMUXC_GPIO1_IO12_GPIO1_IO12	0
+		MX8MN_IOMUXC_GPIO1_IO13_GPIO1_IO13	0
+		MX8MN_IOMUXC_GPIO1_IO14_GPIO1_IO14	0
+		>;
+	};
+
+	pinctrl_peridot: peridotgrp {
+		fsl,pins = <
+		MX8MN_IOMUXC_SAI5_RXD1_GPIO3_IO22	0
+		>;
+	};
+
+	pinctrl_pmic: pmicirq {
+		fsl,pins = <
+		MX8MN_IOMUXC_GPIO1_IO03_GPIO1_IO3	0x41
+		>;
+	};
+
+	pinctrl_sfpmux: sfpmuxgrp {
+		fsl,pins = <
+		MX8MN_IOMUXC_NAND_CE2_B_GPIO3_IO3	0
+		>;
+	};
+
+	pinctrl_sfp2: sfp2grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_NAND_CE3_B_GPIO3_IO4	0
+		MX8MN_IOMUXC_NAND_CLE_GPIO3_IO5		0
+		MX8MN_IOMUXC_NAND_DATA04_GPIO3_IO10	0
+		MX8MN_IOMUXC_NAND_DATA05_GPIO3_IO11	0
+		MX8MN_IOMUXC_NAND_DATA06_GPIO3_IO12	0
+		>;
+	};
+
+	pinctrl_sfp1: sfp1grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_NAND_DATA07_GPIO3_IO13	0
+		MX8MN_IOMUXC_NAND_DQS_GPIO3_IO14	0
+		MX8MN_IOMUXC_NAND_RE_B_GPIO3_IO15	0
+		MX8MN_IOMUXC_NAND_READY_B_GPIO3_IO16	0
+		MX8MN_IOMUXC_NAND_WE_B_GPIO3_IO17	0
+		>;
+	};
+
+	pinctrl_uart1: uart1grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_UART1_RXD_UART1_DCE_RX	0x140
+		MX8MN_IOMUXC_UART1_TXD_UART1_DCE_TX	0x140
+		>;
+	};
+
+	pinctrl_usdhc1: usdhc1grp {
+		fsl,pins = <
+		MX8MN_IOMUXC_GPIO1_IO06_USDHC1_CD_B     0
+                MX8MN_IOMUXC_SD1_CLK_USDHC1_CLK         0x190
+                MX8MN_IOMUXC_SD1_CMD_USDHC1_CMD         0x1d0
+                MX8MN_IOMUXC_SD1_DATA0_USDHC1_DATA0     0x1d0
+                MX8MN_IOMUXC_SD1_DATA1_USDHC1_DATA1     0x1d0
+                MX8MN_IOMUXC_SD1_DATA2_USDHC1_DATA2     0x1d0
+                MX8MN_IOMUXC_SD1_DATA3_USDHC1_DATA3     0x1d0
+		>;
+	};
+
+	pinctrl_usdhc1_100mhz: usdhc1-100mhzgrp {
+		fsl,pins = <
+		MX8MN_IOMUXC_GPIO1_IO06_USDHC1_CD_B     0
+                MX8MN_IOMUXC_SD1_CLK_USDHC1_CLK         0x194
+                MX8MN_IOMUXC_SD1_CMD_USDHC1_CMD         0x1d4
+                MX8MN_IOMUXC_SD1_DATA0_USDHC1_DATA0     0x1d4
+                MX8MN_IOMUXC_SD1_DATA1_USDHC1_DATA1     0x1d4
+                MX8MN_IOMUXC_SD1_DATA2_USDHC1_DATA2     0x1d4
+                MX8MN_IOMUXC_SD1_DATA3_USDHC1_DATA3     0x1d4
+		>;
+	};
+
+	pinctrl_usdhc1_200mhz: usdhc1-200mhzgrp {
+		fsl,pins = <
+		MX8MN_IOMUXC_GPIO1_IO06_USDHC1_CD_B     0
+                MX8MN_IOMUXC_SD1_CLK_USDHC1_CLK         0x196
+                MX8MN_IOMUXC_SD1_CMD_USDHC1_CMD         0x1d6
+                MX8MN_IOMUXC_SD1_DATA0_USDHC1_DATA0     0x1d6
+                MX8MN_IOMUXC_SD1_DATA1_USDHC1_DATA1     0x1d6
+                MX8MN_IOMUXC_SD1_DATA2_USDHC1_DATA2     0x1d6
+                MX8MN_IOMUXC_SD1_DATA3_USDHC1_DATA3     0x1d6
+		>;
+	};
+
+	pinctrl_wdog: wdoggrp {
+		fsl,pins = <
+		MX8MN_IOMUXC_GPIO1_IO02_WDOG1_WDOG_B		0xc6
+		>;
+	};
+
+	pinctrl_exp: expgrp {
+		fsl,pins = <
+		MX8MN_IOMUXC_SAI5_RXD0_GPIO3_IO21	0
+		>;
+	};
+};
+
+#include <common/system-flash/128M-dual.dtsi>
