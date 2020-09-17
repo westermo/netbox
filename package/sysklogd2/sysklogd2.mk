@@ -8,6 +8,7 @@ SYSKLOGD2_VERSION = 2.1.2
 SYSKLOGD2_SOURCE = sysklogd-$(SYSKLOGD2_VERSION).tar.gz
 SYSKLOGD2_SITE = https://github.com/troglobit/sysklogd/releases/download/v$(SYSKLOGD2_VERSION)
 SYSKLOGD2_LICENSE = BSD-3-Clause
+SYSKLOGD2_CONF_OPTS = --exec-prefix=/
 
 define SYSKLOGD2_INSTALL_SAMPLE_CONFIG
 	$(INSTALL) -D -m 0644 $(BR2_EXTERNAL_NETBOX_PATH)/package/sysklogd2/syslog.conf \
