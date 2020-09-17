@@ -46,11 +46,13 @@ endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_DROPBEAR
 endif
 
-# BusyBox syslogd only, for now
+# Enable Busybox syslogd unless sysklogd v2 is enabled
+ifneq ($(BR2_PACKAGE_SYSKLOGD2),y)
 define SKELETON_INIT_FINIT_SET_SYSLOGD
 	ln -sf /etc/finit.d/available/syslogd.conf $(FINIT_D)/enabled/syslogd.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_SYSLOGD
+endif
 
 # SSDP Responder
 ifeq ($(BR2_PACKAGE_SSDP_RESPONDER),y)
