@@ -26,6 +26,7 @@ case $BR2_ARCH in
 	;;
     aarch64)
 	QEMU_ARCH=$BR2_ARCH
+	QEMU_MACH="virt -cpu cortex-a53"
 	;;
     x86_64)
 	QEMU_ARCH=$BR2_ARCH
