@@ -3,6 +3,7 @@ iface lo inet loopback
 
 auto chan0
 iface chan0 inet manual
+      pre-up    sysctl -q net.ipv6.conf.chan0.disable_ipv6=1
       pre-up    ip link set dev chan0 up
       post-down ip link set dev chan0 down
 
