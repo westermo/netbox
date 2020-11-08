@@ -1,0 +1,125 @@
+#include <common/mv6.h>
+
+#include "base.dtsi"
+
+&fm1mac4 {
+	status = "okay";
+};
+
+&mdio0 {
+	agate: switch@4 {
+		compatible = "marvell,mv88e6085";
+		reg = <0x4>;
+
+		dsa,member = <0 0>;
+		dsa,num_tx_queues = <8>;
+
+		interrupts = <2 1 0 0>;
+		interrupt-parent = <&mpic>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+
+		ports {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+
+			dsa0d: port@5 {
+				reg = <0x5>;
+				label = "dsa0d";
+				link = <&dsa1u>;
+				phy-mode = "rgmii-id";
+
+				fixed-link {
+					speed = <1000>;
+					full-duplex;
+				};
+			};
+
+			port@6 {
+				reg = <0x6>;
+				label = "cpu0";
+				ethernet = <&fm1mac4>;
+				phy-mode = "rgmii-id";
+
+				fixed-link {
+					speed = <1000>;
+					full-duplex;
+				};
+			};
+
+			mv6_port(0, "ethX2" , &aphy0, "gmii");
+			mv6_port(1, "ethX12", &aphy1, "gmii");
+			mv6_port(2, "ethX8" , &aphy2, "gmii");
+			mv6_port(3, "ethX4" , &aphy3, "gmii");
+			mv6_port(4, "ethX3" , &aphy4, "gmii");
+		};
+
+		mdio {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			interrupt-parent = <&agate>;
+
+			aphy0: mv6_phy(0);
+			aphy1: mv6_phy(1);
+			aphy2: mv6_phy(2);
+			aphy3: mv6_phy(3);
+			aphy4: mv6_phy(4);
+		};
+	};
+
+	opal: switch@1 {
+		compatible = "marvell,mv88e6085";
+		reg = <0x1>;
+
+		dsa,member = <0 1>;
+		dsa,num_tx_queues = <4>;
+
+		interrupts = <3 1 0 0>;
+		interrupt-parent = <&mpic>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			dsa1u: port@a {
+				reg = <0xa>;
+				label = "dsa1u";
+				link = <&dsa0d>;
+				phy-mode = "rgmii-id";
+
+				fixed-link {
+					speed = <1000>;
+					full-duplex;
+				};
+			};
+
+			mv6_port(0, "ethX1" , &ophy0, "mii");
+			mv6_port(1, "ethX5" , &ophy1, "mii");
+			mv6_port(2, "ethX6" , &ophy2, "mii");
+			mv6_port(3, "ethX7" , &ophy3, "mii");
+			mv6_port(4, "ethX9" , &ophy4, "mii");
+			mv6_port(5, "ethX10", &ophy5, "mii");
+			mv6_port(6, "ethX11", &ophy6, "mii");
+		};
+
+		mdio {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			interrupt-parent = <&opal>;
+
+			ophy0: mv6_phy(0);
+			ophy1: mv6_phy(1);
+			ophy2: mv6_phy(2);
+			ophy3: mv6_phy(3);
+			ophy4: mv6_phy(4);
+			ophy5: mv6_phy(5);
+			ophy6: mv6_phy(6);
+		};
+	};
+};
+
+&watchdog {
+	gpios = <&gpio0 16 0>;
+};
