@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Create a finit condition on the form hw/model/<model-from-dtb>. This
+# makes it easy to condition a service/task/run based on the
+# underlying hardware.
+
+conddir=/var/run/finit/cond/hw/model
+model=$(cat /sys/firmware/devicetree/base/model | tr "[A-Z] " "[a-z]-")
+
+mkdir -p $conddir
+ln -s ../../reconf $conddir/$model

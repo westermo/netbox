@@ -1,11 +1,31 @@
-proc		/proc		proc	defaults			0	0
-devpts		/dev/pts	devpts	defaults,mode=620,ptmxmode=0666	0	0
-tmpfs		/dev/shm	tmpfs	mode=0777			0	0
-tmpfs		/tmp		tmpfs	mode=1777			0	0
-tmpfs		/run		tmpfs	mode=0755,nosuid,nodev		0	0
-sysfs		/sys		sysfs	defaults			0	0
-debugfs		/sys/kernel/debug  debugfs  nofail			0	0
+# Virtual filesystems
+devtmpfs	/dev		devtmpfs	defaults		0	0
+mkdir#-p	/dev/pts	helper		none			0	0
+devpts		/dev/pts	devpts		mode=620,ptmxmode=0666	0	0
+mkdir#-p	/dev/shm	helper		none			0	0
+tmpfs		/dev/shm	tmpfs		mode=0777		0	0
+proc		/proc		proc		defaults		0	0
+tmpfs		/tmp		tmpfs		mode=1777,nosuid,nodev	0	0
+tmpfs		/run		tmpfs		mode=0755,nosuid,nodev	0	0
+sysfs		/sys		sysfs		defaults		0	0
+debugfs	/sys/kernel/debug	debugfs		nofail			0	0
 
-mtd:Config	/mnt		jffs2	noatime,nodiratime		0	0
-rw-etc		/etc		overlay	lowerdir=/etc,upperdir=/mnt/netbox/etc,workdir=/mnt/netbox/.etc	0	0
-rw-root		/root		overlay	lowerdir=/root,upperdir=/mnt/netbox/root,workdir=/mnt/netbox/.root	0	0
+# Persistent storage if available, otherwise a ramdisk
+mtd:Config		/mnt	jffs2	noatime,nodiratime	0	0
+/lib/netbox/init-tmpfs-fallback#	/mnt	helper	none	0	0
+
+# Ensure that all overlay directories are available
+mkdir#-p	/tmp/netbox/var.u	helper	none	0	0
+mkdir#-p	/tmp/netbox/var.w	helper	none	0	0
+mkdir#-p	/mnt/netbox/varlib.u	helper	none	0	0
+mkdir#-p	/mnt/netbox/varlib.w	helper	none	0	0
+mkdir#-p	/mnt/netbox/etc.u	helper	none	0	0
+mkdir#-p	/mnt/netbox/etc.w	helper	none	0	0
+mkdir#-p	/mnt/netbox/root.u	helper	none	0	0
+mkdir#-p	/mnt/netbox/root.w	helper	none	0	0
+
+# Overlay selected parts of the filesystem with persistent storage
+rw-var	/var		overlay	lowerdir=/var,upperdir=/tmp/netbox/var.u,workdir=/tmp/netbox/var.w		0	0
+rw-vlib	/var/lib	overlay	lowerdir=/var/lib,upperdir=/mnt/netbox/varlib.u,workdir=/mnt/netbox/varlib.w	0	0
+rw-etc	/etc		overlay	lowerdir=/etc,upperdir=/mnt/netbox/etc.u,workdir=/mnt/netbox/etc.w		0	0
+rw-root	/root		overlay	lowerdir=/root,upperdir=/mnt/netbox/root.u,workdir=/mnt/netbox/root.w		0	0

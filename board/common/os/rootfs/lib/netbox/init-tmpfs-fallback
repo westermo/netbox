@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Called from /etc/fstab to make sure that we have something mounted
+# at /mnt. Ideally this is some persistent storage, but if that failed
+# for some reason we fall back to a tmpfs. This effectively brings up
+# the system with the default configuration, but obviously any
+# subsequent configuration is ephemeral.
+
+set -e
+
+if mountpoint -q /mnt; then
+    exit 0
+fi
+
+logger -c -p user.crit -t $0 \
+       "/mnt was not mounted, falling back to tmpfs."
+
+mount -t tmpfs tmpfs-fallback /mnt

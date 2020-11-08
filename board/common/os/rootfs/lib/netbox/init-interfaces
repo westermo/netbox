@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Perform any interface renames as dictated by /etc/mactab.
 nameif -s
 
 # Place all eth* interfaces in the "port" group, such that we can
