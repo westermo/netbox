@@ -14,18 +14,8 @@ addons:
 
 jobs:
   include:
-    - stage: Coronet
-      script:
-        - mkdir -p _build/coronet; cd _build/coronet
-        - make O=$PWD -C /home/travis/build/westermo/netbox netbox_app_coronet_defconfig
-        - make O=$PWD -C /home/travis/build/westermo/netbox
     - stage: Dagger
       script:
         - mkdir -p _build/dagger; cd _build/dagger
         - make O=$PWD -C /home/travis/build/westermo/netbox netbox_app_dagger_defconfig
-        - make O=$PWD -C /home/travis/build/westermo/netbox
-    - stage: Zero
-      script:
-        - mkdir -p _build/zero; cd _build/zero
-        - make O=$PWD -C /home/travis/build/westermo/netbox netbox_app_zero_defconfig
         - make O=$PWD -C /home/travis/build/westermo/netbox
