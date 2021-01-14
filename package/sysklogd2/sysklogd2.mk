@@ -11,7 +11,7 @@ SYSKLOGD2_LICENSE = BSD-3-Clause
 SYSKLOGD2_CONF_OPTS = --exec-prefix=/ --disable-silent-rules
 
 # Create configure script using autoreconf when building from git
-SYSKLOGD2_VERSION = af0da3c
+SYSKLOGD2_VERSION = a95c4ba
 SYSKLOGD2_SITE = git://github.com/troglobit/sysklogd.git
 SYSKLOGD2_AUTORECONF = YES
 SYSKLOGD2_DEPENDENCIES += host-automake host-autoconf host-libtool

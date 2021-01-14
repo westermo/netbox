@@ -6,4 +6,4 @@ sha256 7a71d7603a7c4456df441463e54da35acf151c1be0879246de63544f1f34f477  LICENSE
 sha256 689be96108315775ec2c338959ee4b192ac8afc1e94cb4647493c522aedb4277  sysklogd-2.1.2.tar.gz
 
 # No hash for git snapshots
-none none  sysklogd2-af0da3c.tar.gz
+none none  sysklogd2-a95c4ba.tar.gz
