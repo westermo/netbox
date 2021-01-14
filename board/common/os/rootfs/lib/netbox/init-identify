@@ -5,7 +5,13 @@
 # underlying hardware.
 
 conddir=/var/run/finit/cond/hw/model
-model=$(cat /sys/firmware/devicetree/base/model | tr "[A-Z] " "[a-z]-")
+dtmodel=/sys/firmware/devicetree/base/model
+
+if ! test -e $dtmodel; then
+    exit 0
+fi
+
+model=$(cat $dtmodel | tr "[A-Z] " "[a-z]-")
 
 mkdir -p $conddir
 ln -s ../../reconf $conddir/$model
