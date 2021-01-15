@@ -1,9 +1,9 @@
-# Upstream .md5 from GitHub
-md5 f46120d8bd6288bde0fe95d1f125e6fc  sysklogd-2.1.2.tar.gz
+# Upstream .md5 and .sha256 from GitHub
+md5 776ba3bacafd05e22476ef017646e997  sysklogd-2.2.0.tar.gz
+sha256 60546ae50a9f30b31c19ed9a3ad788ce5798025b0f9a0d552c1a04d5eeac494d  sysklogd-2.2.0.tar.gz
 
 # Locally computed
 sha256 7a71d7603a7c4456df441463e54da35acf151c1be0879246de63544f1f34f477  LICENSE
-sha256 689be96108315775ec2c338959ee4b192ac8afc1e94cb4647493c522aedb4277  sysklogd-2.1.2.tar.gz
 
 # No hash for git snapshots
 none none  sysklogd2-a95c4ba.tar.gz
