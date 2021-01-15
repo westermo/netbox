@@ -9,3 +9,12 @@ awk -F: '
     /^\s*eth|^\s*lan/ {
         print("link set dev", $1, " group port");
     }' </proc/net/dev | ip -batch -
+
+# On systems with a physical switch, the main interface is called chan0,
+# which is used as a VLAN trunk from the physical ports to the CPU.
+if [ -d /sys/class/net/chan0 ]; then
+    # Disable SLAAC frames and such, that's for the port interfaces, and
+    # bring it up so we get link events from the ports to the bridge.
+    sysctl -q net.ipv6.conf.chan0.disable_ipv6=1
+    ip link set dev chan0 up
+fi
