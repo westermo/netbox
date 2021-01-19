@@ -81,6 +81,24 @@ based root filesystem: `netbox-$platform.img`
 > machine.  Archives are available under *Releases*
 
 
+Running
+-------
+
+All NetBox os builds can be run in Qemu.  Highly useful for quick
+turnarounds when developing and testing new features.
+
+```
+make run
+```
+
+The NetBox app builds can be run in LXC, or LXD, on your PC but this is
+not yet documented here.  It is even possible to run non-native archs,
+like Arm64, on your PC using Linux "binfmt misc" support, in which case
+all binaries are run through `qemu-aarch64`.  It both feels and really
+*is* a very weird thing.  So it's not documented yet and we instead
+encourage all newbies to try out the Zero app builds in LXC first.
+
+
 Versioning
 ----------
 
