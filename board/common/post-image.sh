@@ -7,6 +7,8 @@
 imagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/image.sh
 fitimagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/fitimage.sh
 
+gen=$BR2_EXTERNAL_NETBOX_PATH/board/$NETBOX_PLAT/genimage.cfg
+cfg=$BINARIES_DIR/config.jffs2
 ext2=$BINARIES_DIR/rootfs.ext2
 squash=$BINARIES_DIR/rootfs.squashfs
 img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_TYPE-${NETBOX_PLAT}
@@ -37,6 +39,11 @@ case $BR2_ARCH in
     *)
 	;;
 esac
+
+if [ -e $gen ]; then
+    dd if=/dev/zero bs=16384 count=960 2>/dev/null | tr '\000' '\377' >$cfg
+    ./support/scripts/genimage.sh $BINARIES_DIR -c $gen
+fi
 
 cat <<EOF > $qemucfg
 QEMU_ARCH=$QEMU_ARCH
