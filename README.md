@@ -98,6 +98,22 @@ all binaries are run through `qemu-aarch64`.  It both feels and really
 *is* a very weird thing.  So it's not documented yet and we instead
 encourage all newbies to try out the Zero app builds in LXC first.
 
+- https://github.com/myrootfs/myrootfs#lxd
+
+
+### Example
+
+Here's an example run of a Zero OS build, with the added bonus of a
+persistent store for all configuration using an image file in your
+`~/.cache/`:
+
+```
+make distclean
+make netbox_os_zero_defconfig
+make
+QEMU_MNT=~/.cache/netbox-zero.img make run
+```
+
 
 Versioning
 ----------
