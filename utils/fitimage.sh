@@ -12,6 +12,10 @@ out=$3
 load=0
 
 case $plat in
+    basis)
+	arch="arm"
+	load="0x20000000"
+	;;
     coronet)
 	arch="powerpc"
 	;;
