@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Called from /etc/fstab to ensure we have something mounted at /mnt,
+# which is used by Netbox to store device modifications made to /root,
+# /var/lib and /etc.
+#
+# The source can be (1) an MTD partition named "Config", (2) a disk
+# partition labeled "Config". If none of those are available, (3) fall
+# back to a tmpfs based RAM disk. This effectively brings up the
+# system with the default configuration, but obviously any subsequent
+# configuration is ephemeral.
+
+set -e
+
+# If something is already setup, leave it be.
+mountpoint -q /mnt && exit 0
+
+# Internal FLASH takes precedence over disks.
+mount   mtd:Config && exit 0
+mount LABEL=Config && exit 0
+
+logger -c -p user.crit -t $0 \
+       "$mnt was not mounted, falling back to tmpfs."
+
+# Fall back to RAM disk.
+mount tmpfs-Config
+exit 1
