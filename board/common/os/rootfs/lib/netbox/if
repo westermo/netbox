@@ -1,5 +1,25 @@
 #!/bin/sh
 
+chans=0
+setup_chan() {
+    ip link set dev $1 name chan$chans
+
+    # Disable SLAAC frames and such, that's for the port interfaces, and
+    # bring it up so we get link events from the ports to the bridge.
+    sysctl -q net.ipv6.conf.chan$chans.disable_ipv6=1
+    ip link set dev chan$chans up
+
+    chans=$(($chans + 1))
+}
+
+# If any ethernet interface is being used as a channel between the CPU
+# and a switch managed by DSA, set it up early.
+for iface in $(ls /sys/class/net); do
+    if [ -f /sys/class/net/$iface/dsa/tagging ]; then
+	setup_chan $iface
+    fi
+done
+
 # Perform any interface renames as dictated by /etc/mactab.
 nameif -s
 
@@ -9,12 +29,3 @@ awk -F: '
     /^\s*eth|^\s*lan/ {
         print("link set dev", $1, " group port");
     }' </proc/net/dev | ip -batch -
-
-# On systems with a physical switch, the main interface is called chan0,
-# which is used as a VLAN trunk from the physical ports to the CPU.
-if [ -d /sys/class/net/chan0 ]; then
-    # Disable SLAAC frames and such, that's for the port interfaces, and
-    # bring it up so we get link events from the ports to the bridge.
-    sysctl -q net.ipv6.conf.chan0.disable_ipv6=1
-    ip link set dev chan0 up
-fi
