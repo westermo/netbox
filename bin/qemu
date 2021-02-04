@@ -45,13 +45,19 @@ Environment variables that impact qemu:
     QEMU_HOST - Directory to passthrough-mount (9p) as /host
        default: None, mandatory
 
+    QEMU_N_NICS - Number of Network adapters
+       default: 1
+
     QEMU_NIC - Network adapter model
-       default: None, mandatory
+       default: virtio-net
 
     QEMU_NET - Network mode
-      "bridge": Bridge the quests interface to the host's virbr0
+      "bridge": Bridge the quests interface to the host's QEMU_BRIDGE
 	 "tap": Guest interface is exported as exported to host as qtap
        default: "bridge"
+
+    QEMU_BRIDGE - Host-side bridge to attach interfaces to
+       default: "virbr0"
 
 EOF
 }
@@ -121,14 +127,26 @@ host_args()
 
 net_args()
 {
-    case $(default bridge "${QEMU_NET}") in
-	bridge) echo -n "-net bridge,br=virbr0" ;;
-	tap)    echo -n "-net tap,ifname=qtap"  ;;
-    esac
+    brname=${QEMU_BRIDGE:-virbr0}
+    model=${QEMU_NIC}
+    mode=${QEMU_NET:-bridge}
 
-    if [ ! -z ${QEMU_NIC} ]; then
-	echo -n " -net nic,model=${QEMU_NIC} "
-    fi
+    for n in $(seq 0 $((${QEMU_N_NICS:-1} - 1)) ); do
+	if [ "${mode}" = "bridge" -a ${n} -eq 0 ]; then
+	    # new style -nic config allows no ifname in bridged mode
+	    echo -n "-nic bridge,br=${brname}"
+	else
+	    # ignore any enslave script for unbridged ports
+	    echo -n "-nic tap,ifname=qtap${n},script=no"
+	fi
+
+	# Use qemu-system default if no model is given
+	if [ -n "${model}" ]; then
+	    echo -n ",model=${model} "
+	else
+	    echo -n " "
+	fi
+    done
 }
 
 consle_args()
