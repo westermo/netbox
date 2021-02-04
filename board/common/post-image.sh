@@ -32,7 +32,7 @@ case $BR2_ARCH in
 	;;
     x86_64)
 	QEMU_ARCH=$BR2_ARCH
-	QEMU_NIC=rtl8139
+	QEMU_NIC=virtio-net-pci
 	QEMU_SCSI=virtio-scsi-pci
 	QEMU_MACH="q35,accel=kvm -smp 2 -watchdog i6300esb -cpu host -enable-kvm -rtc clock=host"
 	;;
