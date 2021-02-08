@@ -21,7 +21,9 @@ for iface in $(ls /sys/class/net); do
 done
 
 # Perform any interface renames as dictated by /etc/mactab.
-nameif -s
+if [ -f /etc/mactab ]; then
+    nameif -s
+fi
 
 # Place all eth* interfaces in the "port" group, such that we can
 # reference them together later, e.g. in /etc/network/interfaces.
