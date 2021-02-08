@@ -19,8 +19,14 @@ FINIT_SITE = git://github.com/troglobit/finit.git
 FINIT_AUTORECONF = YES
 FINIT_DEPENDENCIES += host-automake host-autoconf host-libtool
 
+# Buildroot defaults to /usr for both prefix and exec-prefix, this we
+# must override because we want to install into /sbin and /bin for the
+# finit and initctl programs, respectively.  The expected plugin path is
+# /lib/finit/ and scripts in /libexec, both are set by --exec-prefix.
+# The localstatedir is set to the correct system path by Buildroot, so
+# no override necessary there.
 FINIT_CONF_OPTS =				\
-	--prefix=/				\
+	--prefix=/usr				\
 	--exec-prefix=/				\
 	--disable-docs				\
 	--disable-contrib			\
