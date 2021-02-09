@@ -16,13 +16,12 @@ SKELETON_INIT_FINIT_DEPENDENCIES = skeleton-init-common
 # Enable when BR2_INIT_FINT
 #SKELETON_INIT_FINIT_PROVIDES = skeleton
 
-define SKELETON_INIT_FINIT_INSTALL_TARGET_CMDS
-	$(call SYSTEM_RSYNC,$(SKELETON_INIT_FINIT_PKGDIR)/skeleton,$(TARGET_DIR))
-endef
-
-# Prefer Finit built-in getty unless options are set
+# Prefer Finit built-in getty unless options are set, squash zero baudrate
 define SKELETON_INIT_FINIT_GETTY
 	if [ -z "$(SYSTEM_GETTY_OPTIONS)" ]; then \
+		if [ $(SYSTEM_GETTY_BAUDRATE) -eq 0 ]; then \
+			SYSTEM_GETTY_BAUDRATE="" \
+		fi \
 		echo "tty [12345789] $(SYSTEM_GETTY_PORT) $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_TERM) noclear"; \
 	else \
 		echo "tty [12345789] /sbin/getty -L $(SYSTEM_GETTY_OPTIONS) $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_PORT) $(SYSTEM_GETTY_TERM)"; \
@@ -34,14 +33,14 @@ define SKELETON_INIT_FINIT_SET_GENERIC_GETTY
 	grep -qxF "`cat $(SKELETON_INIT_FINIT_TMPFILE)`" $(FINIT_D)/available/getty.conf \
 		|| cat $(SKELETON_INIT_FINIT_TMPFILE) >> $(FINIT_D)/available/getty.conf
 	rm $(SKELETON_INIT_FINIT_TMPFILE)
-	ln -sf /etc/finit.d/available/getty.conf $(FINIT_D)/enabled/getty.conf
+	ln -sf ../available/getty.conf $(FINIT_D)/enabled/getty.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_GENERIC_GETTY
 
 # Dropbear SSH
 ifeq ($(BR2_PACKAGE_DROPBEAR),y)
 define SKELETON_INIT_FINIT_SET_DROPBEAR
-	ln -sf /etc/finit.d/available/dropbear.conf $(FINIT_D)/enabled/dropbear.conf
+	ln -sf ../available/dropbear.conf $(FINIT_D)/enabled/dropbear.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_DROPBEAR
 endif
@@ -49,7 +48,7 @@ endif
 # Enable Busybox syslogd unless sysklogd v2 is enabled
 ifneq ($(BR2_PACKAGE_SYSKLOGD2),y)
 define SKELETON_INIT_FINIT_SET_SYSLOGD
-	ln -sf /etc/finit.d/available/syslogd.conf $(FINIT_D)/enabled/syslogd.conf
+	ln -sf ../available/syslogd.conf $(FINIT_D)/enabled/syslogd.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_SYSLOGD
 endif
@@ -57,7 +56,7 @@ endif
 # SSDP Responder
 ifeq ($(BR2_PACKAGE_SSDP_RESPONDER),y)
 define SKELETON_INIT_FINIT_SET_SSDP_RESPONDER
-	ln -sf /etc/finit.d/available/ssdp-responder.conf $(FINIT_D)/enabled/ssdp-responder.conf
+	ln -sf ../available/ssdp-responder.conf $(FINIT_D)/enabled/ssdp-responder.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_SSDP_RESPONDER
 endif
@@ -65,7 +64,7 @@ endif
 # Watchdogd
 ifeq ($(BR2_PACKAGE_WATCHDOGD),y)
 define SKELETON_INIT_FINIT_SET_WATCHDOGD
-	ln -sf /etc/finit.d/available/watchdogd.conf $(FINIT_D)/enabled/watchdogd.conf
+	ln -sf ../available/watchdogd.conf $(FINIT_D)/enabled/watchdogd.conf
 endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_WATCHDOGD
 endif
