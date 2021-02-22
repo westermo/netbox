@@ -31,10 +31,6 @@ FINIT_CONF_OPTS =				\
 	--disable-docs				\
 	--disable-contrib			\
 	--enable-fallback-shell			\
-	--enable-progress			\
-	--enable-inetd-chargen-plugin		\
-	--enable-inetd-echo-plugin		\
-	--enable-inetd-time-plugin		\
 	--enable-x11-common-plugin		\
 	$(if $(SKELETON_INIT_COMMON_ISSUE),--with-heading="$(SKELETON_INIT_COMMON_ISSUE)") \
 	$(if $(SKELETON_INIT_COMMON_HOSTNAME),--with-hostname="$(SKELETON_INIT_COMMON_HOSTNAME)") \
