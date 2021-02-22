@@ -14,7 +14,7 @@ FINIT_DEPENDENCIES = host-pkgconf libite libuev
 FINIT_D = $(TARGET_DIR)/etc/finit.d
 
 # Create configure script using autoreconf when building from git
-FINIT_VERSION = 8266439
+FINIT_VERSION = fc82f02
 FINIT_SITE = git://github.com/troglobit/finit.git
 FINIT_AUTORECONF = YES
 FINIT_DEPENDENCIES += host-automake host-autoconf host-libtool
