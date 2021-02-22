@@ -104,7 +104,10 @@ dtb_args()
 mnt_args()
 {
     if [ -z "${QEMU_MNT}" ]; then
-	return
+	if [ ! -d ~/.cache ]; then
+	    return;
+	fi
+	QEMU_MNT=~/.cache/netbox-$${NETBOX_PLAT}.img
     fi
 
     if [ ! -e "${QEMU_MNT}" ]; then

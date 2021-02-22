@@ -46,6 +46,8 @@ if [ -e $gen ]; then
 fi
 
 cat <<EOF > $qemucfg
+# Westermo NetBox target emulation using Qemu
+NETBOX_PLAT=$NETBOX_PLAT
 QEMU_ARCH=$QEMU_ARCH
 QEMU_MACH="$QEMU_MACH"
 QEMU_NIC=$QEMU_NIC
