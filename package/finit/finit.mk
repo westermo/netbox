@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-FINIT_VERSION = 4.0-rc1
+FINIT_VERSION = 4.0-rc2
 FINIT_SOURCE = finit-$(FINIT_VERSION).tar.gz
 FINIT_SITE = https://github.com/troglobit/finit/releases/download/$(FINIT_VERSION)
 FINIT_LICENSE = MIT
@@ -28,7 +28,7 @@ FINIT_D = $(TARGET_DIR)/etc/finit.d
 FINIT_CONF_OPTS =				\
 	--prefix=/usr				\
 	--exec-prefix=/				\
-	--disable-docs				\
+	--disable-doc				\
 	--disable-contrib			\
 	--enable-fallback-shell			\
 	--enable-x11-common-plugin		\
