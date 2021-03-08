@@ -28,7 +28,9 @@ case $BR2_ARCH in
 	;;
     aarch64)
 	QEMU_ARCH=$BR2_ARCH
-	QEMU_MACH="virt -cpu cortex-a53"
+	QEMU_NIC=virtio-net-pci
+	QEMU_SCSI=virtio-scsi-pci
+	QEMU_MACH="virt -cpu cortex-a53 -watchdog i6300esb -rtc clock=host"
 	;;
     x86_64)
 	QEMU_ARCH=$BR2_ARCH
