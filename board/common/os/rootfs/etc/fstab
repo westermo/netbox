@@ -18,14 +18,14 @@ tmpfs-Config	 /mnt		tmpfs		noatime,nodiratime,noauto	0	0
 /lib/netbox/mnt# /mnt		helper		none				0	0
 
 # Ensure that all overlay directories are available
-mkdir#-p	/tmp/netbox/var.u	helper	none	0	0
-mkdir#-p	/tmp/netbox/var.w	helper	none	0	0
-mkdir#-p	/mnt/netbox/varlib.u	helper	none	0	0
-mkdir#-p	/mnt/netbox/varlib.w	helper	none	0	0
-mkdir#-p	/mnt/netbox/etc.u	helper	none	0	0
-mkdir#-p	/mnt/netbox/etc.w	helper	none	0	0
-mkdir#-p	/mnt/netbox/root.u	helper	none	0	0
-mkdir#-p	/mnt/netbox/root.w	helper	none	0	0
+mkdir#-p#-m0755	/tmp/netbox/var.u	helper	none	0	0
+mkdir#-p#-m0755	/tmp/netbox/var.w	helper	none	0	0
+mkdir#-p#-m0755	/mnt/netbox/varlib.u	helper	none	0	0
+mkdir#-p#-m0755	/mnt/netbox/varlib.w	helper	none	0	0
+mkdir#-p#-m0755	/mnt/netbox/etc.u	helper	none	0	0
+mkdir#-p#-m0755	/mnt/netbox/etc.w	helper	none	0	0
+mkdir#-p#-m0700	/mnt/netbox/root.u	helper	none	0	0
+mkdir#-p#-m0700	/mnt/netbox/root.w	helper	none	0	0
 
 # Overlay selected parts of the filesystem with persistent storage
 rw-var	/var		overlay	lowerdir=/var,upperdir=/tmp/netbox/var.u,workdir=/tmp/netbox/var.w		0	0
