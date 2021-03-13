@@ -25,6 +25,13 @@ echo "HOME_URL=${BR2_EXTERNAL_HOME}"        >>$TARGET_DIR/etc/os-release
 
 printf "$BR2_EXTERNAL_NAME $BR2_EXTERNAL_VERSION -- `date +"%b %e %H:%M %Z %Y"`\n" > $TARGET_DIR/etc/version
 
+# Default buildroot is a symlink to /var/run/dropbear, meaning
+#  1. the /var/run/dropbear directory must be created at boot
+#  2. the host key will be regenerated every boot == annoying
+# NetBox has writable overlayfs for /etc, so let's use that.
+rm    $TARGET_DIR/etc/dropbear
+mkdir $TARGET_DIR/etc/dropbear
+
 if [ "$NETBOX_PLAT" != "app" ]; then
     kernel=$(basename $TARGET_DIR/boot/*Image)
 
