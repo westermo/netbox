@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-FINIT_VERSION = 4.0-rc2
+FINIT_VERSION = 4.0-rc3
 FINIT_SOURCE = finit-$(FINIT_VERSION).tar.gz
 FINIT_SITE = https://github.com/troglobit/finit/releases/download/$(FINIT_VERSION)
 FINIT_LICENSE = MIT
