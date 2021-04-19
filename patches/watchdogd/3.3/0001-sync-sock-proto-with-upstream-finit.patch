@@ -1,0 +1,24 @@
+commit 1186df0e0d3b43f9bfbf8517909708f65e6c27df
+Author: Jacques de Laval <jacques@de-laval.se>
+Date:   Tue Apr 13 15:58:20 2021 +0200
+
+    Sync socket protocol with current Finit
+    
+    Since commit [1845b7b](https://github.com/troglobit/finit/commit/1845b7b) Finit
+    uses SOCK_SEQPACKET rather than SOCK_STREAM.
+    
+    Signed-off-by: Jacques de Laval <jacques@de-laval.se>
+
+diff --git a/src/finit.c b/src/finit.c
+index 5968434..add1ac0 100644
+--- a/src/finit.c
++++ b/src/finit.c
+@@ -43,7 +43,7 @@ int wdt_register(void)
+ 		return 0;
+ 	}
+ 
+-	sd = socket(AF_UNIX, SOCK_STREAM, 0);
++	sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+ 	if (-1 == sd)
+ 		return -1;
+ 

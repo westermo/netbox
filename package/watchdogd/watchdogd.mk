@@ -21,4 +21,10 @@ define WATCHDOGD_INSTALL_INIT_SYSV
 		$(TARGET_DIR)/etc/init.d/S01watchdogd
 endef
 
+WATCHDOGD_CONF_OPTS =				\
+	--with-generic				\
+	--with-loadavg				\
+	--with-filenr				\
+	--with-meminfo
+
 $(eval $(autotools-package))
