@@ -10,11 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: sudo apt install -y libc6:i386 libstdc++6:i386 zlib1g:i386
-      - name: Zero App Image
-        run:
-          - make netbox_app_zero_defconfig
-          - make
-      - name: Upload Zero artifacts
+      - name: defconfig
+        run: make netbox_app_zero_defconfig
+      - name: build
+        run: make
+      - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: image
