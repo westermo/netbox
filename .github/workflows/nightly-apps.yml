@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt install -y libc6:i386 libstdc++6:i386 zlib1g:i386
       - name: defconfig
         run: make netbox_app_zero_defconfig
       - name: build
