@@ -5,6 +5,32 @@ on:
     branches: [master]
 
 jobs:
+  coronet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: defconfig
+        run: make netbox_app_coronet_defconfig
+      - name: build
+        run: make
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: netobx-app-coronet
+          path: output/images/*
+  dagger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: defconfig
+        run: make netbox_app_dagger_defconfig
+      - name: build
+        run: make
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: netobx-app-dagger
+          path: output/images/*
   zero:
     runs-on: ubuntu-latest
     steps:
@@ -16,5 +42,5 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: image
+          name: netobx-app-zero
           path: output/images/*
