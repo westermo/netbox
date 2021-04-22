@@ -22,12 +22,12 @@ Platforms
 The NetBox project follows the Westermo product platform naming.  This to
 be able to easily match what container image works on a Westermo device:
 
-| **Architecture** | **Platform Code Name** | **App Image**   |
-|------------------|------------------------|-----------------|
-| powerpc          | Coronet                | [coronet.app][] |
-| arm              | Dagger                 | [dagger.app][]  |
-| aarch64          | Envoy                  |                 |
-| x86_64           | Zero                   | [zero.app][]    |
+| **Architecture** | **Platform Code Name** | **Nightly App Image** |
+|------------------|------------------------|-----------------------|
+| powerpc          | Coronet                | [coronet.app][]       |
+| arm              | Dagger                 | [dagger.app][]        |
+| aarch64          | Envoy                  |                       |
+| x86_64           | Zero                   | [zero.app][]          |
 
 
 Flavor
