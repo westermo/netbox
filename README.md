@@ -22,12 +22,12 @@ Platforms
 The NetBox project follows the Westermo product platform naming.  This to
 be able to easily match what container image works on a Westermo device:
 
-| **Architecture** | **Platform Code Name** |
-|------------------|------------------------|
-| powerpc          | Coronet                |
-| arm              | Dagger                 |
-| aarch64          | Envoy                  |
-| x86_64           | Zero                   |
+| **Architecture** | **Platform Code Name** | **App Image**   |
+|------------------|------------------------|-----------------|
+| powerpc          | Coronet                | [coronet.app][] |
+| arm              | Dagger                 | [dagger.app][]  |
+| aarch64          | Envoy                  |                 |
+| x86_64           | Zero                   | [zero.app][]    |
 
 
 Flavor
@@ -137,6 +137,9 @@ command line, but you must also have tagged the repository.
 [Buildroot]:     https://buildroot.org/ 
 [App-Demo]:      https://github.com/westermo/app-demo
 [myRootFS]:      https://github.com/myrootfs
-[Open Source]:   https://en.wikipedia.org/wiki/Free_and_open-source_software 
+[Open Source]:   https://en.wikipedia.org/wiki/Free_and_open-source_software
+[coronet.app]:   https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-coronet.zip
+[dagger.app]:    https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-dagger.zip
+[zero.app]:      https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-zero.zip
 [Travis]:        https://travis-ci.org/westermo/netbox
 [Travis Status]: https://travis-ci.org/westermo/netbox.png?branch=master
