@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-WATCHDOGD_VERSION = 3.3
-WATCHDOGD_SOURCE = watchdogd-$(WATCHDOGD_VERSION).tar.xz
+WATCHDOGD_VERSION = 3.4
+WATCHDOGD_SOURCE = watchdogd-$(WATCHDOGD_VERSION).tar.gz
 WATCHDOGD_SITE = https://github.com/troglobit/watchdogd/releases/download/$(WATCHDOGD_VERSION)
 WATCHDOGD_LICENSE = ISC
 WATCHDOGD_LICENSE_FILES = LICENSE
