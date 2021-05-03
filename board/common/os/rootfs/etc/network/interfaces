@@ -13,3 +13,5 @@ auto vlan1
 iface vlan1 inet dhcp
       pre-up bridge vlan add dev br0 vid 1 self
       pre-up ip link add link br0 dev vlan1 type vlan id 1
+      post-down ip link del vlan1
+      post-down bridge vlan del vid 1 dev br0 self
