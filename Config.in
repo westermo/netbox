@@ -8,24 +8,39 @@ config NETBOX_PLAT
 	default BR2_ARCH
 
 choice
-	bool "type"
+	bool "Type"
 	default NETBOX_TYPE_APP
 	help
-	  Select the NetBox type to build.
+	  Select the NetBox type:
+
+	    o Application        Basic root filesystem, no kernel
+	    o Operating System   Like app + kernel
 
 config NETBOX_TYPE_APP
 	bool "Application (LXC)"
 	help
-	  Application container image for the chosen CPU platform.
+	  Application build for the chosen CPU platform.  This only
+	  creates a root filesystem, no kernel is built.
+
+	  This is typically suitable for container images (LXC), but can
+	  also be useful for systems where a pre-built kernel exists
+	  already.
+
+	  Selecting this pre-selects the app profile option (below),
+	  this is only a recommendation.
 
 config NETBOX_TYPE_OS
 	bool "Operating System (kernel + userland)"
 	help
 	  Complete operating system, including kernel and userland,
 	  for the chosen CPU platform.
-	  .
-	  This is the same as the application build, with the kernel,
-	  and optionally a (second) stage bootloader.
+
+	  This is the same as the application build, but includes a
+	  kernel, and optionally a (second) stage bootloader.
+
+	  Selecting this pre-selects the OS profile option (below),
+	  this is only a recommendation.
+
 endchoice
 
 config NETBOX_TYPE
@@ -33,12 +48,55 @@ config NETBOX_TYPE
 	default "app" if NETBOX_TYPE_APP
 	default "os"  if NETBOX_TYPE_OS
 
-config NETBOX_META_PACKAGE
-	bool "NetBox meta package"
+choice
+	bool "Profile"
+	default NETBOX_PROFILE_APP if NETBOX_TYPE_APP
+	default NETBOX_PROFILE_OS  if NETBOX_TYPE_OS
+	help
+	  NetBox is built around BusyBox and Finit.  Comprising the very
+	  core of the exprience of this embedded system.  On top of that
+	  two main profiles are available; slimmed down applications or
+	  full-blown operating systems.
+
+	    o Applicaiton        Finit + Dropbear SSH + tcpdump
+	    o Operating System   Finit + lots of tools & daemons
+	    o Custom             Finit
+
+	  See each profile for details.
+
+config NETBOX_PROFILE_CUSTOM
+	bool "Custom (minimal)"
+	select BR2_PACKAGE_FINIT
+	help
+	  The custom profile allows more fine grained control over what
+	  packages are included.  However, NetBox always has Finit as
+	  its preferred init.  If you want something else, you should
+	  probably skip NetBox and use buildroot directly.
+
+config NETBOX_PROFILE_APP
+	bool "Appplication (basic)"
+	select BR2_PACKAGE_FINIT
+	select BR2_PACKAGE_DROPBEAR
+	select BR2_PACKAGE_TCPDUMP
+	help
+	  The application profile includes a set of basic packages
+	  that usually are essential to a basic contatainer app:
+
+	    o Dropbear SSH (server + client)
+	    o tcpdump
+
+	  SSH in to your container from remote, and support to debug
+	  network connections in case SSH connection fails.
+
+	  If you want to create a really small app and do not need these
+	  tools, use the custom profile or use buildroot directly.
+
+config NETBOX_PROFILE_OS
+	bool "Operating System (full)"
+	select BR2_PACKAGE_FINIT
 	select BR2_PACKAGE_DNSMASQ
 	select BR2_PACKAGE_DROPBEAR
 	select BR2_PACKAGE_ETHTOOL
-	select BR2_PACKAGE_FINIT
 	select BR2_PACKAGE_INADYN
 	select BR2_PACKAGE_IPROUTE2
 	select BR2_PACKAGE_LIBCURL
@@ -62,10 +120,22 @@ config NETBOX_META_PACKAGE
 	select BR2_PACKAGE_TCPDUMP
 	select BR2_PACKAGE_WATCHDOGD
 	help
-	  This selects all packages that comprise NetBox.
-	  .
-	  Unchecking this makes the build system revert back to its
-	  default extended Buildroot state.
+	  The operating system profile comes with a lot more features
+	  compared to the other profiles.  The intention is to provide
+	  common network services and also tools for debugging network
+	  devices on all the different layers in the stack of a switch
+	  or router product.
+
+	  This profile will likely expand and change a lot over time.
+	  Use the custom profile to get more fine grained control.
+
+endchoice
+
+config NETBOX_PROFILE
+	string
+	default "app"     if NETBOX_PROFILE_APP
+	default "os"      if NETBOX_PROFILE_OS
+	default "custom"  if NETBOX_PROFILE_CUSTOM
 
 menu "Developer"
 
@@ -75,7 +145,6 @@ config NETBOX_IMAGE_FIT
 	select BR2_PACKAGE_HOST_UBOOT_TOOLS
 	select BR2_PACKAGE_HOST_UBOOT_TOOLS_FIT_SUPPORT
 	select BR2_PACKAGE_HOST_UBOOT_TOOLS_FIT_SIGNATURE_SUPPORT
-
 	help
 	  Build an FIT image with all device trees in boot/, creating a
 	  configuration for each, the default kernel and the SquashFS as
