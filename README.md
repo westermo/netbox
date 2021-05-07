@@ -22,12 +22,13 @@ Platforms
 The NetBox project follows the Westermo product platform naming.  This to
 be able to easily match what container image works on a Westermo device:
 
-| **Architecture** | **Platform Code Name** | **Nightly App Image** |
-|------------------|------------------------|-----------------------|
-| powerpc          | Coronet                | [coronet.app][]       |
-| arm              | Dagger                 | [dagger.app][]        |
-| aarch64          | Envoy                  |                       |
-| x86_64           | Zero                   | [zero.app][]          |
+| **Architecture** | **Platform Code Name** | **Nightly App Image** | **Nightly OS Image** |
+|------------------|------------------------|-----------------------|----------------------|
+| arm9             | Basis                  | N/A                   | **in-progress**      |
+| powerpc          | Coronet                | [coronet.app][]       | **in-progress**      |
+| arm cortex-a9    | Dagger                 | [dagger.app][]        | **in-progress**      |
+| aarch64          | Envoy                  | **pending**           | **pending**          |
+| x86_64           | Zero                   | [zero.app][]          | **in-progress**      |
 
 
 Flavor
@@ -141,5 +142,8 @@ command line, but you must also have tagged the repository.
 [coronet.app]:   https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-coronet.zip
 [dagger.app]:    https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-dagger.zip
 [zero.app]:      https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-zero.zip
+[coronet.os]:    https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-os-coronet.zip
+[dagger.os]:     https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-os-dagger.zip
+[zero.os]:       https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-os-zero.zip
 [Travis]:        https://travis-ci.org/westermo/netbox
 [Travis Status]: https://travis-ci.org/westermo/netbox.png?branch=master
