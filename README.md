@@ -24,11 +24,11 @@ be able to easily match what container image works on a Westermo device:
 
 | **Architecture** | **Platform Code Name** | **Nightly App Image** | **Nightly OS Image** |
 |------------------|------------------------|-----------------------|----------------------|
-| arm9             | Basis                  | N/A                   | **in-progress**      |
-| powerpc          | Coronet                | [coronet.app][]       | **in-progress**      |
-| arm cortex-a9    | Dagger                 | [dagger.app][]        | **in-progress**      |
+| arm9             | Basis                  | N/A                   | [basis.os][]       |
+| powerpc          | Coronet                | [coronet.app][]       | [coronet.os][]       |
+| arm cortex-a9    | Dagger                 | [dagger.app][]        | N/A                  |
 | aarch64          | Envoy                  | **pending**           | **pending**          |
-| x86_64           | Zero                   | [zero.app][]          | **in-progress**      |
+| x86_64           | Zero                   | [zero.app][]          | [zero.os][]          |
 
 
 Flavor
@@ -142,8 +142,8 @@ command line, but you must also have tagged the repository.
 [coronet.app]:   https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-coronet.zip
 [dagger.app]:    https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-dagger.zip
 [zero.app]:      https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-zero.zip
-[coronet.os]:    https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-os-coronet.zip
-[dagger.os]:     https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-os-dagger.zip
-[zero.os]:       https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-os-zero.zip
+[basis.os]:      https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-basis.zip
+[coronet.os]:    https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-coronet.zip
+[zero.os]:       https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-zero.zip
 [Travis]:        https://travis-ci.org/westermo/netbox
 [Travis Status]: https://travis-ci.org/westermo/netbox.png?branch=master
