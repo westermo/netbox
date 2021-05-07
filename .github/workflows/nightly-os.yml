@@ -1,46 +1,59 @@
-name: NetBox App image artifacts
+name: NetBox OS image artifacts
 
 on:
   push:
     branches: [master]
 
 jobs:
-  coronet:
+  basis:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: defconfig
-        run: make netbox_app_coronet_defconfig
+        run: make netbox_os_basis_defconfig
       - name: build
         run: make
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: netbox-app-coronet
+          name: netbox-os-basis
+          path: output/images/*
+  coronet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: defconfig
+        run: make netbox_os_coronet_defconfig
+      - name: build
+        run: make
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: netbox-os-coronet
           path: output/images/*
   dagger:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: defconfig
-        run: make netbox_app_dagger_defconfig
+        run: make netbox_os_dagger_defconfig
       - name: build
         run: make
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: netbox-app-dagger
+          name: netbox-os-dagger
           path: output/images/*
   zero:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: defconfig
-        run: make netbox_app_zero_defconfig
+        run: make netbox_os_zero_defconfig
       - name: build
         run: make
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: netbox-app-zero
+          name: netbox-os-zero
           path: output/images/*
