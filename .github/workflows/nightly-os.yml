@@ -31,19 +31,6 @@ jobs:
         with:
           name: netbox-os-coronet
           path: output/images/*
-  dagger:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: defconfig
-        run: make netbox_os_dagger_defconfig
-      - name: build
-        run: make
-      - name: upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: netbox-os-dagger
-          path: output/images/*
   zero:
     runs-on: ubuntu-latest
     steps:
