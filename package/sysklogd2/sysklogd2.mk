@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-SYSKLOGD2_VERSION = 2.2.0
+SYSKLOGD2_VERSION = 2.2.3
 SYSKLOGD2_SOURCE = sysklogd-$(SYSKLOGD2_VERSION).tar.gz
 SYSKLOGD2_SITE = https://github.com/troglobit/sysklogd/releases/download/v$(SYSKLOGD2_VERSION)
 SYSKLOGD2_LICENSE = BSD-3-Clause
