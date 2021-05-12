@@ -45,13 +45,17 @@ endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_DROPBEAR
 endif
 
-# Enable Busybox syslogd unless sysklogd v2 is enabled
-ifneq ($(BR2_PACKAGE_SYSKLOGD2),y)
+# Enable Busybox syslogd unless sysklogd is enabled
+ifeq ($(BR2_PACKAGE_SYSKLOGD),y)
+define SKELETON_INIT_FINIT_SET_SYSLOGD
+	ln -sf ../available/sysklogd.conf $(FINIT_D)/enabled/sysklogd.conf
+endef
+else
 define SKELETON_INIT_FINIT_SET_SYSLOGD
 	ln -sf ../available/syslogd.conf $(FINIT_D)/enabled/syslogd.conf
 endef
-SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_SYSLOGD
 endif
+SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_SYSLOGD
 
 # SSDP Responder
 ifeq ($(BR2_PACKAGE_SSDP_RESPONDER),y)
