@@ -1,6 +1,0 @@
-config BR2_PACKAGE_PLY
-	bool "ply"
-	help
-	  Light-weight dynamic tracer for Linux.
-
-	  https://github.com/wkz/ply
