@@ -11,6 +11,17 @@
 				ethernet = <&fm1mac4>;
 				phy-mode = "rgmii-id";
 
+				/* TO_CPU frames from device 0, port
+				8, will have a DSA tag where the two
+				first bytes are 00 40. The T1023's
+				hardware parser mistakenly thinks this
+				is an 802.3 length field and drops
+				them if the real length does not
+				match. So we force the tag format to
+				Ethertyped DSA which, while not
+				officially supported, does work. */
+				dsa-tag-protocol = "edsa";
+
 				fixed-link {
 					speed = <1000>;
 					full-duplex;
