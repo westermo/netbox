@@ -25,7 +25,7 @@
 
 			dsa0d: port@5 {
 				reg = <0x5>;
-				label = "dsa0d";
+				label = "dsa";
 				link = <&dsa1u>;
 				phy-mode = "rgmii-id";
 
@@ -85,9 +85,9 @@
 
 			dsa1u: port@a {
 				reg = <0xa>;
-				label = "dsa1u";
+				label = "dsa";
 				link = <&dsa0d>;
-				phy-mode = "rgmii-id";
+				phy-mode = "rgmii";
 
 				fixed-link {
 					speed = <1000>;
