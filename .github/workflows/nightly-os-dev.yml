@@ -1,0 +1,24 @@
+name: NetBox OS developer images
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    name: ${{ matrix.board }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        board: [envious]
+    steps:
+      - uses: actions/checkout@v2
+      - name: defconfig
+        run: make netbox_os_${{ matrix.board }}_defconfig
+      - name: build
+        run: make
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: netbox-os-${{ matrix.board }}
+          path: output/images/*
