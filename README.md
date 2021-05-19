@@ -27,7 +27,7 @@ be able to easily match what container image works on a Westermo device:
 | arm9             | Basis                  | N/A                   | [basis.os][]       |
 | powerpc          | Coronet                | [coronet.app][]       | [coronet.os][]       |
 | arm cortex-a9    | Dagger                 | [dagger.app][]        | N/A                  |
-| aarch64          | Envoy                  | **pending**           | **pending**          |
+| aarch64          | Envoy                  | **pending**           | [envoy.os][]         |
 | x86_64           | Zero                   | [zero.app][]          | [zero.os][]          |
 
 
@@ -144,6 +144,7 @@ command line, but you must also have tagged the repository.
 [zero.app]:      https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-zero.zip
 [basis.os]:      https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-basis.zip
 [coronet.os]:    https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-coronet.zip
+[envoy.os]:      https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-envoy.zip
 [zero.os]:       https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-zero.zip
 [Travis]:        https://travis-ci.org/westermo/netbox
 [Travis Status]: https://travis-ci.org/westermo/netbox.png?branch=master
