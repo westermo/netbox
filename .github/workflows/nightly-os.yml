@@ -5,42 +5,20 @@ on:
     branches: [master]
 
 jobs:
-  basis:
+  build:
+    name: ${{ matrix.platform }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [basis, coronet, zero]
     steps:
       - uses: actions/checkout@v2
       - name: defconfig
-        run: make netbox_os_basis_defconfig
+        run: make netbox_os_${{ matrix.platform }}_defconfig
       - name: build
         run: make
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: netbox-os-basis
-          path: output/images/*
-  coronet:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: defconfig
-        run: make netbox_os_coronet_defconfig
-      - name: build
-        run: make
-      - name: upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: netbox-os-coronet
-          path: output/images/*
-  zero:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: defconfig
-        run: make netbox_os_zero_defconfig
-      - name: build
-        run: make
-      - name: upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: netbox-os-zero
+          name: netbox-os-${{ matrix.platform }}
           path: output/images/*

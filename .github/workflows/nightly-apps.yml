@@ -5,42 +5,20 @@ on:
     branches: [master]
 
 jobs:
-  coronet:
+  build:
+    name: ${{ matrix.platform }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [coronet, dagger, zero]
     steps:
       - uses: actions/checkout@v2
       - name: defconfig
-        run: make netbox_app_coronet_defconfig
+        run: make netbox_app_${{ matrix.platform }}_defconfig
       - name: build
         run: make
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: netbox-app-coronet
-          path: output/images/*
-  dagger:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: defconfig
-        run: make netbox_app_dagger_defconfig
-      - name: build
-        run: make
-      - name: upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: netbox-app-dagger
-          path: output/images/*
-  zero:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: defconfig
-        run: make netbox_app_zero_defconfig
-      - name: build
-        run: make
-      - name: upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: netbox-app-zero
+          name: netbox-app-${{ matrix.platform }}
           path: output/images/*
