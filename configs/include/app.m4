@@ -1,0 +1,1 @@
+NETBOX_TYPE_APP=y
