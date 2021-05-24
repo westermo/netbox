@@ -25,6 +25,9 @@ case $BR2_ARCH in
 	;;
     arm)
 	QEMU_ARCH=$BR2_ARCH
+	QEMU_NIC=virtio-net-pci
+	QEMU_SCSI=virtio-scsi-pci
+	QEMU_MACH="versatilepb -watchdog i6300esb -dtb ${BINARIES_DIR}/versatile-pb.dtb"
 	;;
     aarch64)
 	QEMU_ARCH=$BR2_ARCH
