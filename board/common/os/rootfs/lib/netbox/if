@@ -31,3 +31,22 @@ awk -F: '
     /^\s*eth|^\s*lan/ {
         print("link set dev", $1, " group port");
     }' </proc/net/dev | ip -batch -
+
+if [ "$(ip -br link show group port | uniq -f 2 -d)" ]; then
+    logger -c -p user.warning -t $0 \
+       "Port MAC addresses not unique, assigning from randomized base MAC."
+
+    base=$(printf '%.2x:%.2x:%.2x:%.2x:%.2x' \
+		  $(($RANDOM & 0xfe | 0x02)) $(($RANDOM & 0xff)) \
+		  $(($RANDOM & 0xff)) $(($RANDOM & 0xff)) $(($RANDOM & 0xff)))
+    lsb=1;
+
+    # Try to be cute and assign the LSB according to the natural order
+    # of the interface names. E.g. on a system with eth1..eth10, eth1
+    # would be assigned $base:01 and eth10 $base:0a.
+    for iface in $(ip -br link show group port \
+		       | awk '{ sub(/@.*/, ""); print($1); }' | sort -V); do
+	ip link set dev $iface address $base:$(printf '%.2x' $lsb)
+	lsb=$(($lsb + 1))
+    done
+fi
