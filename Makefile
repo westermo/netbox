@@ -8,7 +8,7 @@ config := $(O)/.config
 bmake   = $(MAKE) -C buildroot O=$(O) $1
 
 
-all: $(config) buildroot/Makefile
+all: $(config) | buildroot/Makefile
 	@+$(call bmake,$@)
 
 $(config):
@@ -18,14 +18,14 @@ $(config):
 	@echo "'make <board>_defconfig' before building an image."
 	@exit 1
 
-netbox_%_defconfig: configs/netbox_%_defconfig buildroot/Makefile
+netbox_%_defconfig: configs/netbox_%_defconfig | buildroot/Makefile
 	@+$(call bmake,$@)
 
 configs/netbox_%_defconfig: configs/netbox_%_defconfig.m4 configs/include/*.m4
 	@echo "Generating $(@F)"
 	@cd $(@D) && m4 -I include $(<F) >$(@F)
 
-%: buildroot/Makefile
+%: | buildroot/Makefile
 	@+$(call bmake,$@)
 
 buildroot/Makefile:
