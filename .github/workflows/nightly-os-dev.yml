@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: defconfig
-        run: make netbox_os_${{ matrix.board }}_defconfig
+        run: make netbox_${{ matrix.board }}_defconfig
       - name: build
         run: make
       - name: upload artifacts
