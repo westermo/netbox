@@ -13,6 +13,11 @@ jobs:
         board: [envious]
     steps:
       - uses: actions/checkout@v2
+      - name: Cache downloads
+        uses: actions/cache@v2
+	with:
+	  key: dl
+	  path: dl
       - name: defconfig
         run: make netbox_${{ matrix.board }}_defconfig
       - name: build
