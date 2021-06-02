@@ -15,9 +15,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: Cache downloads
         uses: actions/cache@v2
-	with:
-	  key: dl
-	  path: dl
+        with:
+          key: dl
+          path: dl
       - name: defconfig
         run: make netbox_app_${{ matrix.platform }}_defconfig
       - name: build
