@@ -76,11 +76,6 @@ make
 Done.  See the `output/images/` directory for the resulting SquasFS
 based root filesystem: `netbox-$platform.img`
 
-> **Note:** the included NetBox `defconfigs` use pre-built toolchains from
-> the [myRootFS][] project, built from crosstool-NG.  See that project for
-> details, including the `.config` needed to rebuild for your own build
-> machine.  Archives are available under *Releases*
-
 
 Running
 -------
@@ -96,10 +91,10 @@ The NetBox app builds can be run in LXC, or LXD, on your PC but this is
 not yet documented here.  It is even possible to run non-native archs,
 like Arm64, on your PC using Linux "binfmt misc" support, in which case
 all binaries are run through `qemu-aarch64`.  It both feels and really
-*is* a very weird thing.  So it's not documented yet and we instead
+*is* a very weird thing.  This is not documented yet and we instead
 encourage all newbies to try out the Zero app builds in LXC first.
 
-- https://github.com/myrootfs/myrootfs#lxd
+For an example, see https://github.com/myrootfs/myrootfs#lxd
 
 
 ### Example
@@ -137,7 +132,6 @@ command line, but you must also have tagged the repository.
 [Westermo]:      https://www.westermo.com/
 [Buildroot]:     https://buildroot.org/ 
 [App-Demo]:      https://github.com/westermo/app-demo
-[myRootFS]:      https://github.com/myrootfs
 [Open Source]:   https://en.wikipedia.org/wiki/Free_and_open-source_software
 [coronet.app]:   https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-coronet.zip
 [dagger.app]:    https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-dagger.zip
