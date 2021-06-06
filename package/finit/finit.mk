@@ -29,10 +29,39 @@ FINIT_CONF_OPTS =				\
 	--prefix=/usr				\
 	--exec-prefix=				\
 	--disable-doc				\
-	--disable-contrib			\
-	--with-watchdog
+	--disable-contrib
 
 # Disable/Enable features
+ifeq ($(BR2_PACKAGE_FINIT_KEVENTD),y)
+FINIT_CONF_OPTS += --with-keventd
+else
+FINIT_CONF_OPTS += --without-keventd
+endif
+
+ifeq ($(BR2_PACKAGE_FINIT_WATCHDOG),y)
+FINIT_CONF_OPTS += --with-watchdog=$(BR2_PACKAGE_FINIT_WATCHDOG_DEV)
+else
+FINIT_CONF_OPTS += --without-watchdog
+endif
+
+ifeq ($(BR2_PACKAGE_FINIT_PLUGIN_HOTPLUG),y)
+FINIT_CONF_OPTS += --enable-hotplug-plugin
+else
+FINIT_CONF_OPTS += --disable-hotplug-plugin
+endif
+
+ifeq ($(BR2_PACKAGE_FINIT_PLUGIN_RTC),y)
+FINIT_CONF_OPTS += --enable-rtc-plugin
+else
+FINIT_CONF_OPTS += --disable-rtc-plugin
+endif
+
+ifeq ($(BR2_PACKAGE_FINIT_PLUGIN_URANDOM),y)
+FINIT_CONF_OPTS += --enable-urandom-plugin
+else
+FINIT_CONF_OPTS += --disable-urandom-plugin
+endif
+
 ifneq ($(SKELETON_INIT_COMMON_HOSTNAME),)
 FINIT_CONF_OPTS += --with-hostname="$(SKELETON_INIT_COMMON_HOSTNAME)"
 endif
