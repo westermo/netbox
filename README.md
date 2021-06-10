@@ -44,6 +44,44 @@ a pre-configured NetBox flavor for a given platform:
 - `netbox_os_$platform`
 
 
+Requirements
+------------
+
+The build environment currently requires *at least* the following tools,
+tested on Ubuntu 21.04 (x86_64): make, gcc, g++, m4, and openssl devel.
+On Debian based systems:
+
+```sh
+sudo apt install build-essential m4 libssl-dev
+```
+
+> **Note:** the Zero build is what requires host-side libssl-dev, this
+> dependency may be removed in the future.
+
+To run in Qemu, either enable host-side build in `make menuconfig`, or
+for quicker builds you can use the version shipped with your Linux host.
+On Debian based systems:
+
+```sh
+sudo apt install qemu-system
+```
+
+For smooth sailing, after install, add the following line to the file
+`/etc/qemu/bridge.conf`:
+
+```
+allow all
+```
+
+For network access to work out of the box in your Qemu system, install
+the virt-manager package, this creates a host bridge called `virbr0`:
+
+
+```sh
+sudo apt install virt-manager
+```
+
+
 Building
 --------
 
@@ -86,6 +124,19 @@ turnarounds when developing and testing new features.
 ```
 make run
 ```
+
+By default, this command starts the `bin/qemu` script and tries to
+connect one interface to a host bridge called `virbr0`.  That bridge
+only exists if you installed virt-manager (above), if not, you can have
+a look at the `bin/qemu` script arguments and environment variables,
+or try:
+
+```
+make QEMU_NET=tap run
+```
+
+> **Note:** you may need `sudo`, unless you have set up your system with
+> capabilities https://troglobit.com/2016/12/11/a-life-without-sudo/
 
 The NetBox app builds can be run in LXC, or LXD, on your PC but this is
 not yet documented here.  It is even possible to run non-native archs,
