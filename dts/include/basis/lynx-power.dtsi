@@ -1,0 +1,73 @@
+&i2c1 {
+	eeprom@53 {
+		compatible = "eeprom,eeprom";
+		reg = <0x53>;
+	};
+};
+
+&cspi1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_cspi1>;
+	fsl,spi-num-chipselects = <1>;
+
+        iochain: gpio-expander@0 {
+		compatible = "fairchild,74hc595";
+		reg = <0>;
+		spi-max-frequency = <1000000>;
+	        gpio-controller;
+	        #gpio-cells = <2>;
+
+		/* TODO: Second device is an input register, but
+		existing driver only supports chaining multiple output
+		registers. This means we have no way of reading
+		dc1/dc2 or relay input at the moment. */
+		registers-number = <2>;
+	};
+};
+
+&pinctrls {
+	pinctrl_cspi1: cspi1grp {
+		fsl,pins = <
+		MX27_PAD_CSPI1_MISO__CSPI1_MISO 0x0
+		MX27_PAD_CSPI1_MOSI__CSPI1_MOSI 0x0
+		MX27_PAD_CSPI1_SCLK__CSPI1_SCLK 0x0
+		MX27_PAD_CSPI1_SS0__CSPI1_SS0	0x0
+		>;
+	};
+};
+
+/ {
+	gpio-leds {
+		frnt-green {
+			label = "basis:green:frnt";
+                        gpios = <&iochain 0 GPIO_ACTIVE_LOW>;
+                        default-state = "off";
+		};
+		frnt-red {
+			label = "basis:red:frnt";
+                        gpios = <&iochain 1 GPIO_ACTIVE_LOW>;
+                        default-state = "off";
+		};
+		rstp-green {
+			label = "basis:green:rstp";
+                        gpios = <&iochain 2 GPIO_ACTIVE_LOW>;
+                        default-state = "off";
+		};
+		rstp-red {
+			label = "basis:red:rstp";
+                        gpios = <&iochain 3 GPIO_ACTIVE_LOW>;
+                        default-state = "off";
+		};
+		usr1-green {
+			label = "basis:green:usr1";
+                        gpios = <&iochain 4 GPIO_ACTIVE_LOW>;
+                        default-state = "off";
+		};
+		usr1-red {
+			label = "basis:red:usr1";
+                        gpios = <&iochain 5 GPIO_ACTIVE_LOW>;
+                        default-state = "off";
+		};
+	};
+};

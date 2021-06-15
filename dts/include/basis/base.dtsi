@@ -1,0 +1,260 @@
+/*
+* MX27 Basis Device Tree Source stub (no addresses or top-level ranges)
+*
+* Copyright 2011-2012 Freescale Semiconductor Inc.
+* Copyright 2014  Westermo Teleindustri AB
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*     * Redistributions of source code must retain the above copyright
+*       notice, this list of conditions and the following disclaimer.
+*     * Redistributions in binary form must reproduce the above copyright
+*       notice, this list of conditions and the following disclaimer in the
+*       documentation and/or other materials provided with the distribution.
+*     * Neither the name of Freescale Semiconductor nor the
+*       names of its contributors may be used to endorse or promote products
+*       derived from this software without specific prior written permission.
+*
+*
+* ALTERNATIVELY, this software may be distributed under the terms of the
+* GNU General Public License ("GPL") as published by the Free Software
+* Foundation, either version 2 of that License or (at your option) any
+* later version.
+*
+* THIS SOFTWARE IS PROVIDED BY Freescale Semiconductor ``AS IS'' AND ANY
+* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+* DISCLAIMED. IN NO EVENT SHALL Freescale Semiconductor BE LIABLE FOR ANY
+* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/dts-v1/;
+#include "imx27.dtsi"
+
+/ {
+	compatible = "fsl,imx27";
+	model = "Basis";
+	family = "Basis";
+
+	memory@a0000000 {
+		reg = <0xa0000000 0x04000000>;
+	};
+
+	clocks {
+		osc26m {
+			clock-frequency = <25000000>;
+		};
+	};
+
+	regulators {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		reg_3v3: regulator@0 {
+			compatible = "regulator-fixed";
+			reg = <0>;
+			regulator-name = "3V3";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+		};
+
+		reg_5v0: regulator@1 {
+			compatible = "regulator-fixed";
+			reg = <1>;
+			regulator-name = "5V0";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+		};
+	};
+
+	usbphy {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		usbphy0: usbphy@0 {
+			compatible = "usb-nop-xceiv";
+			reg = <0>;
+			reset-gpios = <&gpio2 22 GPIO_ACTIVE_LOW>;
+			clocks = <&clks IMX27_CLK_DUMMY>;
+			clock-names = "main_clk";
+		};
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_gpio_leds>;
+
+		on_green: on-green {
+			label = "basis:green:on";
+                        gpios = <&gpio2 31 GPIO_ACTIVE_LOW>;
+                        default-state = "off";
+		};
+		on_red: on-red {
+			label = "basis:red:on";
+                        gpios = <&gpio2 30 GPIO_ACTIVE_LOW>;
+                        default-state = "on";
+		};
+	};
+
+	chosen: chosen {
+		base_mac_address = <0 0 0 0 0 0>;
+	};
+};
+
+&iomuxc {
+        pinctrls: basis {
+		pinctrl_gpio_leds: onledgrp {
+			fsl,pins = <
+			MX27_PAD_USBH1_RXDM__GPIO2_30 0x0
+			MX27_PAD_USBH1_RXDP__GPIO2_31 0x0
+			>;
+		};
+
+		pinctrl_fec1: fec1grp {
+			fsl,pins = <
+			MX27_PAD_SD3_CMD__FEC_TXD0      0x0
+			MX27_PAD_SD3_CLK__FEC_TXD1      0x0
+			MX27_PAD_ATA_DATA0__FEC_TXD2    0x0
+			MX27_PAD_ATA_DATA1__FEC_TXD3    0x0
+			MX27_PAD_ATA_DATA2__FEC_RX_ER   0x0
+			MX27_PAD_ATA_DATA3__FEC_RXD1    0x0
+			MX27_PAD_ATA_DATA4__FEC_RXD2    0x0
+			MX27_PAD_ATA_DATA5__FEC_RXD3    0x0
+			MX27_PAD_ATA_DATA6__FEC_MDIO    0x0
+			MX27_PAD_ATA_DATA7__FEC_MDC     0x0
+			MX27_PAD_ATA_DATA8__FEC_CRS     0x0
+			MX27_PAD_ATA_DATA9__FEC_TX_CLK  0x0
+			MX27_PAD_ATA_DATA10__FEC_RXD0   0x0
+			MX27_PAD_ATA_DATA11__FEC_RX_DV  0x0
+			MX27_PAD_ATA_DATA12__FEC_RX_CLK 0x0
+			MX27_PAD_ATA_DATA13__FEC_COL    0x0
+			MX27_PAD_ATA_DATA14__FEC_TX_ER  0x0
+			MX27_PAD_ATA_DATA15__FEC_TX_EN  0x0
+			>;
+		};
+
+		pinctrl_uart1: uart1grp {
+			fsl,pins = <
+			MX27_PAD_UART1_TXD__UART1_TXD 0x0
+			MX27_PAD_UART1_RXD__UART1_RXD 0x0
+			MX27_PAD_UART1_CTS__UART1_CTS 0x0
+			MX27_PAD_UART1_RTS__UART1_RTS 0x0
+			>;
+		};
+		pinctrl_i2c1: i2c1grp {
+			fsl,pins = <
+			MX27_PAD_I2C_DATA__I2C_DATA 0x0
+			MX27_PAD_I2C_CLK__I2C_CLK   0x0
+			>;
+		};
+
+		pinctrl_i2c2: i2c2grp {
+			fsl,pins = <
+			MX27_PAD_I2C2_SDA__I2C2_SDA 0x0
+			MX27_PAD_I2C2_SCL__I2C2_SCL 0x0
+			>;
+		};
+
+		pinctrl_pmic: pmicgrp {
+			fsl,pins = <
+			MX27_PAD_USB_PWR__GPIO2_23 0x0 /* PMIC IRQ */
+			>;
+		};
+
+		pinctrl_usbotg: usbotggrp {
+			fsl,pins = <
+			MX27_PAD_USBOTG_CLK__USBOTG_CLK     0x0
+			MX27_PAD_USBOTG_DIR__USBOTG_DIR     0x0
+			MX27_PAD_USBOTG_NXT__USBOTG_NXT     0x0
+			MX27_PAD_USBOTG_STP__USBOTG_STP     0x0
+			MX27_PAD_USBOTG_DATA0__USBOTG_DATA0 0x0
+			MX27_PAD_USBOTG_DATA1__USBOTG_DATA1 0x0
+			MX27_PAD_USBOTG_DATA2__USBOTG_DATA2 0x0
+			MX27_PAD_USBOTG_DATA3__USBOTG_DATA3 0x0
+			MX27_PAD_USBOTG_DATA4__USBOTG_DATA4 0x0
+			MX27_PAD_USBOTG_DATA5__USBOTG_DATA5 0x0
+			MX27_PAD_USBOTG_DATA6__USBOTG_DATA6 0x0
+			MX27_PAD_USBOTG_DATA7__USBOTG_DATA7 0x0
+			>;
+		};
+	};
+};
+
+&weim {
+	status = "okay";
+
+	system_flash: nor@0,0 {
+		compatible = "cfi-flash";
+		reg = <0 0x00000000 0x02000000>;
+		bank-width = <2>;
+                fsl,weim-cs-timing = <0x22c2cf00 0x75000d01 0x00000900>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+	};
+};
+
+&uart1 {
+	fsl,uart-has-rtscts;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1>;
+	status = "okay";
+};
+
+&fec {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_fec1>;
+
+	fsl,clock-always-on;
+
+	phy-mode = "rgmii";
+	fixed-link {
+		speed = <100>;
+		full-duplex;
+	};
+};
+
+&usbotg {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usbotg>;
+	dr_mode = "otg";
+	phy_type = "ulpi";
+	fsl,usbphy = <&usbphy0>;
+	disable-over-current;
+	status = "okay";
+};
+
+&i2c1 {
+	clock-frequency = <200000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c1>;
+	status = "okay";
+
+	jc42@18 {
+		compatible = "jc42,jc42";
+		reg = <0x18>;
+	};
+
+	pcf8563@51 {
+		compatible = "nxp,pcf8563";
+		reg = <0x51>;
+	};
+
+	idmem_cpu0: idmem@50 {
+		status = "disabled";
+        compatible = "at24,24c02";
+        read-only;
+		reg = <0x50>;
+	};
+
+};
+
+#include <common/system-flash/32M-single.dtsi>

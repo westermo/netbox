@@ -1,0 +1,11 @@
+#include <basis/base.dtsi>
+#include <basis/lynx-cpu.dtsi>
+#include <basis/lynx-power.dtsi>
+
+/ {
+	model = "wmo,L210-F2G";
+};
+
+&usbotg {
+        status = "disabled";
+};

@@ -1,0 +1,236 @@
+#include <common/mv6.h>
+
+/ {
+	family = "Lynx";
+};
+
+&fec {
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		opal: switch@4 {
+			compatible = "marvell,mv88e6085";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_opal>;
+			interrupt-parent = <&gpio3>;
+			interrupts = <29 IRQ_TYPE_LEVEL_LOW>;
+			reg = <0x4>;
+
+			dsa,member = <0 0>;
+			dsa,num_tx_queues = <4>;
+
+			interrupt-controller;
+			#interrupt-cells = <2>;
+
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@a {
+					reg = <0xa>;
+					label = "cpu0";
+					ethernet = <&fec>;
+					phy-mode = "rgmii-id";
+
+					fixed-link {
+						speed = <100>;
+						full-duplex;
+					};
+				};
+
+				mv6_port(0, "eth10", &phy0, "mii");
+				mv6_port(1, "eth6",  &phy1, "mii");
+				mv6_port(2, "eth9",  &phy2, "mii");
+				mv6_port(3, "eth5",  &phy3, "mii");
+				mv6_port(4, "eth8",  &phy4, "mii");
+				mv6_port(5, "eth4",  &phy5, "mii");
+				mv6_port(6, "eth7",  &phy6, "mii");
+				mv6_port(7, "eth3",  &phy7, "mii");
+
+				mv6_port(8, "eth2",  &phy8, "sgmii");
+				mv6_port(9, "eth1",  &phy9, "sgmii");
+			};
+
+			mdio {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				interrupt-parent = <&opal>;
+
+				phy0: mv6_phy(0);
+				phy1: mv6_phy(1);
+				phy2: mv6_phy(2);
+				phy3: mv6_phy(3);
+				phy4: mv6_phy(4);
+				phy5: mv6_phy(5);
+				phy6: mv6_phy(6);
+				phy7: mv6_phy(7);
+			};
+
+			mdioe {
+                                compatible = "marvell,mv88e6xxx-mdio-external";
+                                #address-cells = <1>;
+                                #size-cells = <0>;
+
+				phy8: phy@8 {
+					pinctrl-names = "default";
+					pinctrl-0 = <&pinctrl_phy8>;
+
+                                        reg = <8>;
+					sfp = <&sfp8>;
+					interrupt-parent = <&gpio3>;
+					interrupts = <30 IRQ_TYPE_LEVEL_LOW>;
+
+					marvell,reg-init =
+					/* LOS: LOS, INIT: IRQ, STATUS1: Off, STATUS2: Link/act */
+					<3 16 0x0000 0x0e81>,
+					/* SIGDET polarity inverted */
+					<1 16 0x0200 0x0200>;
+                                };
+
+                                phy9: phy@9 {
+					pinctrl-names = "default";
+					pinctrl-0 = <&pinctrl_phy9>;
+
+                                        reg = <9>;
+					sfp = <&sfp9>;
+					interrupt-parent = <&gpio3>;
+					interrupts = <31 IRQ_TYPE_LEVEL_LOW>;
+
+					marvell,reg-init =
+					/* LOS: LOS, INIT: IRQ, STATUS1: Off, STATUS2: Link/act */
+					<3 16 0x0000 0x0e81>,
+					/* SIGDET polarity inverted */
+					<1 16 0x0200 0x0200>;
+                                };
+                        };
+
+		};
+	};
+};
+
+/ {
+	regulator-sfp-3v3 {
+		compatible = "regulator-fixed";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_sfpshared>;
+		regulator-name = "sfp-3v3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio3 28 GPIO_ACTIVE_LOW>;
+		regulator-always-on;
+	};
+
+	sfp8: sfp8 {
+		/* "FX1" in the schematics (eth2) */
+		compatible = "sff,sfp";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_sfp8>;
+		maximum-power-milliwatt = <1000>;
+		i2c-bus = <&sfp8_i2c>;
+
+		/* Cannot be used by driver since they are shared */
+		/* tx-fault-gpios     = <&gpio3 27 GPIO_ACTIVE_HIGH>; */
+		/* tx-disable-gpios   = <&gpio3 28 GPIO_ACTIVE_HIGH>; */
+		mod-def0-gpios     = <&gpio3 24 GPIO_ACTIVE_LOW>;
+		rate-select0-gpios = <&gpio2 26 GPIO_ACTIVE_HIGH>;
+		los-gpios          = <&gpio2 27 GPIO_ACTIVE_HIGH>;
+	};
+
+	sfp9: sfp9 {
+		/* "FX0" in the schematics (eth1) */
+		compatible = "sff,sfp";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_sfp9>;
+		maximum-power-milliwatt = <1000>;
+		i2c-bus = <&sfp9_i2c>;
+
+		/* Cannot be used by driver since they are shared */
+		/* tx-fault-gpios     = <&gpio3 27 GPIO_ACTIVE_HIGH>; */
+		/* tx-disable-gpios   = <&gpio3 28 GPIO_ACTIVE_HIGH>; */
+		mod-def0-gpios     = <&gpio3 16 GPIO_ACTIVE_LOW>;
+		rate-select0-gpios = <&gpio2 25 GPIO_ACTIVE_HIGH>;
+		los-gpios          = <&gpio2 28 GPIO_ACTIVE_HIGH>;
+	};
+
+
+	aliases {
+		i2c2 = &sfp8_i2c;
+		i2c3 = &sfp9_i2c;
+	};
+
+	sfp8_i2c: i2c-gpio2 {
+		compatible = "i2c-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_i2c2_gpio>;
+
+		sda-gpios = <&gpio3 26 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&gpio3 25 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+
+		/* ~50 kHz , measured by Anders Ö 2009-11-20. */
+		i2c-gpio,delay-us = <8>;
+	};
+
+	sfp9_i2c: i2c-gpio3 {
+		compatible = "i2c-gpio";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_i2c3_gpio>;
+
+		sda-gpios = <&gpio3 18 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&gpio3 17 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+
+		/* ~50 kHz , measured by Anders Ö 2009-11-20. */
+		i2c-gpio,delay-us = <8>;
+	};
+
+
+};
+
+&pinctrls {
+	pinctrl_opal: opalgrp {
+		fsl,pins = <MX27_PAD_SSI3_RXDAT__GPIO3_29 0x0>;
+	};
+	pinctrl_phy8: phy8grp {
+		fsl,pins = <MX27_PAD_SSI3_TXDAT__GPIO3_30 0x0>;
+	};
+
+	pinctrl_phy9: phy9grp {
+		fsl,pins = <MX27_PAD_SSI3_CLK__GPIO3_31 0x0>;
+	};
+
+	pinctrl_sfpshared: sfpsharedgrp {
+		fsl,pins = <
+		MX27_PAD_SSI3_FS__GPIO3_28  0x0 /* TX disable */
+		MX27_PAD_SSI2_CLK__GPIO3_27 0x0 /* TX fault */
+		>;
+	};
+
+	pinctrl_sfp8: sfp8grp {
+		fsl,pins = <
+		MX27_PAD_USBH1_FS__GPIO2_26   0x0 /* Rate select */
+		MX27_PAD_USBH1_OE_B__GPIO2_27 0x0 /* LOS */
+		MX27_PAD_SSI2_FS__GPIO3_24    0x0 /* ModDef0 */
+		>;
+	};
+
+	pinctrl_sfp9: sfp9grp {
+		fsl,pins = <
+		MX27_PAD_USBH1_RCV__GPIO2_25  0x0 /* Rate select */
+		MX27_PAD_USBH1_TXDM__GPIO2_28 0x0 /* LOS */
+		MX27_PAD_SSI4_FS__GPIO3_16    0x0 /* ModDef0 */
+		>;
+	};
+
+	pinctrl_i2c2_gpio: gpio-i2c2_grp {
+		fsl,pins = <
+		MX27_PAD_SSI2_TXDAT__GPIO3_26 0x0
+		MX27_PAD_SSI2_RXDAT__GPIO3_25 0x0
+		>;
+	};
+	pinctrl_i2c3_gpio: gpio-i2c3_grp {
+		fsl,pins = <
+		MX27_PAD_SSI4_TXDAT__GPIO3_18 0x0
+		MX27_PAD_SSI4_RXDAT__GPIO3_17 0x0
+		>;
+	};
+};
