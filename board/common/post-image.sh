@@ -1,9 +1,6 @@
 #!/bin/sh
 . $BR2_CONFIG 2>/dev/null
 
-# Figure out identity for os-release
-. $BR2_EXTERNAL_NETBOX_PATH/board/common/ident.rc
-
 imagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/image.sh
 fitimagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/fitimage.sh
 
@@ -11,7 +8,13 @@ gen=$BR2_EXTERNAL_NETBOX_PATH/board/$NETBOX_PLAT/genimage.cfg
 cfg=$BINARIES_DIR/config.jffs2
 ext2=$BINARIES_DIR/rootfs.ext2
 squash=$BINARIES_DIR/rootfs.squashfs
-img=$BINARIES_DIR/$BR2_EXTERNAL_ID-$NETBOX_TYPE-${NETBOX_PLAT}
+
+# Type is now optional, possibly the image name should be customizable
+if [ -n "$NETBOX_TYPE" ]; then
+    img=$BINARIES_DIR/$NETBOX_VENDOR_ID-$NETBOX_TYPE-${NETBOX_PLAT}
+else
+    img=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}
+fi
 
 qemucfg="${BINARIES_DIR}/qemu.cfg"
 

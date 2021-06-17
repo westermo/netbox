@@ -7,6 +7,48 @@ config NETBOX_PLAT
 	default "zero"    if BR2_x86_64
 	default BR2_ARCH
 
+config NETBOX_VENDOR_ID
+	string "Single word lower-case identifier for the operating system"
+	default "netbox"
+	help
+	  A lower-case string (no spaces or other characters outside of
+          0–9, a–z, '.', '_' and '-') identifying the operating system,
+          excluding any version information and suitable for processing
+          by scripts or usage in generated filenames.
+
+	  Used for identifying the OS, e.g. as ID in /etc/os-release and
+	  in the generated image name: ID-TYPE-PLAT.img
+
+config NETBOX_VENDOR_NAME
+	string "String identifier for the operating system"
+	default "NetBox"
+	help
+	  Used for identifying the OS, e.g. as NAME in /etc/os-release
+
+config NETBOX_VENDOR_DESC
+	string "Pretty operating system name, format for presentation to user"
+	default "NetBox - The Networking Toolbox"
+	help
+	  Used for identifying the OS, e.g. as PRETTY_NAME in /etc/os-release
+
+config NETBOX_VENDOR_HOME
+	string "Internet URL for the homepage of the operating system"
+	default "https://github.com/westermo/netbox/"
+	help
+	  Used for identifying the OS, e.g. as HOME_URL in /etc/os-release
+
+config NETBOX_VENDOR_VERSION
+	string "Version of operating system, may be a script with ``"
+	default "`$BR2_EXTERNAL_NETBOX_PATH/bin/mkversion $BR2_EXTERNAL_NETBOX_PATH`"
+	help
+	   A lower-case string (no spaces or other characters outside of
+           0–9, a–z, '.', '_' and '-') identifying the operating system
+           version, excluding any OS name information or release code
+           name, and suitable for processing by scripts or usage in
+           generated filenames.
+
+	   Used for VERSION and VERSION_ID in /etc/os-release
+
 choice
 	bool "Type"
 	default NETBOX_TYPE_APP
