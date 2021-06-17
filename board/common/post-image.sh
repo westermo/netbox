@@ -95,6 +95,9 @@ fi
 if [ -n "$TFTPDIR" -a -e $img.img ]; then
     echo "xfering '$img' -> '$TFTPDIR/$fn'"
     scp -B $img.img $TFTPDIR
+    if [ "$NETBOX_IMAGE_FIT" ]; then
+        scp -B $img.itb $TFTPDIR
+    fi
 fi
 
 exit $err
