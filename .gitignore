@@ -1,6 +1,7 @@
 *~
 # Please never commit any local.mk to the repo.  Instead, put your own
 # in the root and symlink to output-envoy/local.mk, or similar.
+/.buildroot-ccache/
 /local.mk
 /dl
 /output
