@@ -12,6 +12,8 @@
 
 set -e
 
+ident=`basename $0`
+
 # If something is already setup, leave it be.
 mountpoint -q /mnt && exit 0
 
@@ -19,8 +21,8 @@ mountpoint -q /mnt && exit 0
 mount   mtd:Config && exit 0
 mount LABEL=Config && exit 0
 
-logger -c -p user.crit -t $0 \
-       "$mnt was not mounted, falling back to tmpfs."
+logger -c -p user.crit -t $ident \
+       "/mnt was not properly mounted, falling back to tmpfs."
 
 # Fall back to RAM disk.
 mount tmpfs-Config
