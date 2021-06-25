@@ -107,7 +107,7 @@ mnt_args()
 {
     if [ -z "${QEMU_MNT}" ]; then
 	[ -d ~/.cache ] || return
-	QEMU_MNT=~/.cache/netbox-${NETBOX_PLAT}.img
+	QEMU_MNT=~/.cache/${NETBOX_VENDOR_ID}-${NETBOX_PLAT}.img
     fi
 
     if [ ! -e "${QEMU_MNT}" ]; then
