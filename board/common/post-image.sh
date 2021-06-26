@@ -48,9 +48,8 @@ case $BR2_ARCH in
 	;;
 esac
 
-if [ -e $gen ]; then
-    dd if=/dev/zero bs=16384 count=960 2>/dev/null | tr '\000' '\377' >$cfg
-    ./support/scripts/genimage.sh $BINARIES_DIR -c $gen
+if [ -e "$gen" ]; then
+    ./support/scripts/genimage.sh "$BINARIES_DIR" -c "$gen"
 fi
 
 cat <<EOF > $qemucfg
