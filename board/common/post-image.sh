@@ -4,16 +4,39 @@
 imagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/image.sh
 fitimagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/fitimage.sh
 
+ver=dev
 gen=$BR2_EXTERNAL_NETBOX_PATH/board/$NETBOX_PLAT/genimage.cfg
-cfg=$BINARIES_DIR/config.jffs2
-ext2=$BINARIES_DIR/rootfs.ext2
+iso=$BINARIES_DIR/rootfs.iso9660
+gns3=$BR2_EXTERNAL_NETBOX_PATH/board/common/gns3.tmpl
+gns3a=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}
 squash=$BINARIES_DIR/rootfs.squashfs
+config=$BINARIES_DIR/config.ext3
+cfg=$BINARIES_DIR/$NETBOX_VENDOR_ID-config-${NETBOX_PLAT}
 
 # Type is now optional, possibly the image name should be customizable
 if [ -n "$NETBOX_TYPE" ]; then
     img=$BINARIES_DIR/$NETBOX_VENDOR_ID-$NETBOX_TYPE-${NETBOX_PLAT}
 else
     img=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}
+fi
+
+err=0
+if [ -n "$RELEASE" ]; then
+    # NOTE: Must use `-f €BR2_EXTERNAL` here to get, e.g. app-demo GIT version
+    ver=`$BR2_EXTERNAL_NETBOX_PATH/bin/mkversion -f $BR2_EXTERNAL`
+    img=$img-$ver
+    cfg=$cfg-$ver.ext3
+    gns3a=$gns3a-$ver.gns3a
+
+    if [ "$RELEASE" != "$ver" ]; then
+       echo "==============================================================================="
+       echo "WARNING: Release verision '$RELEASE' does not match tag '$ver'!"
+       echo "==============================================================================="
+       err=1
+    fi
+else
+    cfg=$cfg.ext3
+    gns3a=$gns3a.gns3a
 fi
 
 qemucfg="${BINARIES_DIR}/qemu.cfg"
@@ -52,6 +75,30 @@ if [ -e "$gen" ]; then
     ./support/scripts/genimage.sh "$BINARIES_DIR" -c "$gen"
 fi
 
+if [ -e "$iso" ]; then
+    mv "$iso" "$img.iso"
+fi
+
+if [ -e "$config" ]; then
+    mv "$config" "$cfg"
+fi
+
+if [ -e $gns3 ]; then
+    sed -e "s#VENDOR_NAME#${NETBOX_VENDOR_NAME}#g" \
+	-e "s#VENDOR_DESC#${NETBOX_VENDOR_DESC}#g" \
+	-e "s#VENDOR_HOME#${NETBOX_VENDOR_HOME}#g" \
+	-e "s#VENDOR_VERSION#${ver}#g" \
+        -e "s#ROOTFS_FILE#$(basename ${img}.iso)#g" \
+	-e "s#ROOTFS_SIZE#$(stat --printf='%s' ${img}.iso)#g" \
+	-e "s#ROOTFS_MD5SUM#$(md5sum ${img}.iso | awk '{print $1}')#g" \
+	-e "s#ROOTFS_VERSION#${ver}#g" \
+	-e "s#CONFIG_FILE#$(basename ${cfg})#g" \
+	-e "s#CONFIG_SIZE#$(stat --printf='%s' ${cfg})#g" \
+	-e "s#CONFIG_MD5SUM#$(md5sum ${cfg} | awk '{print $1}')#g" \
+	-e "s#CONFIG_VERSION#${ver}#g" \
+	< ${gns3} > ${gns3a}
+fi
+
 cat <<EOF > $qemucfg
 # Westermo NetBox target emulation using Qemu
 NETBOX_PLAT=$NETBOX_PLAT
@@ -62,20 +109,6 @@ QEMU_SCSI=$QEMU_SCSI
 
 QEMU_KERNEL=${BINARIES_DIR}/$(basename $BINARIES_DIR/*Image)
 EOF
-
-err=0
-if [ -n "$RELEASE" ]; then
-    # NOTE: Must use `-f €BR2_EXTERNAL` here to get, e.g. app-demo GIT version
-    ver=`$BR2_EXTERNAL_NETBOX_PATH/bin/mkversion -f $BR2_EXTERNAL`
-    img=$img-$ver
-
-    if [ "$RELEASE" != "$ver" ]; then
-       echo "==============================================================================="
-       echo "WARNING: Release verision '$RELEASE' does not match tag '$ver'!"
-       echo "==============================================================================="
-       err=1
-    fi
-fi
 
 if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
     $imagesh $squash $img.img

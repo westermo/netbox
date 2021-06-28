@@ -1,0 +1,47 @@
+{
+    "name": "VENDOR_NAME",
+    "category": "router",
+    "description": "VENDOR_DESC",
+    "vendor_name": "Westermo Network Technologies",
+    "vendor_url": "VENDOR_HOME",
+    "product_name": "VENDOR_NAME",
+    "registry_version": 6,
+    "status": "stable",
+    "maintainer": "Westermo Network Technologies",
+    "maintainer_email": "info@westermo.com",
+    "port_name_format": "eth{0}",
+    "linked_clone": true,
+    "qemu": {
+        "adapter_type": "e1000",
+        "adapters": 8,
+        "ram": 384,
+        "cpus": 1,
+        "hda_disk_interface": "virtio",
+        "arch": "x86_64",
+        "console_type": "telnet",
+        "kvm": "allow"
+    },
+    "images": [
+        {
+            "filename": "ROOTFS_FILE",
+            "filesize": ROOTFS_SIZE,
+            "md5sum": "ROOTFS_MD5SUM",
+            "version": "VENDOR_VERSION"
+        },
+        {
+            "filename": "CONFIG_FILE",
+            "filesize": CONFIG_SIZE,
+            "md5sum": "CONFIG_MD5SUM",
+            "version": "CONFIG_VERSION"
+        }
+    ],
+    "versions": [
+        {
+            "name": "VENDOR_VERSION",
+            "images": {
+                "cdrom_image": "ROOTFS_FILE",
+                "hda_disk_image": "CONFIG_FILE"
+            }
+        }
+    ]
+}
