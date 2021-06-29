@@ -47,12 +47,11 @@ a pre-configured NetBox flavor for a given platform:
 Requirements
 ------------
 
-The build environment currently requires *at least* the following tools,
-tested on Ubuntu 21.04 (x86_64): make, gcc, g++, m4, and openssl devel.
-On Debian based systems:
+The build environment requires the following tools, tested on Ubuntu
+21.04 (x86_64): make, gcc, g++, m4.  On Debian based systems:
 
 ```sh
-sudo apt install build-essential m4 libssl-dev
+sudo apt install build-essential m4
 ```
 
 > **Note:** the Zero build is what requires host-side libssl-dev, this
