@@ -408,6 +408,27 @@ poe_i2c: &i2c3 {
 		gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>;
 	};
 
+    din {
+        compatible = "gpio-keys";
+
+		din {
+			label = "din";
+			debounce-interval = <100>;
+			linux,code = <BTN_MISC>;
+			gpio-key,wakeup;
+			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+		};
+    };
+
+	dout {
+		compatible = "gpio-leds";
+
+		dout {
+			label = "dout";
+			gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
 	gpio-leds {
 		compatible = "gpio-leds";
 		pinctrl-names = "default";
@@ -436,11 +457,29 @@ poe_i2c: &i2c3 {
 			gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
 		};
 
-		taint-red {
-			function = "taint";
+		sgn-red {
+			function = "sgn";
 			color = <LED_COLOR_ID_RED>;
 			gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
 			default-state = "keep";
+		};
+		sgn-green {
+			function = "sgn";
+			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+		usr-red {
+			function = "usr";
+			color = <LED_COLOR_ID_RED>;
+			gpios = <&gpio5 20 GPIO_ACTIVE_LOW>;
+		};
+
+		usr-green {
+			function = "usr";
+			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&gpio5 21 GPIO_ACTIVE_LOW>;
 		};
 	};
 
@@ -451,9 +490,9 @@ poe_i2c: &i2c3 {
 	pinctrl-0 = <&pinctrl_io>;
 	gpio-line-names =
 	"dc1", "dc2", "", "",
-	"io-in", "io-out", "", "",
+	"din", "dout", "", "",
 	"", "", "led-on-red", "led-on-green",
-	"led-ring-red", "led-ring-green", "led-taint-red", "led-taint-in",
+	"led-ring-red", "led-ring-green", "led-sgn-red", "led-sgn-green",
 	"", "", "", "",
 	"", "", "", "",
 	"", "", "", "",
@@ -486,6 +525,18 @@ poe_i2c: &i2c3 {
 	pinctrl_dc2: dc2grp {
 		fsl,pins = <
 		 MX8MN_IOMUXC_GPIO1_IO01_GPIO1_IO1	0
+		>;
+	};
+
+	pinctrl_din: dingrp {
+		fsl,pins = <
+			MX8MN_IOMUXC_GPIO1_IO04_GPIO1_IO4	0
+		>;
+	};
+
+	pinctrl_dout: doutgrp {
+		fsl,pins = <
+			MX8MN_IOMUXC_GPIO1_IO05_GPIO1_IO5	0
 		>;
 	};
 
@@ -543,11 +594,7 @@ poe_i2c: &i2c3 {
 	};
 
 	pinctrl_io: iogrp {
-		fsl,pins = <
-		MX8MN_IOMUXC_GPIO1_IO04_GPIO1_IO4	0
-		MX8MN_IOMUXC_GPIO1_IO05_GPIO1_IO5	0
-		MX8MN_IOMUXC_GPIO1_IO15_GPIO1_IO15	0
-		>;
+		fsl,pins = <>;
 	};
 
 	pinctrl_leds: ledgrp {
@@ -557,6 +604,9 @@ poe_i2c: &i2c3 {
 		MX8MN_IOMUXC_GPIO1_IO12_GPIO1_IO12	0
 		MX8MN_IOMUXC_GPIO1_IO13_GPIO1_IO13	0
 		MX8MN_IOMUXC_GPIO1_IO14_GPIO1_IO14	0
+		MX8MN_IOMUXC_GPIO1_IO15_GPIO1_IO15	0
+		MX8MN_IOMUXC_I2C4_SCL_GPIO5_IO20	0
+		MX8MN_IOMUXC_I2C4_SDA_GPIO5_IO21	0
 		>;
 	};
 
@@ -655,3 +705,4 @@ poe_i2c: &i2c3 {
 };
 
 #include <common/system-flash/128M-dual.dtsi>
+
