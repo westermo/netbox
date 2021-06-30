@@ -4,14 +4,14 @@
 #
 ################################################################################
 
-TETRIS_VERSION = 1.2.1
+TETRIS_VERSION = 1.3.0
 TETRIS_SOURCE = tetris-$(TETRIS_VERSION).tar.bz2
 TETRIS_SITE = https://github.com/troglobit/tetris/releases/download/$(TETRIS_VERSION)
 TETRIS_LICENSE = ISC
 TETRIS_LICENSE_FILES = LICENSE
 
 define TETRIS_BUILD_CMDS
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D) all
+	$(TARGET_CONFIGURE_OPTS) $(MAKE) -C $(@D) all
 endef
 
 define TETRIS_INSTALL_TARGET_CMDS
