@@ -1,0 +1,29 @@
+diff --git a/drivers/net/dsa/mv88e6xxx/port.c b/drivers/net/dsa/mv88e6xxx/port.c
+--- a/drivers/net/dsa/mv88e6xxx/port.c
++++ b/drivers/net/dsa/mv88e6xxx/port.c
+@@ -488,10 +488,6 @@
+ 		reg &= ~MV88E6XXX_PORT_STS_CMODE_MASK;
+ 		reg |= cmode;
+ 
+-		err = mv88e6xxx_port_write(chip, port, MV88E6XXX_PORT_STS, reg);
+-		if (err)
+-			return err;
+-
+ 		chip->ports[port].cmode = cmode;
+ 
+ 		lane = mv88e6xxx_serdes_get_lane(chip, port);
+@@ -507,6 +503,13 @@
+ 			if (err)
+ 				return err;
+ 		}
++
++		/* Need to wait until serdes is stable before we set cmode */
++		usleep_range(10000, 20000);
++
++		err = mv88e6xxx_port_write(chip, port, MV88E6XXX_PORT_STS, reg);
++		if (err)
++			return err;
+ 	}
+ 
+ 	return 0;
+
