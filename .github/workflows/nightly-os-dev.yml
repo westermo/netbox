@@ -17,19 +17,19 @@ jobs:
         uses: actions/cache@v2
         with:
           path: dl/
-          key: dl-${{ matrix.platform }}-os-${{ hashFiles('.git/modules/buildroot/HEAD', 'configs/*', 'package/*/*.hash') }}
+          key: dl-${{ matrix.board }}-os-${{ hashFiles('.git/modules/buildroot/HEAD', 'configs/*', 'package/*/*.hash') }}
           restore-keys: |
-            dl-${{ matrix.platform }}-os-
-            dl-${{ matrix.platform }}-
+            dl-${{ matrix.board }}-os-
+            dl-${{ matrix.board }}-
             dl-
       - name: Cache .ccache
         uses: actions/cache@v2
         with:
           path: .buildroot-ccache/
-          key: ccache-${{ matrix.platform }}-os-${{ hashFiles('.git/modules/buildroot/HEAD', 'package/*/*.hash') }}
+          key: ccache-${{ matrix.board }}-os-${{ hashFiles('.git/modules/buildroot/HEAD', 'package/*/*.hash') }}
           restore-keys: |
-            ccache-${{ matrix.platform }}-os-
-            ccache-${{ matrix.platform }}-
+            ccache-${{ matrix.board }}-os-
+            ccache-${{ matrix.board }}-
       - name: defconfig
         run: make netbox_${{ matrix.board }}_defconfig
       - name: build
