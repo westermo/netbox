@@ -16,8 +16,17 @@ jobs:
       - name: Cache downloads
         uses: actions/cache@v2
         with:
-          key: dl
-          path: dl
+          path: dl/
+          key: dl-${{ hashFiles('.git/modules/buildroot/HEAD', 'configs/*', 'package/*/*.hash') }}
+          restore-keys: |
+            dl-
+      - name: Cache .ccache
+        uses: actions/cache@v2
+        with:
+          path: .buildroot-ccache/
+          key: ccache-${{ matrix.platform }}-${{ hashFiles('.git/modules/buildroot/HEAD', 'package/*/*.hash') }}
+          restore-keys: |
+            ccache-${{ matrix.platform }}-
       - name: defconfig
         run: make netbox_os_${{ matrix.platform }}_defconfig
       - name: build
