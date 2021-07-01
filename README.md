@@ -1,6 +1,5 @@
 NetBox - Like BusyBox but for Networking
 ========================================
-[![Travis Status]][Travis]
 
 [Westermo][] NetBox is a toolbox for embedded systems based on [Buildroot][].
 
@@ -190,5 +189,3 @@ command line, but you must also have tagged the repository.
 [coronet.os]:    https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-coronet.zip
 [envoy.os]:      https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-envoy.zip
 [zero.os]:       https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-zero.zip
-[Travis]:        https://travis-ci.org/westermo/netbox
-[Travis Status]: https://travis-ci.org/westermo/netbox.png?branch=master
