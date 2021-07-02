@@ -117,9 +117,6 @@ config NETBOX_PROFILE_CUSTOM
 
 config NETBOX_PROFILE_APP
 	bool "Appplication (basic)"
-	select BR2_PACKAGE_FINIT
-	select BR2_PACKAGE_DROPBEAR
-	select BR2_PACKAGE_TCPDUMP
 	help
 	  The application profile includes a set of basic packages
 	  that usually are essential to a basic contatainer app:
@@ -135,34 +132,6 @@ config NETBOX_PROFILE_APP
 
 config NETBOX_PROFILE_OS
 	bool "Operating System (full)"
-	select BR2_PACKAGE_FINIT
-	select BR2_PACKAGE_DNSMASQ
-	select BR2_PACKAGE_DROPBEAR
-	select BR2_PACKAGE_ETHTOOL
-	select BR2_PACKAGE_INADYN
-	select BR2_PACKAGE_IPROUTE2
-	select BR2_PACKAGE_LIBCURL
-	select BR2_PACKAGE_LIBNL
-	select BR2_PACKAGE_LLDPD
-	select BR2_PACKAGE_MDIO_TOOLS
-	select BR2_PACKAGE_MG
-	select BR2_PACKAGE_NETCALC
-	select BR2_PACKAGE_NFTABLES
-	select BR2_PACKAGE_QUAGGA
-	select BR2_PACKAGE_QUAGGA_ZEBRA
-	select BR2_PACKAGE_QUAGGA_ISISD
-	select BR2_PACKAGE_QUAGGA_OSPFD
-	select BR2_PACKAGE_QUAGGA_OSPF6D
-	select BR2_PACKAGE_QUAGGA_RIPD
-	select BR2_PACKAGE_QUAGGA_RIPNGD
-	select BR2_PACKAGE_QUAGGA_VTYSH
-	select BR2_PACKAGE_SMCROUTE
-	select BR2_PACKAGE_SOCAT
-	select BR2_PACKAGE_SSDP_RESPONDER
-	select BR2_PACKAGE_SYSKLOGD
-	select BR2_PACKAGE_SYSKLOGD_LOGGER
-	select BR2_PACKAGE_TCPDUMP
-	select BR2_PACKAGE_WATCHDOGD
 	help
 	  The operating system profile comes with a lot more features
 	  compared to the other profiles.  The intention is to provide
