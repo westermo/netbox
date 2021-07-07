@@ -4,22 +4,14 @@
 imagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/image.sh
 fitimagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/fitimage.sh
 
-squash=$BINARIES_DIR/rootfs.squashfs
-
-# Type is now optional, possibly the image name should be customizable
-if [ -n "$NETBOX_TYPE" ]; then
-    img=$BINARIES_DIR/$NETBOX_VENDOR_ID-$NETBOX_TYPE-${NETBOX_PLAT}
-else
-    img=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}
-fi
-
-# Figure out version for image files, default to -dev
+# Figure out version suffix for image files, default to empty suffix for
+# developer builds.  After a long discussion, this turned out to be the
+# least contentious alternative to: -dev, -devel, -HEAD, etc.
 err=0
-ver=dev
+ver=""
 if [ -n "$RELEASE" ]; then
     # NOTE: Must use `-f $BR2_EXTERNAL` here to get, e.g. app-demo GIT version
-    ver=`$BR2_EXTERNAL_NETBOX_PATH/bin/mkversion -f $BR2_EXTERNAL`
-    img=$img-$ver
+    ver="-$($BR2_EXTERNAL_NETBOX_PATH/bin/mkversion -f $BR2_EXTERNAL)"
 
     if [ "$RELEASE" != "$ver" ]; then
        echo "==============================================================================="
@@ -29,11 +21,20 @@ if [ -n "$RELEASE" ]; then
     fi
 fi
 
+# Type is now optional, possibly the image name should be customizable
+if [ -n "$NETBOX_TYPE" ]; then
+    img=$BINARIES_DIR/$NETBOX_VENDOR_ID-$NETBOX_TYPE-${NETBOX_PLAT}${ver}.img
+else
+    img=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}${ver}.img
+fi
+
 if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
-    $imagesh "$squash" "${img}.img"
+    squash=$BINARIES_DIR/rootfs.squashfs
+    $imagesh "$squash" "${img}"
 
     if [ "$NETBOX_IMAGE_FIT" ]; then
-	$fitimagesh "$NETBOX_PLAT" "$squash" "${img}.itb"
+	itb=$(basename "${img}" .img).itb
+	$fitimagesh "$NETBOX_PLAT" "$squash" "$itb"
     fi
 fi
 
@@ -62,12 +63,12 @@ esac
 # Set TFTPDIR, in your .bashrc, or similar, to copy the resulting image
 # to your FTP/TFTP server directory.  Notice the use of scp, so you can
 # copy the image to another system.
-if [ -n "$TFTPDIR" -a -e "${img}.img" ]; then
+if [ -n "$TFTPDIR" -a -e "${img}" ]; then
     fn=$(basename "$img")
     echo "xfering '$img' -> '${TFTPDIR}/$fn'"
-    scp -B "${img}.img" "$TFTPDIR"
+    scp -B "${img}" "$TFTPDIR"
     if [ "$NETBOX_IMAGE_FIT" ]; then
-        scp -B "${img}.itb" "$TFTPDIR"
+        scp -B "${itb}" "$TFTPDIR"
     fi
 fi
 
