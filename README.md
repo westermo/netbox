@@ -123,10 +123,10 @@ turnarounds when developing and testing new features.
 make run
 ```
 
-By default, this command starts the `bin/qemu` script and tries to
+By default, this command starts the `utils/qemu` script and tries to
 connect one interface to a host bridge called `virbr0`.  That bridge
 only exists if you installed virt-manager (above), if not, you can have
-a look at the `bin/qemu` script arguments and environment variables,
+a look at the `utils/qemu` script arguments and environment variables,
 or try:
 
 ```

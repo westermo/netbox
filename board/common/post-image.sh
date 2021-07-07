@@ -1,8 +1,8 @@
 #!/bin/sh
 . $BR2_CONFIG 2>/dev/null
 
-imagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/image.sh
-fitimagesh=$BR2_EXTERNAL_NETBOX_PATH/utils/fitimage.sh
+imagesh=$BR2_EXTERNAL_NETBOX_PATH/support/scripts/image.sh
+fitimagesh=$BR2_EXTERNAL_NETBOX_PATH/support/scripts/fitimage.sh
 
 # Figure out version suffix for image files, default to empty suffix for
 # developer builds.  After a long discussion, this turned out to be the
@@ -11,7 +11,7 @@ err=0
 ver=""
 if [ -n "$RELEASE" ]; then
     # NOTE: Must use `-f $BR2_EXTERNAL` here to get, e.g. app-demo GIT version
-    ver="-$($BR2_EXTERNAL_NETBOX_PATH/bin/mkversion -f $BR2_EXTERNAL)"
+    ver="-$($BR2_EXTERNAL_NETBOX_PATH/utils/mkversion -f $BR2_EXTERNAL)"
 
     if [ "$RELEASE" != "$ver" ]; then
        echo "==============================================================================="
@@ -39,8 +39,8 @@ if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
 fi
 
 # Source functions for generating .gns3a and qemu.cfg files
-. $BR2_EXTERNAL_NETBOX_PATH/board/common/gns3.sh
-. $BR2_EXTERNAL_NETBOX_PATH/board/common/qemu.sh
+. $BR2_EXTERNAL_NETBOX_PATH/support/scripts/gns3.sh
+. $BR2_EXTERNAL_NETBOX_PATH/support/scripts/qemu.sh
 
 case $BR2_ARCH in
     powerpc)

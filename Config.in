@@ -39,7 +39,7 @@ config NETBOX_VENDOR_HOME
 
 config NETBOX_VENDOR_VERSION
 	string "Version of operating system, may be a script with ``"
-	default "`$BR2_EXTERNAL_NETBOX_PATH/bin/mkversion $BR2_EXTERNAL_NETBOX_PATH`"
+	default "`$BR2_EXTERNAL_NETBOX_PATH/utils/mkversion $BR2_EXTERNAL_NETBOX_PATH`"
 	help
 	   A lower-case string (no spaces or other characters outside of
            0–9, a–z, '.', '_' and '-') identifying the operating system
