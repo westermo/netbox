@@ -2,8 +2,6 @@
 # To be sourced from NetBox common post-image.sh and called for targets
 # where .gns3a appliance files are supported.
 
-gen=${BR2_EXTERNAL_NETBOX_PATH}/board/${NETBOX_PLAT}/genimage.cfg
-
 iso=${BINARIES_DIR}/rootfs.iso9660
 
 config=${BINARIES_DIR}/config.ext3
@@ -15,13 +13,11 @@ gns3_appliance=${BINARIES_DIR}/${NETBOX_VENDOR_ID}-${NETBOX_PLAT}${ver}.gns3a
 gns3a_generate()
 {
     if [ -e "$gns3_template" ]; then
-	if [ -e "$gen" ]; then
-	    # create config.ext3 and rename it
-	    ./support/scripts/genimage.sh "$BINARIES_DIR" -c "$gen"
-	    [ -e "$config" ] && mv "$config" "$cfg"
+	if [ -e "$config" ]; then
+	    mv "$config" "$cfg"
 	    cfg_sz=$(stat --printf='%s' "${cfg}")
 	    cfg_md5=$(md5sum "${cfg}" | awk '{print $1}')
-  	fi
+	fi
 	if [ "$BR2_TARGET_ROOTFS_ISO9660_HYBRID" = "y" ]; then
 	    dir=$(dirname "$img")
 	    fn="$dir"/$(basename "$img" .img).iso

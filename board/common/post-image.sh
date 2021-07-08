@@ -38,6 +38,15 @@ if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
     fi
 fi
 
+gen=""
+if [ "$BR2_PACKAGE_HOST_GENIMAGE" = "y" ]; then
+    gen=${BR2_EXTERNAL_NETBOX_PATH}/board/${NETBOX_PLAT}/genimage.cfg
+
+    # create config.ext3 for Zero .gns3a and sdcard.img for Envoy, and
+    # possibly other platforms with a genimage.cfg
+    ./support/scripts/genimage.sh "$BINARIES_DIR" -c "$gen"
+fi
+
 # Source functions for generating .gns3a and qemu.cfg files
 . $BR2_EXTERNAL_NETBOX_PATH/support/scripts/gns3.sh
 . $BR2_EXTERNAL_NETBOX_PATH/support/scripts/qemu.sh
