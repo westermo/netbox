@@ -12,8 +12,10 @@ All supported boards default to 115200 8N1.  The on-board serial TTL to
 USB converter is either a Prolific or FTDI controller.
 
 
-Booting
--------
+Marvell ESPRESSObin
+-------------------
+
+### Booting
 
 By default, the ESPRESSObin comes with a pre-flashed U-Boot set up to
 load the kernel, device-tree and rootfs from SPI NOR flash.  The board
@@ -39,7 +41,7 @@ up the factory U-Boot to boot into Buildroot:
 
         > setenv kernel_addr 0x5000000
         > setenv fdt_addr 0x1800000
-        > setenv fdt_name boot/armada-3720-espressobin.dtb
+        > setenv fdt_name boot/marvell/armada-3720-espressobin.dtb
         > setenv console console=ttyMV0,115200 earlycon=ar3700_uart,0xd0012000
         > setenv bootcmd 'mmc dev 0; ext4load mmc 0:1 $kernel_addr $image_name;ext4load mmc 0:1 $fdt_addr $fdt_name;setenv bootargs $console root=/dev/mmcblk0p1 ro quiet block2mtd.block2mtd=/dev/mmcblk0p2,,Config net.ifnames=0 biosdevname=0; booti $kernel_addr - $fdt_addr'
 
@@ -52,7 +54,7 @@ up the factory U-Boot to boot into Buildroot:
 Networking
 ----------
 
-In contrast to vanilla Buildroot, NetBox comes prefconfigured with all
+In contrast to vanilla Buildroot, NetBox comes prefconfigured with all¹
 ports set up in a VLAN capable bridge, with offloading to the underlying
 switchcore enabled.  On top of the bridge a VLAN interface (vlan1) is
 set up which runs a DHCP client.
@@ -71,3 +73,6 @@ blog post:
 
 https://westermo.github.io/howto/2020/03/24/linux-networking-bridge.html
 
+____  
+¹ Exceptions to the rule exist, the ESPRESSObin has two lan ports and one
+wan port, only the lan ports are included in the bridge.
