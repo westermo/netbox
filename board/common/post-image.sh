@@ -69,6 +69,7 @@ case $BR2_ARCH in
 	;;
 esac
 
+##
 # Set TFTPDIR, in your .bashrc, or similar, to copy the resulting image
 # to your FTP/TFTP server directory.  Notice the use of scp, so you can
 # copy the image to another system.
@@ -79,6 +80,17 @@ if [ -n "$TFTPDIR" -a -e "${img}" ]; then
     if [ "$NETBOX_IMAGE_FIT" ]; then
         scp -B "${itb}" "$TFTPDIR"
     fi
+fi
+
+##
+# Cleanup of intermediate files that we don't need and don't want to
+# include in the artifacts generated on GitHub
+if [ "$BR2_TARGET_ROOTFS_EXT2" = "y" ]; then
+    rm -f $BINARIES_DIR/rootfs.ext2
+    rm -f $BINARIES_DIR/rootfs.ext4
+fi
+if [ "$BR2_TARGET_ROOTFS_ISO9660_HYBRID" = "y" ]; then
+    rm -f $BINARIES_DIR/rootfs.cpio
 fi
 
 exit $err
