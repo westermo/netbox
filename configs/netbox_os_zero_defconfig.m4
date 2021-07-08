@@ -4,7 +4,6 @@ include(`os.m4')dnl
 BR2_LINUX_KERNEL_NEEDS_HOST_LIBELF=y
 
 dnl Used to create an .iso image with isolinux for the GNS3 appliance and live CD/USB
-BR2_TARGET_ROOTFS_EXT2=y
 BR2_TARGET_ROOTFS_ISO9660=y
 BR2_TARGET_ROOTFS_ISO9660_BOOT_MENU="$(BR2_EXTERNAL_NETBOX_PATH)/board/zero/isolinux.cfg"
 BR2_TARGET_ROOTFS_ISO9660_HYBRID=y
