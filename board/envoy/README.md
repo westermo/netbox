@@ -51,6 +51,38 @@ up the factory U-Boot to boot into Buildroot:
         > run bootcmd
 
 
+Marvell MACCHIATObin
+--------------------
+
+### Booting
+
+By default, the MACCHIATObin is set to boot from SD card, so the switches
+SW2 and SW1 needs to be changed to boot from SPI flash.  That way we can
+reuse the same SD card and boot method for the ESPRESSObin (above).
+
+| Boot    | SW2(1/5) | SW2(2/5) | SW2(3/5) | SW2(4/5) | SW2(5/5) | SW1(1/5) | SW1(2/5) | SW1(3/5) | SW1(4/5) | SW1(5/5) |
+|---------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+| SPI ROM | off      | off      | off      | on       | on       | off      | x        | x        | x        | x        |
+| SD card | off      | on       | on       | on       | off      | on       | x        | x        | x        | x        |
+| eMMC    | off      | on       | on       | on       | on       | off      | x        | x        | x        | x        |
+
+https://developer.solid-run.com/knowledge-base/marvell-armada-8040-dipswitch/
+
+There some differences to the ESPRSSObin though, so pay attention to
+these U-Boot commands:
+
+    > setenv image_name boot/Image
+    > setenv kernel_addr 0x5000000
+    > setenv fdt_addr 0x4f00000
+    > setenv fdt_name boot/marvell/armada-8040-mcbin.dtb
+    > setenv console console=ttyS0,115200
+    > setenv bootcmd 'mmc dev 1; ext4load mmc 1:1 $kernel_addr $image_name;ext4load mmc 1:1 $fdt_addr $fdt_name;setenv bootargs $console root=/dev/mmcblk1p1 ro quiet block2mtd.block2mtd=/dev/mmcblk1p2,,Config net.ifnames=0 biosdevname=0; booti $kernel_addr - $fdt_addr'
+    > saveenv
+    > run bootcmd
+
+On the next board reset, the `$bootcmd` will be executed automatically.
+
+
 Networking
 ----------
 
