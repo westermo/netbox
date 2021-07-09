@@ -29,6 +29,9 @@ be able to easily match what container image works on a Westermo device:
 | aarch64          | Envoy                  | **pending**           | [envoy.os][]         |
 | x86_64           | Zero                   | [zero.app][]          | [zero.os][]          |
 
+> **Note:** the *Envoy* platform includes support also for the Marvell
+> ESPRESSObin (Globalscale) and MACCHIATObin (Solidrun) boards.
+
 
 Flavor
 ------
