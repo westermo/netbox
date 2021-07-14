@@ -44,7 +44,9 @@ if [ "$BR2_PACKAGE_HOST_GENIMAGE" = "y" ]; then
 
     # create config.ext3 for Zero .gns3a and sdcard.img for Envoy, and
     # possibly other platforms with a genimage.cfg
-    ./support/scripts/genimage.sh "$BINARIES_DIR" -c "$gen"
+    if [ -f "$gen" ]; then
+	./support/scripts/genimage.sh "$BINARIES_DIR" -c "$gen"
+    fi
 fi
 
 # Source functions for generating .gns3a and qemu.cfg files
