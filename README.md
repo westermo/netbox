@@ -159,6 +159,16 @@ E.g., for NetBox Zero OS: `~/.cache/netbox-config-zero.img`.  See the
 helper script `utils/qemu` for more information.
 
 
+### Sharing a Host Directory with Qemu
+
+Most platforms (except *Basis*) support 9P file system sharing with the
+host.  This can be enabled by setting the absolute path in `QEMU_HOST`.
+
+```
+~/src/netbox$ make run QEMU_HOST=/tmp
+```
+
+
 ### Example
 
 Here is an example run of a Zero OS build, the persistent store for all
