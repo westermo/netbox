@@ -127,8 +127,7 @@ host_args()
 {
     [ -z "${QEMU_HOST}" ] && return
 
-    echo -n "-fsdev local,id=hostfs,path=${QEMU_HOST},security_model=none "
-    echo -n "-device virtio-9p-pci,fsdev=hostfs,mount_tag=hostfs "
+    echo -n "-virtfs local,path=${QEMU_HOST},security_model=none,mount_tag=hostfs "
 }
 
 net_args()
