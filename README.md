@@ -112,7 +112,7 @@ build it will take some time:
 ```
 
 Done.  See the `output/images/` directory for the resulting SquasFS
-based root file system: `netbox-$platform.img`
+based root file system: `netbox-app-zero.img`
 
 
 Running
@@ -146,11 +146,11 @@ or try:
 > **Note:** you may need `sudo`, unless you have set up your system with
 > capabilities https://troglobit.com/2016/12/11/a-life-without-sudo/
 
-Qemu nodes have persistent storage as an image file on the host system.
-This is controlled by the environment variable `$QEMU_MNT`, which on
-systems with a `~/.cache` directory, defaults to `VENDOR-PLATFORM.img`,
-e.g., for a NetBox Zero OS build: `~/.cache/netbox-zero.img`.  See the
-helper script `utils/qemu` for more information.
+Qemu nodes have persistent storage as a disk image file on the host
+system.  This is controlled by the environment variable `$QEMU_MNT`,
+which defaults to `VENDOR-config-PLATFORM.img`, provided `~/.cache`
+exists .  E.g., for NetBox Zero OS: `~/.cache/netbox-config-zero.img`.
+See the helper script `utils/qemu` for more information.
 
 The NetBox app builds can be run in LXC, or LXD, on your PC but this is
 not yet documented here.  It is even possible to run non-native archs,
@@ -164,16 +164,19 @@ For an example, see https://github.com/myrootfs/myrootfs#lxd
 
 ### Example
 
-Here's an example run of a Zero OS build, with the added bonus of a
-persistent store for all configuration using an image file in your
-`~/.cache/`:
+Here is an example run of a Zero OS build, the persistent store for all
+your configuration (in `/etc` or `/home`) is stored in a disk image file
+named `~/.cache/netbox-config-zero.img`:
 
 ```sh
 ~/src/netbox$ make distclean
 ~/src/netbox$ make netbox_os_zero_defconfig
 ~/src/netbox$ make
-~/src/netbox$ QEMU_MNT=~/.cache/netbox-zero.img make run
+~/src/netbox$ make run
 ```
+
+> **Note:** you may still need to call `sudo make run`, see the note on
+> capabilities, above.
 
 
 Versioning
