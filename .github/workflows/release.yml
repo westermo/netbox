@@ -42,7 +42,7 @@ jobs:
     strategy:
       matrix:
         profile: [app, os]
-        platform: [basis, coronet, dagger, zero]
+        platform: [basis, coronet, dagger, envoy, zero]
     steps:
       - uses: actions/checkout@v2
       - name: Set Build Variables
@@ -60,11 +60,11 @@ jobs:
       - name: Configure & Build
         env:
           RELEASE: ${{ steps.vars.outputs.tag }}
-          DIRNAME: netbox-${{ matrix.profile }}-${{ matrix.platform }}-${RELEASE}
-          TARBALL: ${RELEASE}.tar.gz
+          DIRNAME: netbox-${{ matrix.profile }}-${{ matrix.platform }}-${{ steps.vars.outputs.tag }}
+          TARBALL: netbox-${{ matrix.profile }}-${{ matrix.platform }}-${{ steps.vars.outputs.tag }}.tar.gz
         run: |
           echo "Building NetBox ${TARBALL} ..."
-          make ${{ matrix.profile }}_${{ matrix.platform }}_defconfig
+          make netbox_${{ matrix.profile }}_${{ matrix.platform }}_defconfig
           make
           cd output
           mv images ${DIRNAME}
