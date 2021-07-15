@@ -16,7 +16,11 @@ qemucfg_generate()
 	    QEMU_ARCH=$BR2_ARCH
 	    QEMU_NIC=virtio-net-pci
 	    QEMU_SCSI=virtio-scsi-pci
-	    QEMU_MACH="versatilepb -watchdog i6300esb -dtb ${BINARIES_DIR}/versatile-pb.dtb"
+	    if [ "$BR2_cortex_a9" = "y" ]; then
+		QEMU_MACH="virt,highmem=off -watchdog i6300esb"
+	    else
+		QEMU_MACH="versatilepb -watchdog i6300esb -dtb ${BINARIES_DIR}/versatile-pb.dtb"
+	    fi
 	    ;;
 	aarch64)
 	    QEMU_ARCH=$BR2_ARCH
