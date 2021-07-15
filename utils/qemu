@@ -107,7 +107,11 @@ mnt_args()
 {
     if [ -z "${QEMU_MNT}" ]; then
 	[ -d ~/.cache ] || return
-	QEMU_MNT=~/.cache/${NETBOX_VENDOR_ID}-${NETBOX_PLAT}.img
+	QEMU_MNT=~/.cache/${NETBOX_VENDOR_ID}-config-${NETBOX_PLAT}.img
+
+	# Transitional, rename any netbox-foo.img -> netbox-config-foo.img
+	old=~/.cache/${NETBOX_VENDOR_ID}-${NETBOX_PLAT}.img
+	[ -f $old ] && mv $old $QEMU_MNT
     fi
 
     if [ ! -e "${QEMU_MNT}" ]; then
