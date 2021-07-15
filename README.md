@@ -119,8 +119,16 @@ based root filesystem: `netbox-$platform.img`
 Running
 -------
 
-All NetBox os builds can be run in Qemu.  Highly useful for quick
-turnarounds when developing and testing new features.
+All NetBox OS builds are supported by Qemu.  This is actually a corner
+stone in NetBox, and principal testing strategy at Westermo.  It can be
+highly useful for quick turnarounds when developing and testing new
+features.
+
+Any feature targeting OSI layer 3, and above, need nothing else to run.
+For more advanced test setups, with multiple networked Qemu nodes, we
+highly recommend [Qeneth](https://github.com/wkz/qeneth).
+
+To start a single node:
 
 ```
 make run
@@ -138,6 +146,12 @@ make QEMU_NET=tap run
 
 > **Note:** you may need `sudo`, unless you have set up your system with
 > capabilities https://troglobit.com/2016/12/11/a-life-without-sudo/
+
+Qemu nodes have persistent storage as an image file on the host system.
+This is controlled by the environment variable `$QEMU_MNT`, which on
+systems with a `~/.cache` directory, defaults to `VENDOR-PLATFORM.img`,
+e.g., for a NetBox Zero OS build: `~/.cache/netbox-zero.img`.  See the
+helper script `utils/qemu` for more information.
 
 The NetBox app builds can be run in LXC, or LXD, on your PC but this is
 not yet documented here.  It is even possible to run non-native archs,
