@@ -29,12 +29,18 @@ else
 fi
 
 if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
-    squash=$BINARIES_DIR/rootfs.squashfs
-    $imagesh "$squash" "${img}"
+    if [ "$BR2_LINUX_KERNEL" = "y" ]; then
+	squash=$BINARIES_DIR/rootfs.squashfs
+	$imagesh "$squash" "${img}"
 
-    if [ "$NETBOX_IMAGE_FIT" ]; then
-	itb=$(basename "${img}" .img).itb
-	$fitimagesh "$NETBOX_PLAT" "$squash" "$itb"
+	if [ "$NETBOX_IMAGE_FIT" ]; then
+	    itb=$(basename "${img}" .img).itb
+	    $fitimagesh "$NETBOX_PLAT" "$squash" "$itb"
+	fi
+
+	rm $squash
+    else
+	mv $squash $img
     fi
 fi
 
@@ -53,23 +59,25 @@ fi
 . $BR2_EXTERNAL_NETBOX_PATH/support/scripts/gns3.sh
 . $BR2_EXTERNAL_NETBOX_PATH/support/scripts/qemu.sh
 
-case $BR2_ARCH in
-    powerpc)
-	qemucfg_generate
-	;;
-    arm)
-	qemucfg_generate
-	;;
-    aarch64)
-	qemucfg_generate
-	;;
-    x86_64)
-	qemucfg_generate
-	gns3a_generate		# only supported on x86_64 for now
-	;;
-    *)
-	;;
-esac
+if [ "$BR2_LINUX_KERNEL" = "y" ]; then
+    case $BR2_ARCH in
+	powerpc)
+	    qemucfg_generate
+	    ;;
+	arm)
+	    qemucfg_generate
+	    ;;
+	aarch64)
+	    qemucfg_generate
+	    ;;
+	x86_64)
+	    qemucfg_generate
+	    gns3a_generate		# only supported on x86_64 for now
+	    ;;
+	*)
+	    ;;
+    esac
+fi
 
 ##
 # Set TFTPDIR, in your .bashrc, or similar, to copy the resulting image
