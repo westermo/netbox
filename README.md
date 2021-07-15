@@ -9,10 +9,20 @@ the base for any application, but is strongly recommended for all use cases
 for container applications running in WeOS.  Official WeOS container
 applications will be based on NetBox.
 
-NetBox is built using the *External Tree* facility in Buildroot.  This is a
-layered approach making it easy to customize without changing Buildroot at
-its core.  Proprietary applications may use NetBox as NetBox use Buildroot,
-see the [App-Demo][] project for an example of this.
+NetBox is built using the Buildroot *External Tree* facility.  This is a
+layered approach which enables customizing without changing Buildroot.
+You may use NetBox as NetBox use Buildroot, see the [App-Demo][] project
+for an example -- click *Use this template* -- to create your own.
+
+To contribute, see the file [HACKING][] for details.
+
+
+Versioning
+----------
+
+NetBox use the same versioning as Buildroot, with an appended `-rN` to
+denote the *revision* of Buildroot with Westermo extensions.  E.g., the
+first release is 2020.02-r1.
 
 
 Platforms
@@ -195,26 +205,10 @@ encourage all newbies to try out the Zero app builds in LXC first.
 For an example, see https://github.com/myrootfs/myrootfs#lxd
 
 
-Versioning
-----------
-
-NetBox use the same versioning as Buildroot, with an appended `-rN` to
-denote the *revision* of Buildroot with Westermo extensions.  E.g., the
-first release is 2020.02-r1.
-
-
-Releasing
----------
-
-To trigger release builds, the `RELEASE=` variable must be set from the
-command line, but you must also have tagged the repository.
-
-  1. Tag the repository: `$BR2_VERSION-rN`
-  2. Set the environment variable `RELEASE=$BR2_VERSION-rN` and run make
-
 
 [Westermo]:      https://www.westermo.com/
 [Buildroot]:     https://buildroot.org/ 
+[HACKING]:       HACKING.md
 [App-Demo]:      https://github.com/westermo/app-demo
 [Open Source]:   https://en.wikipedia.org/wiki/Free_and_open-source_software
 [basis.app]:     https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-basis.zip
