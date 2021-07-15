@@ -21,13 +21,13 @@ Platforms
 The NetBox project follows the Westermo product platform naming.  This to
 be able to easily match what container image works on a Westermo device:
 
-| **Architecture** | **Platform Code Name** | **Nightly App Image** | **Nightly OS Image** |
-|------------------|------------------------|-----------------------|----------------------|
-| arm9             | Basis                  | N/A                   | [basis.os][]       |
-| powerpc          | Coronet                | [coronet.app][]       | [coronet.os][]       |
-| arm cortex-a9    | Dagger                 | [dagger.app][]        | N/A                  |
-| aarch64          | Envoy                  | **pending**           | [envoy.os][]         |
-| x86_64           | Zero                   | [zero.app][]          | [zero.os][]          |
+| **Architecture** | **Platform Name** | **Nightly App** | **Nightly OS** |
+|------------------|-------------------|-----------------|----------------|
+| arm9             | Basis             | [basis.app][]   | [basis.os][]   |
+| powerpc          | Coronet           | [coronet.app][] | [coronet.os][] |
+| arm cortex-a9    | Dagger            | [dagger.app][]  | N/A            |
+| aarch64          | Envoy             | [envoy.app][]   | [envoy.os][]   |
+| x86_64           | Zero              | [zero.app][]    | [zero.os][]    |
 
 > **Note:** the *Envoy* platform includes support also for the Marvell
 > ESPRESSObin (Globalscale) and MACCHIATObin (Solidrun) boards.
@@ -220,8 +220,10 @@ command line, but you must also have tagged the repository.
 [Buildroot]:     https://buildroot.org/ 
 [App-Demo]:      https://github.com/westermo/app-demo
 [Open Source]:   https://en.wikipedia.org/wiki/Free_and_open-source_software
+[basis.app]:     https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-basis.zip
 [coronet.app]:   https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-coronet.zip
 [dagger.app]:    https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-dagger.zip
+[envoy.app]:     https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-envoy.zip
 [zero.app]:      https://nightly.link/westermo/netbox/workflows/nightly-apps/master/netbox-app-zero.zip
 [basis.os]:      https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-basis.zip
 [coronet.os]:    https://nightly.link/westermo/netbox/workflows/nightly-os/master/netbox-os-coronet.zip
