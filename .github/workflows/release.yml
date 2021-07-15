@@ -49,11 +49,11 @@ jobs:
       - name: Set Build Variables
         id: vars
         run: |
-          export NB_TUPLE=${{ matrix.profile }}-${{ matrix.platform }}
-          export NB_VER=${GITHUB_REF#refs/tags/}
-          echo ::set-output name=tag::${NB_VER}
-          echo ::set-output name=dir::netbox-${NB_TUPLE}-${NB_VER}
-          echo ::set-output name=tgz::netbox-${NB_TUPLE}-${NB_VER}.tar.gz
+          export NETBOX_TUPLE=${{ matrix.profile }}-${{ matrix.platform }}
+          export NETBOX_VER=${GITHUB_REF#refs/tags/}
+          echo ::set-output name=tag::${NETBOX_VER}
+          echo ::set-output name=dir::netbox-${NETBOX_TUPLE}-${NETBOX_VER}
+          echo ::set-output name=tgz::netbox-${NETBOX_TUPLE}-${NETBOX_VER}.tar.gz
       - uses: actions/cache@v2
         with:
           path: dl/
