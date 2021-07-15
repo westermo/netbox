@@ -60,10 +60,11 @@ Requirements
 ------------
 
 The build environment requires the following tools, tested on Ubuntu
-21.04 (x86_64): make, gcc, g++, m4.  On Debian based systems:
+21.04 (x86_64): make, gcc, g++, m4, and openssl development package.
+On Debian based systems:
 
 ```sh
-~$ sudo apt install build-essential m4
+~$ sudo apt install build-essential m4 libssl-dev
 ```
 
 To run in Qemu, either enable host-side build in `make menuconfig`, or
