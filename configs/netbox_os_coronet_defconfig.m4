@@ -1,5 +1,6 @@
 include(`plat-coronet.m4')dnl
 include(`base.m4')dnl
+include(`toolchain-bootlin.m4')dnl
 include(`os.m4')dnl
 # Linux insists on building an uImage as part of "make all", which
 # requires mkimage.
