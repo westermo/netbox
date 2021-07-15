@@ -48,7 +48,11 @@ jobs:
       - name: Set Build Variables
         id: vars
         run: |
-          echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
+          export NB_TUPLE=${{ matrix.profile }}-${{ matrix.platform }}
+          export NB_VER=${GITHUB_REF#refs/tags/}
+          echo ::set-output name=nb.tag::${NB_VER}
+          echo ::set-output name=nb.dir::netbox-${NB_TUPLE}-${NB_VER}
+          echo ::set-output name=nb.tgz::netbox-${NB_TUPLE}-${NB_VER}.tar.gz
       - uses: actions/cache@v2
         with:
           path: dl/
@@ -59,20 +63,19 @@ jobs:
             dl-
       - name: Configure & Build
         env:
-          RELEASE: ${{ steps.vars.outputs.tag }}
-          DIRNAME: netbox-${{ matrix.profile }}-${{ matrix.platform }}-${{ steps.vars.outputs.tag }}
-          TARBALL: netbox-${{ matrix.profile }}-${{ matrix.platform }}-${{ steps.vars.outputs.tag }}.tar.gz
+          RELEASE: ${{ steps.vars.outputs.nb.tag }}
         run: |
-          echo "Building NetBox ${TARBALL} ..."
+          echo "Building NetBox ${{ nb.tgz }} ..."
           make netbox_${{ matrix.profile }}_${{ matrix.platform }}_defconfig
           make
           cd output
-          mv images ${DIRNAME}
-          tar cfz ${TARBALL} ${DIRNAME}
+          mv images ${{ nb.dir }}
+          tar cfz ${{ nb.tgz }} ${{ nb.dir }}
+          ls *
       - name: Upload release artifacts ...
         uses: skx/github-action-publish-binaries@release-0.15
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           releaseId: ${{ needs.release.outputs.release_id }}
-          args: output/${TARBALL}
+          args: output/${{ nb.tgz }}
