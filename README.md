@@ -53,7 +53,7 @@ The build environment requires the following tools, tested on Ubuntu
 21.04 (x86_64): make, gcc, g++, m4.  On Debian based systems:
 
 ```sh
-sudo apt install build-essential m4
+~$ sudo apt install build-essential m4
 ```
 
 > **Note:** the Zero build is what requires host-side libssl-dev, this
@@ -64,22 +64,21 @@ for quicker builds you can use the version shipped with your Linux host.
 On Debian based systems:
 
 ```sh
-sudo apt install qemu-system
+~$ sudo apt install qemu-system
 ```
 
 For smooth sailing, after install, add the following line to the file
 `/etc/qemu/bridge.conf`:
 
-```
+```ApacheConf
 allow all
 ```
 
 For network access to work out of the box in your Qemu system, install
 the virt-manager package, this creates a host bridge called `virbr0`:
 
-
 ```sh
-sudo apt install virt-manager
+~$ sudo apt install virt-manager
 ```
 
 
@@ -90,30 +89,30 @@ First clone the repository, optionally check out the tagged release you
 want to use.  The build system clones the submodule on the first build,
 but you can also run the command manually:
 
-```
-cd ~/src
-git clone https://github.com/westermo/netbox.git
-cd netbox
-git submodule update --init
+```sh
+~$ cd ~/src
+~/src$ git clone https://github.com/westermo/netbox.git
+~/src$ cd netbox
+~/src/netbox$ git submodule update --init
 ```
 
 Second, select your target `_defconfig`, see the `configs/` directory,
 or use `make list-defconfigs` to see all Buildroot and NetBox configs
 available.  We select the defconfig for Zero (x86-64) NetBox app flavor:
 
-```
-make netbox_app_zero_defconfig
+```sh
+~/src/netbox$ make netbox_app_zero_defconfig
 ```
 
 Third, type make and fetch a cup of coffee because the first time you
 build it will take some time:
 
-```
-make
+```sh
+~/src/netbox$ make
 ```
 
 Done.  See the `output/images/` directory for the resulting SquasFS
-based root filesystem: `netbox-$platform.img`
+based root file system: `netbox-$platform.img`
 
 
 Running
@@ -130,8 +129,8 @@ highly recommend [Qeneth](https://github.com/wkz/qeneth).
 
 To start a single node:
 
-```
-make run
+```sh
+~/src/netbox$ make run
 ```
 
 By default, this command starts the `utils/qemu` script and tries to
@@ -140,8 +139,8 @@ only exists if you installed virt-manager (above), if not, you can have
 a look at the `utils/qemu` script arguments and environment variables,
 or try:
 
-```
-make QEMU_NET=tap run
+```sh
+~/src/netbox$ make QEMU_NET=tap run
 ```
 
 > **Note:** you may need `sudo`, unless you have set up your system with
@@ -169,11 +168,11 @@ Here's an example run of a Zero OS build, with the added bonus of a
 persistent store for all configuration using an image file in your
 `~/.cache/`:
 
-```
-make distclean
-make netbox_os_zero_defconfig
-make
-QEMU_MNT=~/.cache/netbox-zero.img make run
+```sh
+~/src/netbox$ make distclean
+~/src/netbox$ make netbox_os_zero_defconfig
+~/src/netbox$ make
+~/src/netbox$ QEMU_MNT=~/.cache/netbox-zero.img make run
 ```
 
 
