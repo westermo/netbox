@@ -2,7 +2,7 @@ name: NetBox App image artifacts
 
 on:
   push:
-    branches: [master]
+    branches: [disabled]
 
 jobs:
   build:
