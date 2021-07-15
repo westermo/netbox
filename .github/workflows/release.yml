@@ -35,7 +35,7 @@ jobs:
           draft: false
           prerelease: ${{ steps.vars.outputs.pre }}
   build:
-    name: NetBox ${{ matrix.profile }} for ${{ matrix.platform }} platform
+    name: Build ${{ matrix.profile }} for ${{ matrix.platform }} platform
     needs: release
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
@@ -50,9 +50,9 @@ jobs:
         run: |
           export NB_TUPLE=${{ matrix.profile }}-${{ matrix.platform }}
           export NB_VER=${GITHUB_REF#refs/tags/}
-          echo ::set-output name=nb.tag::${NB_VER}
-          echo ::set-output name=nb.dir::netbox-${NB_TUPLE}-${NB_VER}
-          echo ::set-output name=nb.tgz::netbox-${NB_TUPLE}-${NB_VER}.tar.gz
+          echo ::set-output name=tag::${NB_VER}
+          echo ::set-output name=dir::netbox-${NB_TUPLE}-${NB_VER}
+          echo ::set-output name=tgz::netbox-${NB_TUPLE}-${NB_VER}.tar.gz
       - uses: actions/cache@v2
         with:
           path: dl/
@@ -63,14 +63,14 @@ jobs:
             dl-
       - name: Configure & Build
         env:
-          RELEASE: ${{ steps.vars.outputs.nb.tag }}
+          RELEASE: ${{ steps.vars.outputs.tag }}
         run: |
-          echo "Building NetBox ${{ nb.tgz }} ..."
+          echo "Building NetBox ${{ steps.vars.outputs.tgz }} ..."
           make netbox_${{ matrix.profile }}_${{ matrix.platform }}_defconfig
           make
           cd output
-          mv images ${{ nb.dir }}
-          tar cfz ${{ nb.tgz }} ${{ nb.dir }}
+          mv images ${{ steps.vars.outputs.dir }}
+          tar cfz ${{ steps.vars.outputs.tgz }} ${{ steps.vars.outputs.dir }}
           ls *
       - name: Upload release artifacts ...
         uses: skx/github-action-publish-binaries@release-0.15
@@ -78,4 +78,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           releaseId: ${{ needs.release.outputs.release_id }}
-          args: output/${{ nb.tgz }}
+          args: output/${{ steps.vars.outputs.tgz }}
