@@ -43,6 +43,7 @@ jobs:
       matrix:
         profile: [app, os]
         platform: [basis, coronet, dagger, envoy, zero]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - name: Set Build Variables
