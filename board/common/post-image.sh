@@ -31,8 +31,8 @@ dir=$(dirname "$img")
 md5=$dir/$(basename "$img" .img).md5
 
 if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
+    squash=$BINARIES_DIR/rootfs.squashfs
     if [ "$BR2_LINUX_KERNEL" = "y" ]; then
-	squash=$BINARIES_DIR/rootfs.squashfs
 	$imagesh "$squash" "${img}"
 
 	if [ "$NETBOX_IMAGE_FIT" ]; then
