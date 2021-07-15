@@ -56,9 +56,6 @@ The build environment requires the following tools, tested on Ubuntu
 ~$ sudo apt install build-essential m4
 ```
 
-> **Note:** the Zero build is what requires host-side libssl-dev, this
-> dependency may be removed in the future.
-
 To run in Qemu, either enable host-side build in `make menuconfig`, or
 for quicker builds you can use the version shipped with your Linux host.
 On Debian based systems:
