@@ -133,6 +133,12 @@ To start a single node:
 ~/src/netbox$ make run
 ```
 
+> **Note:** you may need `sudo`, unless you have set up your system with
+> capabilities https://troglobit.com/2016/12/11/a-life-without-sudo/
+
+
+### Basic Networking in Qemu
+
 By default, this command starts the `utils/qemu` script and tries to
 connect one interface to a host bridge called `virbr0`.  That bridge
 only exists if you installed virt-manager (above), if not, you can have
@@ -143,23 +149,14 @@ or try:
 ~/src/netbox$ make QEMU_NET=tap run
 ```
 
-> **Note:** you may need `sudo`, unless you have set up your system with
-> capabilities https://troglobit.com/2016/12/11/a-life-without-sudo/
+### Persistent Storage in Qemu
 
-Qemu nodes have persistent storage as a disk image file on the host
-system.  This is controlled by the environment variable `$QEMU_MNT`,
-which defaults to `VENDOR-config-PLATFORM.img`, provided `~/.cache`
-exists .  E.g., for NetBox Zero OS: `~/.cache/netbox-config-zero.img`.
-See the helper script `utils/qemu` for more information.
-
-The NetBox app builds can be run in LXC, or LXD, on your PC but this is
-not yet documented here.  It is even possible to run non-native archs,
-like Arm64, on your PC using Linux "binfmt misc" support, in which case
-all binaries are run through `qemu-aarch64`.  It both feels and really
-*is* a very weird thing.  This is not documented yet and we instead
-encourage all newbies to try out the Zero app builds in LXC first.
-
-For an example, see https://github.com/myrootfs/myrootfs#lxd
+Qemu nodes start from the same read-only SquasFS image as built for all
+targets.  For persistent storage a disk image file on the host system is
+used.  This is controlled by the environment variable `$QEMU_MNT`, which
+defaults to `VENDOR-config-PLATFORM.img`, provided `~/.cache` exists .
+E.g., for NetBox Zero OS: `~/.cache/netbox-config-zero.img`.  See the
+helper script `utils/qemu` for more information.
 
 
 ### Example
@@ -177,6 +174,18 @@ named `~/.cache/netbox-config-zero.img`:
 
 > **Note:** you may still need to call `sudo make run`, see the note on
 > capabilities, above.
+
+
+### Running in LXC or LXD
+
+The NetBox app builds can be run in LXC, or LXD, on your PC but this is
+not yet documented here.  It is even possible to run non-native archs,
+like Arm64, on your PC using Linux "binfmt misc" support, in which case
+all binaries are run through `qemu-aarch64`.  It both feels and really
+*is* a very weird thing.  This is not documented yet and we instead
+encourage all newbies to try out the Zero app builds in LXC first.
+
+For an example, see https://github.com/myrootfs/myrootfs#lxd
 
 
 Versioning
