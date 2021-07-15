@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [basis, coronet, envoy, zero]
+        platform: [basis, coronet, dagger, envoy, zero]
     steps:
       - uses: actions/checkout@v2
       - name: Cache downloads
