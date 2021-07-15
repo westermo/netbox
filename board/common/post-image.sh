@@ -27,6 +27,8 @@ if [ -n "$NETBOX_TYPE" ]; then
 else
     img=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}${ver}.img
 fi
+dir=$(dirname "$img")
+md5=$dir/$(basename "$img" .img).md5
 
 if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
     if [ "$BR2_LINUX_KERNEL" = "y" ]; then
@@ -43,6 +45,9 @@ if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
 	mv $squash $img
     fi
 fi
+
+# Create foo.md5 to foo.img
+md5sum "$img" > "$md5"
 
 gen=""
 if [ "$BR2_PACKAGE_HOST_GENIMAGE" = "y" ]; then
