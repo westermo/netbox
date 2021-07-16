@@ -13,7 +13,7 @@ if [ -n "$RELEASE" ]; then
     # NOTE: Must use `-f $BR2_EXTERNAL` here to get, e.g. app-demo GIT version
     ver="-$($BR2_EXTERNAL_NETBOX_PATH/utils/mkversion -f $BR2_EXTERNAL)"
 
-    if [ "-$RELEASE" != "$ver" ]; then
+    if [ "-$RELEASE" != "$ver" -a -z "$FORCE_RELEASE" ]; then
        echo "==============================================================================="
        echo "WARNING: Release verision $RELEASE does not match latest tag ${ver#-}!"
        echo "==============================================================================="
