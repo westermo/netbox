@@ -24,8 +24,10 @@ fi
 # Type is now optional, possibly the image name should be customizable
 if [ -n "$NETBOX_TYPE" ]; then
     img=$BINARIES_DIR/$NETBOX_VENDOR_ID-$NETBOX_TYPE-${NETBOX_PLAT}${ver}.img
+    ext=$BINARIES_DIR/$NETBOX_VENDOR_ID-$NETBOX_TYPE-${NETBOX_PLAT}${ver}.ext2
 else
     img=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}${ver}.img
+    ext=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}${ver}.ext2
 fi
 dir=$(dirname "$img")
 md5=$dir/$(basename "$img" .img).md5
@@ -33,17 +35,21 @@ md5=$dir/$(basename "$img" .img).md5
 if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
     squash=$BINARIES_DIR/rootfs.squashfs
     if [ "$BR2_LINUX_KERNEL" = "y" ]; then
-	$imagesh "$squash" "${img}"
+	$imagesh "$squash" "$img"
 
 	if [ "$NETBOX_IMAGE_FIT" ]; then
 	    itb=$(basename "${img}" .img).itb
 	    $fitimagesh "$NETBOX_PLAT" "$squash" "$itb"
 	fi
 
-	rm $squash
+	rm "$squash"
     else
-	mv $squash $img
+	mv "$squash" "$img"
     fi
+elif [ "$BR2_TARGET_ROOTFS_EXT2" = "y" ]; then
+    ext2=$BINARIES_DIR/rootfs.ext2
+    img=$ext
+    mv "$ext2" "$img"
 fi
 
 # Create foo.md5 to foo.img
@@ -65,18 +71,26 @@ fi
 . $BR2_EXTERNAL_NETBOX_PATH/support/scripts/qemu.sh
 
 if [ "$BR2_LINUX_KERNEL" = "y" ]; then
+    if [ -n "$RELEASE" ]; then
+	dir=""
+	fn=$(basename "$img")
+    else
+	dir="$BINARIES_DIR"
+	fn="$img"
+    fi
+
     case $BR2_ARCH in
 	powerpc)
-	    qemucfg_generate
+	    qemucfg_generate "$fn" "$dir"
 	    ;;
 	arm)
-	    qemucfg_generate
+	    qemucfg_generate "$fn" "$dir"
 	    ;;
 	aarch64)
-	    qemucfg_generate
+	    qemucfg_generate "$fn" "$dir"
 	    ;;
 	x86_64)
-	    qemucfg_generate
+	    qemucfg_generate "$fn" "$dir"
 	    gns3a_generate		# only supported on x86_64 for now
 	    ;;
 	*)
@@ -101,8 +115,12 @@ fi
 # Cleanup of intermediate files that we don't need and don't want to
 # include in the artifacts generated on GitHub
 if [ "$BR2_TARGET_ROOTFS_EXT2" = "y" ]; then
-    rm -f $BINARIES_DIR/rootfs.ext2
-    rm -f $BINARIES_DIR/rootfs.ext4
+    # some builds may want to use this instead of initrd to boot
+    # but those who build a squashfs get initrd qemu boot
+    if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
+	rm -f $BINARIES_DIR/rootfs.ext2
+	rm -f $BINARIES_DIR/rootfs.ext4
+    fi
 fi
 if [ "$BR2_TARGET_ROOTFS_ISO9660_HYBRID" = "y" ]; then
     rm -f $BINARIES_DIR/rootfs.cpio

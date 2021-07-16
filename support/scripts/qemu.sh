@@ -4,6 +4,9 @@ qemucfg="${BINARIES_DIR}/qemu.cfg"
 
 qemucfg_generate()
 {
+    img=$1
+    dir=$2
+
     QEMU_ARCH=""
     case $BR2_ARCH in
 	powerpc)
@@ -19,7 +22,7 @@ qemucfg_generate()
 	    if [ "$BR2_cortex_a9" = "y" ]; then
 		QEMU_MACH="virt,highmem=off -watchdog i6300esb"
 	    else
-		QEMU_MACH="versatilepb -watchdog i6300esb -dtb ${BINARIES_DIR}/versatile-pb.dtb"
+		QEMU_MACH="versatilepb -watchdog i6300esb -dtb ${dir}/versatile-pb.dtb"
 	    fi
 	    ;;
 	aarch64)
@@ -48,14 +51,12 @@ QEMU_MACH="$QEMU_MACH"
 QEMU_NIC=$QEMU_NIC
 QEMU_SCSI=$QEMU_SCSI
 
-QEMU_KERNEL=${BINARIES_DIR}/$(basename $BINARIES_DIR/*Image)
+QEMU_KERNEL=${dir}/*Image
 EOF
 
     if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
-	echo "QEMU_INITRD=${BINARIES_DIR}/rootfs.squashfs" >>$qemucfg
-    fi
-
-    if [ "$BR2_TARGET_ROOTFS_EXT2" = "y" ]; then
-	echo "QEMU_DISK=${BINARIES_DIR}/rootfs.ext2" >>$qemucfg
+	echo "QEMU_INITRD=$img" >>$qemucfg
+    elif [ "$BR2_TARGET_ROOTFS_EXT2" = "y" ]; then
+	echo "QEMU_DISK=$img"   >>$qemucfg
     fi
 }
