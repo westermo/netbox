@@ -3,7 +3,7 @@ usage()
 {
     cat <<EOF
 Usage:
-    qemu -f qemu.cfg
+    qemu [-f qemu.cfg]
 or
     qemu KERNEL INITRD
 
@@ -176,6 +176,10 @@ gdb_args()
     echo -n "-device virtconsole,name=gdb,chardev=hvc1"
 }
 
+# Assume available from current directory
+dir=.
+cfg=qemu.cfg
+
 case $1 in
     -f)
 	if [ ! -r $2 ]; then
@@ -183,13 +187,19 @@ case $1 in
 	    usage
 	    exit 1
 	fi
-	. $2
+	dir=$(dirname $2)
+	cfg=$(basename $2)
 	;;
     *)
 	QEMU_KERNEL=$1
 	QEMU_MACH=$2
 	;;
 esac
+
+# Source default or -f config
+if [ -z "${QEMU_MACH}"  -o -z "${QEMU_KERNEL}" ]; then
+	. "$dir/$cfg"
+fi
 
 if [ -z "${QEMU_ARCH}" -o -z "${QEMU_MACH}"  -o -z "${QEMU_KERNEL}" ]; then
     echo "qemu: One or more of the following are missing"
