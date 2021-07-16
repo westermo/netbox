@@ -57,7 +57,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: dl/
-          key: dl-${{ matrix.platform }}-${{ matrix.profile }}-${{ hashFiles('.git/modules/netbox/HEAD', 'configs/*', 'package/*/*.hash') }}
+          key: dl-${{ matrix.platform }}-${{ matrix.profile }}-${{ hashFiles('.git/modules/buildroot/HEAD', 'configs/*', 'package/*/*.hash') }}
           restore-keys: |
             dl-${{ matrix.platform }}-${{ matrix.profile }}-
             dl-${{ matrix.platform }}-
