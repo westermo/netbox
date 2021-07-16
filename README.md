@@ -169,8 +169,8 @@ helper script `utils/qemu` for more information.
 
 ### Sharing a Host Directory with Qemu
 
-Most platforms (except *Basis*) support 9P file system sharing with the
-host.  This can be enabled by setting the absolute path in `QEMU_HOST`.
+NetBox support 9P file sharing between the host and Qemu targets.  Set
+directory to share, using the absolute path, in `QEMU_HOST`:
 
 ```
 ~/src/netbox$ make run QEMU_HOST=/tmp
