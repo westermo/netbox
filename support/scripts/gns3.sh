@@ -12,6 +12,9 @@ gns3_appliance=${BINARIES_DIR}/${NETBOX_VENDOR_ID}-${NETBOX_PLAT}${ver}.gns3a
 
 gns3a_generate()
 {
+    # Strip any leading dash if ver is set
+    VERSION=${ver#-}
+
     if [ -e "$gns3_template" ]; then
 	if [ -e "$config" ]; then
 	    mv "$config" "$cfg"
@@ -30,15 +33,15 @@ gns3a_generate()
 	sed -e "s#VENDOR_NAME#${NETBOX_VENDOR_NAME}#g" \
 	    -e "s#VENDOR_DESC#${NETBOX_VENDOR_DESC}#g" \
 	    -e "s#VENDOR_HOME#${NETBOX_VENDOR_HOME}#g" \
-	    -e "s#VENDOR_VERSION#${ver}#g" \
+	    -e "s#VENDOR_VERSION#${VERSION}#g" \
             -e "s#ROOTFS_FILE#$(basename "${iso}")#g" \
 	    -e "s#ROOTFS_SIZE#${iso_sz}#g" \
 	    -e "s#ROOTFS_MD5SUM#${iso_md5}#g" \
-	    -e "s#ROOTFS_VERSION#${ver}#g" \
+	    -e "s#ROOTFS_VERSION#${VERSION}#g" \
 	    -e "s#CONFIG_FILE#$(basename "${cfg}")#g" \
 	    -e "s#CONFIG_SIZE#${cfg_sz}#g" \
 	    -e "s#CONFIG_MD5SUM#${cfg_md5}#g" \
-	    -e "s#CONFIG_VERSION#${ver}#g" \
+	    -e "s#CONFIG_VERSION#${VERSION}#g" \
 	    < "${gns3_template}" > "${gns3_appliance}"
     fi
 }
