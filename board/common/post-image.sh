@@ -66,6 +66,12 @@ if [ "$BR2_PACKAGE_HOST_GENIMAGE" = "y" ]; then
     fi
 fi
 
+if [ -f "$BINARIES_DIR/sdcard.img" ]; then
+    # named like the zero config.ext3 disk image for gns3
+    sdc=$BINARIES_DIR/$NETBOX_VENDOR_ID-sdcard-${NETBOX_PLAT}${ver}.img
+    mv "$BINARIES_DIR/sdcard.img" "$sdc"
+fi
+
 # Source functions for generating .gns3a and qemu.cfg files
 . $BR2_EXTERNAL_NETBOX_PATH/support/scripts/gns3.sh
 . $BR2_EXTERNAL_NETBOX_PATH/support/scripts/qemu.sh
