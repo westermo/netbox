@@ -104,6 +104,19 @@ if [ "$BR2_LINUX_KERNEL" = "y" ]; then
     esac
 fi
 
+# Release builds enter here
+if [ -n "$RELEASE" ]; then
+    # Strip paths to images and .dtb files to run stand-alone
+    if [ -f "$BINARIES_DIR/qemu.cfg" ]; then
+	cp "$BR2_EXTERNAL_NETBOX_PATH/utils/qemu" "$BINARIES_DIR/"
+
+	# Have qemu.cfg == os build, provide more info if avail.
+	if [ -f "$BR2_EXTERNAL_NETBOX_PATH/board/$NETBOX_PLAT/README.md" ]; then
+	    cp "$BR2_EXTERNAL_NETBOX_PATH/board/$NETBOX_PLAT/README.md" "$BINARIES_DIR/"
+	fi
+    fi
+fi
+
 ##
 # Set TFTPDIR, in your .bashrc, or similar, to copy the resulting image
 # to your FTP/TFTP server directory.  Notice the use of scp, so you can
