@@ -66,13 +66,11 @@ jobs:
         env:
           RELEASE: ${{ steps.vars.outputs.tag }}
         run: |
-          echo "Building NetBox ${{ steps.vars.outputs.tgz }} ..."
           make netbox_${{ matrix.profile }}_${{ matrix.platform }}_defconfig
           make
           cd output
           mv images ${{ steps.vars.outputs.dir }}
           tar cfz ${{ steps.vars.outputs.tgz }} ${{ steps.vars.outputs.dir }}
-          ls *
       - name: Upload release artifacts ...
         uses: skx/github-action-publish-binaries@release-0.15
         env:
