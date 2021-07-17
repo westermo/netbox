@@ -1,0 +1,48 @@
+name: Bob the Builder
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    name: Build ${{ matrix.profile }} for ${{ matrix.platform }} platform
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile: [app, os]
+        platform: [basis, coronet, dagger, envoy, zero]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set Build Variables
+        id: vars
+        run: |
+          export NETBOX_TUPLE=${{ matrix.profile }}-${{ matrix.platform }}
+          echo ::set-output name=dir::netbox-${NETBOX_TUPLE}
+          echo ::set-output name=tgz::netbox-${NETBOX_TUPLE}.tar.gz
+      - uses: actions/cache@v2
+        with:
+          path: dl/
+          key: dl-${{ matrix.platform }}-${{ matrix.profile }}-${{ hashFiles('.git/modules/buildroot/HEAD', 'configs/*', 'package/*/*.hash') }}
+          restore-keys: |
+            dl-${{ matrix.platform }}-${{ matrix.profile }}-
+            dl-${{ matrix.platform }}-os-
+            dl-${{ matrix.platform }}-
+            dl-
+      - name: Configure & Build
+        run: |
+          make netbox_${{ matrix.profile }}_${{ matrix.platform }}_defconfig
+          make
+          cd output
+          mv images ${{ steps.vars.outputs.dir }}
+          tar cfz ${{ steps.vars.outputs.tgz }} ${{ steps.vars.outputs.dir }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.vars.outputs.tgz }}
+          path: output/${{ steps.vars.outputs.tgz }}
