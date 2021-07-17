@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build ${{ matrix.profile }} for ${{ matrix.platform }} platform
+    name: Build ${{ matrix.platform }} ${{ matrix.profile }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
