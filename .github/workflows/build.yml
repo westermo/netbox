@@ -25,7 +25,8 @@ jobs:
           export NETBOX_TUPLE=${{ matrix.profile }}-${{ matrix.platform }}
           echo ::set-output name=dir::netbox-${NETBOX_TUPLE}
           echo ::set-output name=tgz::netbox-${NETBOX_TUPLE}.tar.gz
-      - uses: actions/cache@v2
+      - name: Cache dl/
+        uses: actions/cache@v2
         with:
           path: dl/
           key: dl-${{ matrix.platform }}-${{ matrix.profile }}-${{ hashFiles('.git/modules/buildroot/HEAD', 'configs/*', 'package/*/*.hash') }}
@@ -34,6 +35,15 @@ jobs:
             dl-${{ matrix.platform }}-os-
             dl-${{ matrix.platform }}-
             dl-
+      - name: Cache .ccache
+        uses: actions/cache@v2
+        with:
+          path: .buildroot-ccache/
+          key: ccache-${{ matrix.board }}-os-${{ hashFiles('.git/modules/buildroot/HEAD', 'package/*/*.hash') }}
+          restore-keys: |
+            ccache-${{ matrix.board }}-os-
+            ccache-${{ matrix.board }}-
+            ccache--os-
       - name: Configure & Build
         run: |
           make netbox_${{ matrix.profile }}_${{ matrix.platform }}_defconfig
