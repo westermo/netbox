@@ -71,7 +71,7 @@ jobs:
           make
           cd output
           mv images ${{ steps.vars.outputs.dir }}
-          tar cfz ${{ steps.vars.outputs.tgz }} ${{ steps.vars.outputs.dir }}
+          tar --exclude=${{ steps.vars.outputs.dir }}/syslinux -czf ${{ steps.vars.outputs.tgz }} ${{ steps.vars.outputs.dir }}
       - name: Upload release artifacts ...
         uses: skx/github-action-publish-binaries@release-0.15
         env:

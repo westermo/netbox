@@ -172,8 +172,5 @@ fi
 if [ "$BR2_TARGET_ROOTFS_ISO9660_HYBRID" = "y" ]; then
     rm -f "$BINARIES_DIR/rootfs.cpio"
 fi
-if [ -n "$BINARIES_DIR" -a -d "$BINARIES_DIR/syslinux" ]; then
-    rm -rf "$BINARIES_DIR/syslinux"
-fi
 
 exit $err
