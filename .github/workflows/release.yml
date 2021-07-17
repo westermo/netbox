@@ -60,6 +60,7 @@ jobs:
           key: dl-${{ matrix.platform }}-${{ matrix.profile }}-${{ hashFiles('.git/modules/buildroot/HEAD', 'configs/*', 'package/*/*.hash') }}
           restore-keys: |
             dl-${{ matrix.platform }}-${{ matrix.profile }}-
+            dl-${{ matrix.platform }}-os-
             dl-${{ matrix.platform }}-
             dl-
       - name: Configure & Build
