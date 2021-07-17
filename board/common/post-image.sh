@@ -4,6 +4,16 @@
 imagesh=$BR2_EXTERNAL_NETBOX_PATH/support/scripts/image.sh
 fitimagesh=$BR2_EXTERNAL_NETBOX_PATH/support/scripts/fitimage.sh
 
+md5()
+{
+    dir=$(dirname "$1")
+    fn=$(basename "$1")
+
+    cd "$dir" || return
+    md5sum "$fn" > "$fn".md5
+    cd -
+}
+
 # Figure out version suffix for image files, default to empty suffix for
 # developer builds.  After a long discussion, this turned out to be the
 # least contentious alternative to: -dev, -devel, -HEAD, etc.
@@ -22,40 +32,61 @@ if [ -n "$RELEASE" ]; then
 fi
 
 # Type is now optional, possibly the image name should be customizable
+# The following files, for different use-cases, are root filesystem
+# image files:
+# img : squashfs initramfs image for qemu or for flashing to MTD flash
+# ext : ext2 disk image for qemu or writing to a disk partition
+# iso : boot cd for running in gns3 (qemu)
+# cfg : config disk image for gns3 (qemu)
+# sdc : sdcard image name for some targets
+# gns : gns3 appliance name (zero)
 if [ -n "$NETBOX_TYPE" ]; then
     img=$BINARIES_DIR/$NETBOX_VENDOR_ID-$NETBOX_TYPE-${NETBOX_PLAT}${ver}.img
     ext=$BINARIES_DIR/$NETBOX_VENDOR_ID-$NETBOX_TYPE-${NETBOX_PLAT}${ver}.ext2
+    iso=$BINARIES_DIR/$NETBOX_VENDOR_ID-$NETBOX_TYPE-${NETBOX_PLAT}${ver}.iso
 else
     img=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}${ver}.img
     ext=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}${ver}.ext2
+    iso=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}${ver}.iso
 fi
-dir=$(dirname "$img")
-md5=$dir/$(basename "$img" .img).md5
 
+# These two are only relevant for os profiles, no type needed
+cfg=$BINARIES_DIR/$NETBOX_VENDOR_ID-config-${NETBOX_PLAT}${ver}.ext3
+sdc=$BINARIES_DIR/$NETBOX_VENDOR_ID-sdcard-${NETBOX_PLAT}${ver}.img
+gns=$BINARIES_DIR/$NETBOX_VENDOR_ID-${NETBOX_PLAT}${ver}.gns3a
+
+# Note: currently this is an either/or situation, either the
+#       platform supports squashfs root, or needs an ext2
 if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
     squash=$BINARIES_DIR/rootfs.squashfs
     if [ "$BR2_LINUX_KERNEL" = "y" ]; then
 	$imagesh "$squash" "$img"
+	md5 "$img"
 
 	if [ "$NETBOX_IMAGE_FIT" ]; then
 	    itb=$(basename "${img}" .img).itb
 	    $fitimagesh "$NETBOX_PLAT" "$squash" "$itb"
+	    md5 "$itb"
 	fi
 
 	rm "$squash"
     else
 	mv "$squash" "$img"
+	md5 "$img"
     fi
 elif [ "$BR2_TARGET_ROOTFS_EXT2" = "y" ]; then
-    ext2=$BINARIES_DIR/rootfs.ext2
+    mv "$BINARIES_DIR/rootfs.ext2" "$ext"
+    md5 "$ext"
+
+    # override img for qemucfg_generate below
     img=$ext
-    mv "$ext2" "$img"
 fi
 
-# Create foo.md5 to foo.img
-md5sum "$img" > "$md5"
+if [ "$BR2_TARGET_ROOTFS_ISO9660_HYBRID" = "y" ]; then
+    mv "${BINARIES_DIR}/rootfs.iso9660" "$iso"
+    md5 "$iso"
+fi
 
-gen=""
 if [ "$BR2_PACKAGE_HOST_GENIMAGE" = "y" ]; then
     gen=${BR2_EXTERNAL_NETBOX_PATH}/board/${NETBOX_PLAT}/genimage.cfg
 
@@ -67,9 +98,8 @@ if [ "$BR2_PACKAGE_HOST_GENIMAGE" = "y" ]; then
 fi
 
 if [ -f "$BINARIES_DIR/sdcard.img" ]; then
-    # named like the zero config.ext3 disk image for gns3
-    sdc=$BINARIES_DIR/$NETBOX_VENDOR_ID-sdcard-${NETBOX_PLAT}${ver}.img
     mv "$BINARIES_DIR/sdcard.img" "$sdc"
+    md5 "$sdc"
 fi
 
 # Source functions for generating .gns3a and qemu.cfg files
@@ -97,7 +127,7 @@ if [ "$BR2_LINUX_KERNEL" = "y" ]; then
 	    ;;
 	x86_64)
 	    qemucfg_generate "$fn" "$dir"
-	    gns3a_generate		# only supported on x86_64 for now
+	    gns3a_generate "$iso" "$cfg" "$gns"
 	    ;;
 	*)
 	    ;;
@@ -121,13 +151,11 @@ fi
 # Set TFTPDIR, in your .bashrc, or similar, to copy the resulting image
 # to your FTP/TFTP server directory.  Notice the use of scp, so you can
 # copy the image to another system.
-if [ -n "$TFTPDIR" -a -e "${img}" ]; then
+if [ -n "$TFTPDIR" -a -e "$img" ]; then
     fn=$(basename "$img")
-    echo "xfering '$img' -> '${TFTPDIR}/$fn'"
-    scp -B "${img}" "$TFTPDIR"
-    if [ "$NETBOX_IMAGE_FIT" ]; then
-        scp -B "${itb}" "$TFTPDIR"
-    fi
+    echo "xfering '$img' -> '$TFTPDIR/$fn'"
+    scp -B "$img" "$TFTPDIR"
+    [ "$NETBOX_IMAGE_FIT" ] && scp -B "$itb" "$TFTPDIR"
 fi
 
 ##
