@@ -137,12 +137,15 @@ if [ "$BR2_TARGET_ROOTFS_EXT2" = "y" ]; then
     # some builds may want to use this instead of initrd to boot
     # but those who build a squashfs get initrd qemu boot
     if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
-	rm -f $BINARIES_DIR/rootfs.ext2
-	rm -f $BINARIES_DIR/rootfs.ext4
+	rm -f "$BINARIES_DIR/rootfs.ext2"
+	rm -f "$BINARIES_DIR/rootfs.ext4"
     fi
 fi
 if [ "$BR2_TARGET_ROOTFS_ISO9660_HYBRID" = "y" ]; then
-    rm -f $BINARIES_DIR/rootfs.cpio
+    rm -f "$BINARIES_DIR/rootfs.cpio"
+fi
+if [ -n "$BINARIES_DIR" -a -d "$BINARIES_DIR/syslinux" ]; then
+    rm -rf "$BINARIES_DIR/syslinux"
 fi
 
 exit $err
