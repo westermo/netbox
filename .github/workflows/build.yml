@@ -24,7 +24,6 @@ jobs:
         run: |
           export NETBOX_TUPLE=${{ matrix.profile }}-${{ matrix.platform }}
           echo ::set-output name=dir::netbox-${NETBOX_TUPLE}
-          echo ::set-output name=tgz::netbox-${NETBOX_TUPLE}.tar.gz
       - name: Cache dl/
         uses: actions/cache@v2
         with:
@@ -50,9 +49,10 @@ jobs:
           make
           cd output
           mv images ${{ steps.vars.outputs.dir }}
-          tar cfz ${{ steps.vars.outputs.tgz }} ${{ steps.vars.outputs.dir }}
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ steps.vars.outputs.tgz }}
-          path: output/${{ steps.vars.outputs.tgz }}
+          name: ${{ steps.vars.outputs.dir }}
+          path: |
+            output/${{ steps.vars.outputs.dir }}/*
+            !output/${{ steps.vars.outputs.dir }}/syslinux/*
