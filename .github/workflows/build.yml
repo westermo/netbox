@@ -48,11 +48,13 @@ jobs:
           make netbox_${{ matrix.profile }}_${{ matrix.platform }}_defconfig
           make
           cd output
+          sed -i 's,/home/runner/work/netbox/netbox/output/images/,,g' images/qemu.cfg
+          cp ../utils/qemu images/
           mv images ${{ steps.vars.outputs.dir }}
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.vars.outputs.dir }}
           path: |
-            output/${{ steps.vars.outputs.dir }}/*
+            output/${{ steps.vars.outputs.dir }}
             !output/${{ steps.vars.outputs.dir }}/syslinux/*
