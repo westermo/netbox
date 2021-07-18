@@ -212,13 +212,13 @@ For an example, see https://github.com/myrootfs/myrootfs#lxd
 [HACKING]:       HACKING.md
 [App-Demo]:      https://github.com/westermo/app-demo
 [Open Source]:   https://en.wikipedia.org/wiki/Free_and_open-source_software
-[basis.app]:     https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-basis.tar.gz
-[coronet.app]:   https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-coronet.tar.gz
-[dagger.app]:    https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-dagger.tar.gz
-[envoy.app]:     https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-envoy.tar.gz
-[zero.app]:      https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-zero.tar.gz
-[basis.os]:      https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-basis.tar.gz
-[coronet.os]:    https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-coronet.tar.gz
-[dagger.os]:     https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-dagger.tar.gz
-[envoy.os]:      https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-envoy.tar.gz
-[zero.os]:       https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-zero.tar.gz
+[basis.app]:     https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-basis.zip
+[coronet.app]:   https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-coronet.zip
+[dagger.app]:    https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-dagger.zip
+[envoy.app]:     https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-envoy.zip
+[zero.app]:      https://nightly.link/westermo/netbox/workflows/build/master/netbox-app-zero.zip
+[basis.os]:      https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-basis.zip
+[coronet.os]:    https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-coronet.zip
+[dagger.os]:     https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-dagger.zip
+[envoy.os]:      https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-envoy.zip
+[zero.os]:       https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-zero.zip
