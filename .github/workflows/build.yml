@@ -24,6 +24,7 @@ jobs:
         run: |
           export NETBOX_TUPLE=${{ matrix.profile }}-${{ matrix.platform }}
           echo ::set-output name=dir::netbox-${NETBOX_TUPLE}
+          echo ::set-output name=tgz::netbox-${NETBOX_TUPLE}.tar.gz
       - name: Restore Cache of dl/
         uses: actions/cache@v2
         with:
@@ -47,7 +48,10 @@ jobs:
         run: |
           make netbox_${{ matrix.profile }}_${{ matrix.platform }}_defconfig
           make
-      - name: Preparing Images
+      - name: Prepare Artifact
+        # The tarball helps retain file modes and gives us a containing
+        # directory, something the upload-artifact does not support.
+        # Downside, we get a zip with a tar.gz on download
         run: |
           cd output
           rm -rf images/syslinux
@@ -56,8 +60,9 @@ jobs:
             cp ../utils/qemu images/
           fi
           mv images ${{ steps.vars.outputs.dir }}
-      - name: Upload Artifacts
+          tar cfz ${{ steps.vars.outputs.tgz }} ${{ steps.vars.outputs.dir }}
+      - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ steps.vars.outputs.dir }}
-          path: output/${{ steps.vars.outputs.dir }}
+          name: ${{ steps.vars.outputs.tgz }}
+          path: output/${{ steps.vars.outputs.tgz }}
