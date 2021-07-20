@@ -34,6 +34,12 @@ General guidelines:
 And ... to add new packages, please follow the [Buildroot Guidelines][].
 
 
+Kernel Upgrade
+--------------
+
+   0. Remember to also update `patches/` symlinks
+
+
 Releases
 --------
 
