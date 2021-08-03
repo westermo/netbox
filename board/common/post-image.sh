@@ -64,7 +64,7 @@ if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
 	md5 "$img"
 
 	if [ "$NETBOX_IMAGE_FIT" ]; then
-	    itb=$(basename "${img}" .img).itb
+	    itb=$(dirname "${img}")/$(basename "${img}" .img).itb
 	    $fitimagesh "$NETBOX_PLAT" "$squash" "$itb"
 	    md5 "$itb"
 	fi
