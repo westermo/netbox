@@ -357,6 +357,11 @@ poe_i2c: &i2c3 {
 	clock-frequency = <400000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c3>;
+
+	adc081c@58 {
+		compatible = "ti,adc081c";
+		reg = <0x58>;
+	};
 };
 
 &uart1 { /* console */
