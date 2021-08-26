@@ -2,6 +2,18 @@
 
 me=$(basename $0)
 
+gpiobyname() {
+    gpioinfo | awk -v pin=$1 '
+	/^[^\t]/ { chip=$1 }
+	/^\t/ {
+	    if ($3 == "\"" pin "\"") {
+		gsub(":", "");
+		print(chip, $2);
+	    }
+	}
+    '
+}
+
 loop=1
 undervoltage=0
 
@@ -18,20 +30,16 @@ do
         fi
         undervoltage=1
 
-        # Reset both chips
-        i2cset -f -y 2 0x20 0x1a 0x10
-        i2cset -f -y 2 0x24 0x1a 0x10
+        # Reset via PoE_RST
+        gpioset $(gpiobyname exp-reset)=0
+        sleep 0.1
     else
         if [ $undervoltage -eq 1 ]; then
             logger -c -p user.info -t $me "PoE voltage ok: $voltagemV"
 
-            # Reset expansion board
-            # gpioset $(gpiobyname exp-reset)=0
-            # sleep 10
-
-            # Release expansion board from reset
-            # gpioset $(gpiobyname exp-reset)=1
-            # sleep 0.1
+            # Release PoE_RST
+            gpioset $(gpiobyname exp-reset)=1
+            sleep 0.1
 
             Check for ID memory
             if ! i2cget -f -y 2 0x54 &>/dev/null; then
