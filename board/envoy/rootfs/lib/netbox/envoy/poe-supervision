@@ -33,7 +33,7 @@ do
         # Reset via PoE_RST
         gpioset $(gpiobyname exp-reset)=0
         sleep 0.1
-    else
+    elif [ $voltagemV -gt 45500 ]; then
         if [ $undervoltage -eq 1 ]; then
             logger -c -p user.info -t $me "PoE voltage ok: $voltagemV"
 
