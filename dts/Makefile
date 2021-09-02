@@ -2,11 +2,13 @@ ifeq ($(PLAT),)
 $(error "Platform not set.")
 endif
 
-ifeq ($(ARCH),aarch64)
-karch := arm64
-else
-karch := $(ARCH)
-endif
+# Unfortunately this is not always the same as ARCH
+karch-basis   := arm
+karch-coronet := powerpc
+karch-dagger  := arm
+karch-envoy   := arm64
+karch-zero    := x86_64
+karch := $(karch-$(PLAT))
 
 kernel-dts := $(LINUX_DIR)/arch/$(karch)/boot/dts
 board-dts  := $(wildcard $(PLAT)/*/device-tree.dts)
