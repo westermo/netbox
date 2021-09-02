@@ -10,6 +10,7 @@ karch-envoy   := arm64
 karch-zero    := x86_64
 karch := $(karch-$(PLAT))
 
+default-board-dagger := 0000-needle
 default-board := $(default-board-$(PLAT))
 
 kernel-dts := $(LINUX_DIR)/arch/$(karch)/boot/dts
