@@ -1,0 +1,94 @@
+#!/bin/sh
+
+me=$(basename $0)
+
+gpiobyname() {
+    gpioinfo | awk -v pin=$1 '
+	/^[^\t]/ { chip=$1 }
+	/^\t/ {
+	    if ($3 == "\"" pin "\"") {
+		gsub(":", "");
+		print(chip, $2);
+	    }
+	}
+    '
+}
+
+loop=1
+undervoltage=0
+
+while [ $loop -gt 0 ]
+do
+    rawread=`cat /sys/bus/iio/devices/iio:device0/in_voltage_raw`
+    let rawmV=rawread*1000
+    let rawmV=rawmV*66
+    let voltagemV=rawmV/255
+
+    if [ $voltagemV -lt 44000 ]; then
+        if [ $undervoltage -eq 0 ]; then
+            logger -c -p user.info -t $me "PoE Undervoltage: $voltagemV"
+        fi
+        undervoltage=1
+
+        # Reset via PoE_RST
+        gpioset $(gpiobyname exp-reset)=0
+        sleep 0.1
+    elif [ $voltagemV -gt 45500 ]; then
+        if [ $undervoltage -eq 1 ]; then
+            logger -c -p user.info -t $me "PoE voltage ok: $voltagemV"
+
+            # Release PoE_RST
+            gpioset $(gpiobyname exp-reset)=1
+            sleep 0.1
+
+            Check for ID memory
+            if ! i2cget -f -y 2 0x54 &>/dev/null; then
+                logger -c -p user.info -t $me \
+                "No expansion board connected"
+
+                exit 0
+            fi
+
+            # TODO: Support multiple boards
+
+            ids="0x20 0x24"
+
+            for id in $ids; do
+                i2cget -y 2 $id &>/dev/null && continue
+                exit 1
+            done
+
+            for id in $ids; do
+                # Enable high power on all ports
+                i2cset -y 2 $id 0x44 0x0f
+
+                reg=0x46
+                for p in 0 1 2 3; do
+                # Enable 2 event classification
+                i2cset -y 2 $id $reg 0x01
+                reg=$(printf '%#x' $(($reg + 1)))
+
+                # Icut set to 0,6 A (i.e. 32,4 W when 54V supply)
+                i2cset -y 2 $id $reg 0x10
+                reg=$(printf '%#x' $(($reg + 1)))
+
+                # Ilim set to 0,850 A
+                i2cset -y 2 $id $reg 0xa0
+                reg=$(printf '%#x' $(($reg + 3)))
+                done
+
+                # Set all ports in auto mode i.e. controller will automatically
+                # detect/classify and power up.
+                i2cset -y 2 $id 0x12 0xff
+                # Enable detection and classification on all ports.
+                i2cset -y 2 $id 0x14 0xff
+                # Disable AC disconnect and enable DC disconnect on all ports.
+                i2cset -y 2 $id 0x13 0x0f
+            done
+        fi
+
+        undervoltage=0
+    fi
+
+    sleep 2
+done
