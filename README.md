@@ -35,7 +35,7 @@ be able to easily match what container image works on a Westermo device:
 |------------------|-------------------|-----------------|----------------|
 | arm9             | Basis             | [basis.app][]   | [basis.os][]   |
 | powerpc          | Coronet           | [coronet.app][] | [coronet.os][] |
-| arm cortex-a9    | Dagger            | [dagger.app][]  | [dagger.os][]   |
+| arm pj4          | Dagger            | [dagger.app][]  | [dagger.os][]   |
 | aarch64          | Envoy             | [envoy.app][]   | [envoy.os][]   |
 | x86_64           | Zero              | [zero.app][]    | [zero.os][]    |
 
