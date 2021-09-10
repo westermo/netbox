@@ -122,6 +122,13 @@ build it will take some time:
 Done.  See the `output/images/` directory for the resulting SquasFS
 based root file system: `netbox-app-zero.img`
 
+> **Tip:** the same source tree can easily be used to build multiple
+>   defconfigs, use the Buildroot `O=` variable to change the default
+>   `output/...` to `O=/home/$LOGNAME/src/netbox/zero` in one terminal
+>   window, and `O=/home/$LOGNAME/src/netbox/coronet` in another.  This
+>   way, when working with packages, e.g. editing code, you can build
+>   for multiple targets at the same time, without cleaning the tree.
+
 
 Running
 -------
