@@ -1,2 +1,2 @@
+define(`toolchain_arch', `AARCH64')dnl
 BR2_aarch64=y
-BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_AARCH64_GLIBC_STABLE=y
