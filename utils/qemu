@@ -40,10 +40,10 @@ Environment variables that impact qemu:
        default: 4712
 
     QEMU_MNT - JFFS2 image to mount as /mnt
-       default: None, mandatory
+       default: None
 
     QEMU_HOST - Directory to passthrough-mount (9p) as /host
-       default: None, mandatory
+       default: None
 
     QEMU_N_NICS - Number of Network adapters
        default: 1
