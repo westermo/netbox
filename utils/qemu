@@ -127,7 +127,7 @@ host_args()
 {
     [ -z "${QEMU_HOST}" ] && return
 
-    echo -n "-virtfs local,path=${QEMU_HOST},security_model=none,mount_tag=hostfs "
+    echo -n "-virtfs local,path=${QEMU_HOST},security_model=none,writeout=immediate,mount_tag=hostfs "
 }
 
 net_args()

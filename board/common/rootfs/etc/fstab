@@ -12,7 +12,7 @@ sysfs		/sys		sysfs		defaults		0	0
 debugfs	/sys/kernel/debug	debugfs		nofail			0	0
 
 # Optional host share when running in Qemu
-hostfs		/host		9p		nofail,cache=loose	0	0
+hostfs		/host		9p		nofail,cache=none	0	0
 
 # Persistent store on MTD if available, fallback to LABEL:Config, or ramdisk
 mtd:Config	 /mnt		jffs2		noatime,nodiratime,noauto	0	0
