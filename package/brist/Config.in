@@ -1,0 +1,18 @@
+config BR2_PACKAGE_BRIST
+	bool "brist - BRIdge Self Test"
+	select BR2_PACKAGE_SOCAT
+	select BR2_PACKAGE_TCPDUMP
+	select BR2_PACKAGE_IPROUTE2
+	help
+	  Brist is a standalone, easy to use, portable framework to
+	  verify the capabilities of the Linux bridge.  Emphasis on
+	  portable.  It should be possible to run on a full-blown Linux
+	  distribution, but it must be possible to run on limited
+	  embedded systems.
+
+	  Brist is written in POSIX shell script, with some scent of
+	  awk, and uses tools like socat, ping, and tcpdump to do its
+	  bidding.  For some tests nemesis is used, but when it is not
+	  available, those tests are skipped.
+
+          https://github.com/westermo/brist/
