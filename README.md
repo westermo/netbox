@@ -177,6 +177,12 @@ defaults to `VENDOR-config-PLATFORM.img`, provided `~/.cache` exists .
 E.g., for NetBox Zero OS: `~/.cache/netbox-config-zero.img`.  See the
 helper script `utils/qemu` for more information.
 
+When persistent storage is enabled and working, the `/mnt` directory on
+the target system is used to storing an OverlayFS of the target's
+`/etc`, `/root`, and `/var`, directories.  I.e., changing a file in
+either of these directories (exceptions in `/var` exist) is persistent
+across reboots.
+
 
 ### Sharing a Host Directory with Qemu
 
@@ -186,6 +192,9 @@ directory to share, using the absolute path, in `QEMU_HOST`:
 ```
 ~/src/netbox$ make run QEMU_HOST=/tmp
 ```
+
+When booting your target system with `make run`, the hosts' `/tmp`
+directory is available as `/host` on the target system.
 
 
 ### Example
