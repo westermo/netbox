@@ -60,11 +60,11 @@ Requirements
 ------------
 
 The build environment requires the following tools, tested on Ubuntu
-21.04 (x86_64): make, gcc, g++, m4, and openssl development package.
+21.04 (x86_64): make, gcc, g++, m4, python, and openssl development package.
 On Debian based systems:
 
 ```sh
-~$ sudo apt install build-essential m4 libssl-dev
+~$ sudo apt install build-essential m4 libssl-dev python
 ```
 
 To run in Qemu, either enable host-side build in `make menuconfig`, or
@@ -76,7 +76,7 @@ On Debian based systems:
 ```
 
 For smooth sailing, after install, add the following line to the file
-`/etc/qemu/bridge.conf`:
+`/etc/qemu/bridge.conf` (add file if it does not exist):
 
 ```ApacheConf
 allow all
@@ -136,7 +136,11 @@ Running
 All NetBox OS builds are supported by Qemu.  This is actually a corner
 stone in NetBox, and principal testing strategy at Westermo.  It can be
 highly useful for quick turnarounds when developing and testing new
-features.
+features. Make sure you have built one of the os images before running, e.g.:
+
+```sh
+~/src/netbox$ make netbox_os_zero_defconfig
+```
 
 Any feature targeting OSI layer 3, and above, need nothing else to run.
 For more advanced test setups, with multiple networked Qemu nodes, we
