@@ -172,7 +172,7 @@ gdb_args()
     fi
 
     addr="port=${QEMU_GDB_UPORT:-4712},host=localhost"
-    echo -n "-chardev socket,id=hvc1,${addr},server,nowait "
+    echo -n "-chardev socket,id=hvc1,${addr},server=on,wait=off "
     echo -n "-device virtconsole,name=gdb,chardev=hvc1"
 }
 
