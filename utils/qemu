@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC2039
 usage()
 {
     cat <<EOF
@@ -86,7 +87,7 @@ append_args()
 
     if [ "${1}" = "-r" ]; then
 	# Size of initrd, rounded up to nearest kb
-	size=$((($(find ${2} -printf %s)+1023) >> 10))
+	size=$((($(find "${2}" -printf %s)+1023) >> 10))
 	echo -n "root=/dev/ram ramdisk_size=${size} "
 	echo -n "block2mtd.block2mtd=/dev/sda,,Config "
     else
@@ -96,7 +97,7 @@ append_args()
 
 dtb_args()
 {
-    if [ -z ${QEMU_DTB} ]; then
+    if [ -z "${QEMU_DTB}" ]; then
 	return
     fi
 
@@ -167,7 +168,7 @@ consle_args()
 gdb_args()
 {
     echo -n "-gdb tcp::${QEMU_GDB_KPORT:-4711} "
-    if [ ! -z ${QEMU_GDB_KWAIT} ]; then
+    if [ -n "${QEMU_GDB_KWAIT}" ]; then
         echo -n "-S "
     fi
 
