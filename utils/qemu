@@ -1,5 +1,17 @@
 #!/bin/sh
 # shellcheck disable=SC2039
+
+# If user has built a qemu from Buildroot, prefer that over any pre-instsalled
+if [ -n "$O" ]; then
+    export PATH=$O/host/bin:$PATH
+    mkdir -p "$O/host/etc/qemu"
+    #bridge mode doesn't work unless the helper has correct caps
+    #cp /etc/qemu/bridge.conf "$O/host/etc/qemu/bridge.conf"
+
+    # TODO: for now, override QEMU_NET to allow running as regular user
+    QEMU_NET=user
+fi
+
 usage()
 {
     cat <<EOF
@@ -54,6 +66,7 @@ Environment variables that impact qemu:
 
     QEMU_NET - Network mode
       "bridge": Bridge the quests interface to the host's QEMU_BRIDGE
+        "user": User (NAT) networking, no root or capabilities required
 	 "tap": Guest interface is exported as exported to host as qtap
        default: "bridge"
 
@@ -136,6 +149,11 @@ net_args()
     brname=${QEMU_BRIDGE:-virbr0}
     model=${QEMU_NIC}
     mode=${QEMU_NET:-bridge}
+
+    if [ "${mode}" = "user" ]; then
+	/bin/echo -n "-net nic,model=virtio -net user "
+	return
+    fi
 
     for n in $(seq 0 $((${QEMU_N_NICS:-1} - 1)) ); do
 	if [ "${mode}" = "bridge" -a ${n} -eq 0 ]; then
