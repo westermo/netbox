@@ -1,0 +1,28 @@
+commit 4090150690c71a47270bd44f497f92ad60a62c9b
+Author: Lennart Eriksson <lennart.eriksson@westermo.com>
+Date:   Wed Oct 20 13:07:44 2021 +0200
+
+    drivers: sparx5: Increase a pointer causes page fault on sparx5
+
+    sparx5_get_stats64 gets page fault because stats is increased
+    in a for loop but since stats is a pointer it should not be
+    increased like that.
+
+    My guess is that this is a copy-paste error.
+
+    Signed-off-by: Lennart Eriksson <lennart.eriksson@westermo.com>
+ 
+diff --git a/drivers/net/ethernet/microchip/sparx5/sparx5_ethtool.c b/drivers/net/ethernet/microchip/sparx5/sparx5_ethtool.c
+index 59783fc46a7b..10b866e9f726 100644
+--- a/drivers/net/ethernet/microchip/sparx5/sparx5_ethtool.c
++++ b/drivers/net/ethernet/microchip/sparx5/sparx5_ethtool.c
+@@ -1103,7 +1103,7 @@ void sparx5_get_stats64(struct net_device *ndev,
+ 	stats->tx_carrier_errors = portstats[spx5_stats_tx_csense_cnt];
+ 	stats->tx_window_errors = portstats[spx5_stats_tx_late_coll_cnt];
+ 	stats->rx_dropped = portstats[spx5_stats_ana_ac_port_stat_lsb_cnt];
+-	for (idx = 0; idx < 2 * SPX5_PRIOS; ++idx, ++stats)
++	for (idx = 0; idx < 2 * SPX5_PRIOS; ++idx)
+ 		stats->rx_dropped += portstats[spx5_stats_green_p0_rx_port_drop
+ 					       + idx];
+ 	stats->tx_dropped = portstats[spx5_stats_tx_local_drop];
+
