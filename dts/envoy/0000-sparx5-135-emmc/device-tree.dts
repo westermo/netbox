@@ -1,0 +1,304 @@
+/dts-v1/;
+
+#include "microchip/sparx5.dtsi"
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+
+&cpu0 {
+	enable-method = "spin-table";
+	cpu-release-addr = <0x0 0x0000fff8>;
+};
+
+&cpu1 {
+	enable-method = "spin-table";
+	cpu-release-addr = <0x0 0x0000fff8>;
+};
+
+/ {
+	model = "Sparx5 PCB135 Reference Board (NAND)";
+	compatible = "microchip,sparx5-pcb135", "microchip,sparx5";
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x00000000 0x00000000 0x10000000>;
+	};
+	gpio-restart {
+		compatible = "gpio-restart";
+		gpios = <&gpio 37 GPIO_ACTIVE_LOW>;
+		priority = <200>;
+	};
+
+	psci {
+		status = "disabled";
+	};
+};
+
+&gpio {
+	emmc_pins: emmc-pins {
+		/* NB: No "GPIO_35", "GPIO_36", "GPIO_37"
+		 * (N/A: CARD_nDETECT, CARD_WP, CARD_LED)
+		 */
+		pins = "GPIO_34", "GPIO_38", "GPIO_39",
+			"GPIO_40", "GPIO_41", "GPIO_42",
+			"GPIO_43", "GPIO_44", "GPIO_45",
+			"GPIO_46", "GPIO_47";
+		drive-strength = <3>;
+		function = "emmc";
+	};
+};
+
+&sdhci0 {
+	status = "okay";
+	pinctrl-0 = <&emmc_pins>;
+	non-removable;
+	max-frequency = <52000000>;
+	bus-width = <8>;
+	microchip,clock-delay = <10>;
+};
+
+&gpio {
+	cs14_pins: cs14-pins {
+		pins = "GPIO_44";
+		function = "si";
+	};
+};
+
+&spi0 {
+	pinctrl-0 = <&si2_pins>;
+	pinctrl-names = "default";
+	spi@e {
+		compatible = "spi-mux";
+		mux-controls = <&mux>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <14>; /* CS14 */
+		spi-flash@6 {
+			compatible = "spi-nand";
+			pinctrl-0 = <&cs14_pins>;
+			pinctrl-names = "default";
+			reg = <0x6>; /* SPI2 */
+			spi-max-frequency = <42000000>;
+			rx-sample-delay-ns = <7>;  /* Tune for speed */
+		};
+	};
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&uart1 {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+};
+
+&spi0 {
+	status = "okay";
+	spi-flash@0 {
+		compatible = "jedec,spi-nor";
+		spi-max-frequency = <8000000>;
+		reg = <0>;
+	};
+};
+
+&gpio {
+	i2cmux_pins_i: i2cmux-pins-i {
+	       pins = "GPIO_35", "GPIO_36",
+		      "GPIO_50", "GPIO_51";
+		function = "twi_scl_m";
+		output-low;
+	};
+	i2cmux_s29: i2cmux-0 {
+		pins = "GPIO_35";
+		function = "twi_scl_m";
+		output-high;
+	};
+	i2cmux_s30: i2cmux-1 {
+		pins = "GPIO_36";
+		function = "twi_scl_m";
+		output-high;
+	};
+	i2cmux_s31: i2cmux-2 {
+		pins = "GPIO_50";
+		function = "twi_scl_m";
+		output-high;
+	};
+	i2cmux_s32: i2cmux-3 {
+		pins = "GPIO_51";
+		function = "twi_scl_m";
+		output-high;
+	};
+};
+
+&spi0 {
+	status = "okay";
+	spi@0 {
+		compatible = "spi-mux";
+		mux-controls = <&mux>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0>; /* CS0 */
+		spi-flash@9 {
+			compatible = "jedec,spi-nor";
+			spi-max-frequency = <8000000>;
+			reg = <0x9>; /* SPI */
+		};
+	};
+};
+
+&sgpio1 {
+	status = "okay";
+	microchip,sgpio-port-ranges = <24 31>;
+	gpio@0 {
+		ngpios = <64>;
+	};
+	gpio@1 {
+		ngpios = <64>;
+	};
+};
+
+&mdio0 {
+	status = "ok";
+	phy0: ethernet-phy@0 {
+		reg = <0>;
+	};
+	phy1: ethernet-phy@1 {
+		reg = <1>;
+	};
+	phy2: ethernet-phy@2 {
+		reg = <2>;
+	};
+	phy3: ethernet-phy@3 {
+		reg = <3>;
+	};
+	phy4: ethernet-phy@4 {
+		reg = <4>;
+	};
+	phy5: ethernet-phy@5 {
+		reg = <5>;
+	};
+	phy6: ethernet-phy@6 {
+		reg = <6>;
+	};
+	phy7: ethernet-phy@7 {
+		reg = <7>;
+	};
+	phy8: ethernet-phy@8 {
+		reg = <8>;
+	};
+	phy9: ethernet-phy@9 {
+		reg = <9>;
+	};
+	phy10: ethernet-phy@10 {
+		reg = <10>;
+	};
+	phy11: ethernet-phy@11 {
+		reg = <11>;
+	};
+};
+
+&switch {
+	ethernet-ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port1: port@0 {
+			reg = <0>;
+			label = "eth1";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 13>;
+			phy-handle = <&phy0>;
+			phy-mode = "qsgmii";
+		};
+		port2: port@1 {
+			reg = <1>;
+			label = "eth2";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 13>;
+			phy-handle = <&phy1>;
+			phy-mode = "qsgmii";
+		};
+		port3: port@2 {
+			reg = <2>;
+			label = "eth3";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 13>;
+			phy-handle = <&phy2>;
+			phy-mode = "qsgmii";
+		};
+		port4: port@3 {
+			reg = <3>;
+			label = "eth4";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 13>;
+			phy-handle = <&phy3>;
+			phy-mode = "qsgmii";
+		};
+		port5: port@4 {
+			reg = <4>;
+			label = "eth5";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 14>;
+			phy-handle = <&phy4>;
+			phy-mode = "qsgmii";
+		};
+		port6: port@5 {
+			reg = <5>;
+			label = "eth6";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 14>;
+			phy-handle = <&phy5>;
+			phy-mode = "qsgmii";
+		};
+		port7: port@6 {
+			reg = <6>;
+			label = "eth7";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 14>;
+			phy-handle = <&phy6>;
+			phy-mode = "qsgmii";
+		};
+		port8: port@7 {
+			reg = <7>;
+			label = "eth8";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 14>;
+			phy-handle = <&phy7>;
+			phy-mode = "qsgmii";
+		};
+		port9: port@8 {
+			reg = <8>;
+			label = "eth9";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 15>;
+			phy-handle = <&phy8>;
+			phy-mode = "qsgmii";
+		};
+		port10: port@9 {
+			reg = <9>;
+			label = "eth10";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 15>;
+			phy-handle = <&phy9>;
+			phy-mode = "qsgmii";
+		};
+		port11: port@10 {
+			reg = <10>;
+			label = "eth11";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 15>;
+			phy-handle = <&phy10>;
+			phy-mode = "qsgmii";
+		};
+		port12: port@11 {
+			reg = <11>;
+			label = "eth12";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 15>;
+			phy-handle = <&phy11>;
+			phy-mode = "qsgmii";
+		};
+	};
+};
