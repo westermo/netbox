@@ -55,6 +55,7 @@ for dtb in $dtbs; do
 			description = "$name";
 			type = "flat_dt";
 			arch = "$arch";
+			compression = "none";
 			data = /incbin/("$dtb");
 		};
 EOF
@@ -95,6 +96,7 @@ cat <<EOF >$workdir/netbox.its
 			type = "ramdisk";
 			os = "linux";
 			arch = "$arch";
+			compression = "none";
 			data = /incbin/("$squash");
 		};
 
