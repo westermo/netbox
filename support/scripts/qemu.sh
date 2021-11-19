@@ -60,4 +60,9 @@ EOF
     elif [ "$BR2_TARGET_ROOTFS_EXT2" = "y" ]; then
 	echo "QEMU_DISK=$img"   >>$qemucfg
     fi
+
+    echo >>$qemucfg
+    if [ "$BR2_PACKAGE_HOST_QEMU_SYSTEM_MODE" = "y" ]; then
+	echo "QEMU_SYSTEM_PATH=$HOST_DIR/bin" >>$qemucfg
+    fi
 }

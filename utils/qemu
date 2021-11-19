@@ -1,16 +1,15 @@
 #!/bin/sh
+# This script reads env variables (see below) and output/images/qemu.cfg
+# to start a single Qemu instance for your target platform.  You can use
+# the Qemu from your Linux distribution or the host package in Buildroot.
+#
+# Since the one built by Buildroot likely doesn't have capabilities set,
+# you have to set 'QEMU_NET=user', to allow running as regular user, or
+# use 'sudo make run'.  The 'QEMU_NET=bridge' mode doesn't work unless
+# the bridge helper has the correct capabilities set, and a valid bridge
+# set in /etc/qemu/bridge.conf or $O/host/etc/qemu/bridge.conf
+#
 # shellcheck disable=SC2039
-
-# If user has built a qemu from Buildroot, prefer that over any pre-instsalled
-if [ -n "$O" ]; then
-    export PATH=$O/host/bin:$PATH
-    mkdir -p "$O/host/etc/qemu"
-    #bridge mode doesn't work unless the helper has correct caps
-    #cp /etc/qemu/bridge.conf "$O/host/etc/qemu/bridge.conf"
-
-    # TODO: for now, override QEMU_NET to allow running as regular user
-    QEMU_NET=user
-fi
 
 usage()
 {
@@ -66,8 +65,9 @@ Environment variables that impact qemu:
 
     QEMU_NET - Network mode
       "bridge": Bridge the quests interface to the host's QEMU_BRIDGE
-        "user": User (NAT) networking, no root or capabilities required
 	 "tap": Guest interface is exported as exported to host as qtap
+        "user": User (NAT) networking, no root or capabilities required,
+                note, only a single interface is created
        default: "bridge"
 
     QEMU_BRIDGE - Host-side bridge to attach interfaces to
@@ -217,7 +217,10 @@ esac
 
 # Source default or -f config
 if [ -z "${QEMU_MACH}"  -o -z "${QEMU_KERNEL}" ]; then
-	. "$dir/$cfg"
+    . "$dir/$cfg"
+    if [ -n "${QEMU_SYSTEM_PATH}" ]; then
+	export PATH="${QEMU_SYSTEM_PATH}:${PATH}"
+    fi
 fi
 
 if [ -z "${QEMU_ARCH}" -o -z "${QEMU_MACH}"  -o -z "${QEMU_KERNEL}" ]; then
