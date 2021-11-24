@@ -1,0 +1,122 @@
+#!/bin/sh
+# Displays basic information about the system, similar to WeOS CLI show command
+. /etc/os-release
+
+usage()
+{
+    cat <<EOF
+  show ports           Show ports available for bridging
+  show vlans           Show port groups in bridge
+  show ifaces          Show interfaces and their addresses
+  show ip route        Show routing table
+  show rmon PORT       Show RMON counters for PORT (when applicable)
+  show system          Show OS details
+  show version         Show OS verson
+EOF
+}
+
+ports()
+{
+    printf "\e[7mPORT             STATE          ADDRESS <FLAGS>                               \e[0m\n"
+    if grep -q port /etc/iproute2/group; then
+	ip -br link show group port
+    else
+	ip -br link show
+    fi
+}
+
+vlans()
+{
+    printf "\e[7mINTERFACE         VLAN  FLAGS                                                 \e[0m\n"
+    bridge vlan show |tail +2 | awk 'NF { iface=$1; vid=$2; printf("%-16s  %4d  ", iface, vid); for (i=3; i <= NF; i++) printf("%s ", $i); printf("\n"); }'
+}
+
+ifaces()
+{
+    printf "\e[7mINTERFACE        STATE          ADDRESS                                       \e[0m\n"
+    ip -br addr show up
+}
+
+rmon()
+{
+    if [ -z "$*" ]; then
+	echo "Missing argument, see 'show port' for available interfaces"
+	exit 1
+    fi
+    for port in $*; do
+	ethtool -S "$port"
+    done
+}
+
+routes()
+{
+    ip route show
+}
+
+system()
+{
+    printf "\e[7mSYSTEM INFORMATION                                                            \e[0m\n"
+    echo "System Name        : $(uname -n)"
+    echo "System Description : $PRETTY_NAME"
+    echo "System Contact     : $HOME_URL"
+    echo "System Timezone    : $TZ"
+    echo "System Type        : $NAME"
+    echo "System Version     : $(cat /etc/version)"
+    echo "Kernel Version     : $(uname -sr)"
+    echo "Platform           : $VARIANT ($(uname -m))"
+}
+
+version()
+{
+    cat /etc/version
+}
+
+cmd=$1
+if [ -n "$cmd" ]; then
+   shift
+fi
+
+case $cmd in
+    help)
+	usage
+	;;
+    port*)
+	ports
+	;;
+    vlan*)
+	vlans
+	;;
+    if*)
+	ifaces
+	;;
+    ip)
+	cmd=$1
+	shift
+	case $cmd in
+	    addr*)
+		ifaces
+		;;
+	    route*)
+		routes
+		;;
+	    *)
+		usage
+		;;
+	esac
+	;;
+    rmon)
+	rmon "$*"
+	;;
+    route*)
+	routes
+	;;
+    sys*)
+	system
+	;;
+    ver*)
+	version
+	;;
+    *)
+	usage
+	;;
+esac
