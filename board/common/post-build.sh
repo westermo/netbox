@@ -21,6 +21,8 @@ echo "VARIANT_ID=${platform}"                >>$TARGET_DIR/etc/os-release
 echo "HOME_URL=${NETBOX_VENDOR_HOME}"        >>$TARGET_DIR/etc/os-release
 
 printf "$NETBOX_VENDOR_NAME $NETBOX_VENDOR_VERSION -- `date +"%b %e %H:%M %Z %Y"`\n" > $TARGET_DIR/etc/version
+cat $TARGET_DIR/etc/version                                          >> $TARGET_DIR/etc/motd
+printf "Type: 'help' for help with commands, 'exit' to log out.\n\n" >> $TARGET_DIR/etc/motd
 
 # Default buildroot is a symlink to /var/run/dropbear, meaning
 #  1. the /var/run/dropbear directory must be created at boot
