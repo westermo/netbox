@@ -130,6 +130,18 @@ based root file system: `netbox-app-zero.img`
 >   for multiple targets at the same time, without cleaning the tree.
 
 
+Updating
+--------
+
+To update your local copy of NetBox from git, you need to update both
+NetBox and the Buildroot submodule, like when you first cloned (above):
+
+```sh
+~/src/netbox$ git pull
+~/src/netbox$ git submodule update --init
+```
+
+
 Running
 -------
 
