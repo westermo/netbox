@@ -263,6 +263,14 @@ else
 		$(dtb_args) $(mnt_args) $(host_args) $(net_args)\
 		$(consle_args) $(gdb_args)
 fi
+rc=$?
 
 # Restore TTY from Qemu target
-stty ${line}
+stty "${line}"
+
+if [ $rc -ne 0 ]; then
+    echo "\e[1m** Check your QEMU_ variables, e.g QEMU_GDB*, QEMU_MNT, etc.\e[0m"
+    echo "\e[1m** For details, see $0\e[0m"
+fi
+
+exit $rc
