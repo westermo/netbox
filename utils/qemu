@@ -42,6 +42,9 @@ Environment variables that impact qemu:
     QEMU_EXTRA - Commandline options to pass to QEMU
        default: None
 
+    QEMU_GDB - Enable kernel & user GDB connections to target
+       default: Disabled
+
     QEMU_GDB_KPORT - TCP port to listen for GDB connections to kernel
        default: 4711
 
@@ -185,6 +188,10 @@ consle_args()
 
 gdb_args()
 {
+    if [ -z "$QEMU_GDB" ]; then
+	return
+    fi
+
     echo -n "-gdb tcp::${QEMU_GDB_KPORT:-4711} "
     if [ -n "${QEMU_GDB_KWAIT}" ]; then
         echo -n "-S "
