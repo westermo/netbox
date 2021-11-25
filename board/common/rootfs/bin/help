@@ -65,10 +65,17 @@ ${H2}Overview:${H0}
   show [arg]           Show system status, see 'show help' for more info
   top                  Displays CPU usage and top list of running tasks
 
+${H2}Interesting Files:${H0}
+  /etc/default/svc     Command line args for service 'svc' (see above)
+  /etc/rc.local        Local setup, runs after all services have started
+  /etc/network/        Directory of networking setup, most intersting is >
+     interfaces        > Bridge setup and VLAN interfaces config
+
 ${H2}Examples:${H0}
                        cd /tmp; wget ftp://192.168.55.43/some_file
                        cd /var/log; tftp -p -l messages 192.168.55.43
                        cat /proc/net/arp
+		       edit /etc/network/interfaces
 
                        ${H2}.--.--.--.-----.-----.-------.-----.----.--------.-----.${H0}
                        ${H2}|  |  |  |  -__|__ --|_     _|  -__|   _|        |  _  |${H0}
