@@ -1,0 +1,7 @@
+#!/bin/sh
+# Called after all other services have been started by Finit
+
+# Set up firewall rules, port forwards, etc.
+#nft -f /etc/nftables.conf
+
+exit 0
