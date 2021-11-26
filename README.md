@@ -35,9 +35,9 @@ be able to easily match what container image works on a Westermo device:
 |------------------|-------------------|-----------------|----------------|
 | arm9             | Basis             | [basis.app][]   | [basis.os][]   |
 | powerpc          | Coronet           | [coronet.app][] | [coronet.os][] |
-| arm pj4          | Dagger            | [dagger.app][]  | [dagger.os][]   |
+| arm pj4          | Dagger            | [dagger.app][]  | [dagger.os][]  |
 | aarch64          | Envoy             | [envoy.app][]   | [envoy.os][]   |
-| x86_64           | Zero              | [zero.app][]    | [zero.os][]    |
+| x86\_64          | Zero              | [zero.app][]    | [zero.os][]    |
 
 > **Note:** the *Envoy* platform includes support also for the Marvell
 > ESPRESSObin (Globalscale) and MACCHIATObin (Solidrun) boards.
@@ -60,8 +60,10 @@ Requirements
 ------------
 
 The build environment requires the following tools, tested on Ubuntu
-21.04 (x86_64): make, gcc, g++, m4, python, and openssl development package.
-On Debian based systems:
+21.04 (x86\_64): make, gcc, g++, m4, python, and openssl development
+package.
+
+On Debian/Ubuntu based systems:
 
 ```sh
 ~$ sudo apt install build-essential m4 libssl-dev python
@@ -69,7 +71,8 @@ On Debian based systems:
 
 To run in Qemu, either enable host-side build in `make menuconfig`, or
 for quicker builds you can use the version shipped with your Linux host.
-On Debian based systems:
+
+On Debian/Ubuntu based systems:
 
 ```sh
 ~$ sudo apt install qemu-system
