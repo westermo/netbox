@@ -46,6 +46,9 @@ if ! mnt; then
     exit 1
 fi
 
+# Allow users in wheel group to write to /mnt
+chgrp wheel /mnt && chmod g+w   /mnt
+
 if [ -f "$resetme" ]; then
    logger $opt -p user.crit -t "$ident" \
 	  "Resetting to factory default settings."

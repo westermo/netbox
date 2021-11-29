@@ -7,6 +7,10 @@ BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
 BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="$(BR2_EXTERNAL_NETBOX_PATH)/board/$(NETBOX_PLAT)/linux_defconfig"
 BR2_LINUX_KERNEL_INSTALL_TARGET=y
 
+dnl Additional users and their permiossions
+BR2_ROOTFS_USERS_TABLES="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/users_table.txt"
+BR2_ROOTFS_DEVICE_TABLE="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/xattrs"
+
 dnl OS profile selects the following packages
 NETBOX_TYPE_OS=y
 BR2_PACKAGE_BRIST=y
