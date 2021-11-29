@@ -1,0 +1,72 @@
+#!/bin/sh
+
+reboot=1
+interactive=1
+resetme=/mnt/factory-reset.now
+
+usage()
+{
+    echo "usage: factory [opts]"
+    echo
+    echo "Options:"
+    echo " -h, --help        This help text"
+    echo " -r, --no-reboot   Don't reboot.  Reboot manually to activate."
+    echo " -y, --assume-yes  Automatic yes to prompts; assume \"yes\" as answer to all"
+    echo "                   prompts and run non-interactively"
+    echo
+    echo "Note: this program initiates a factory reset by raising a flag and rebooting"
+    echo "      the system.  When it comes back up it safely removes all the OverlayFS"
+    echo "      worker/upper directories for /etc, /home, and /var"
+    echo
+
+    exit "$1"
+}
+
+prompt()
+{
+    if [ ! $interactive ]; then
+	return
+    fi
+
+    printf "%s (y/N)? " "$1"
+    read -r yorn
+
+    if [ "$yorn" != "y" ] && [ "$yorn" != "Y" ]; then
+	echo "Aborting."
+	exit 0;
+    fi
+}
+
+while [ "$1" != "" ]; do
+    case $1 in
+	-h | --help)
+	    usage 0
+	    ;;
+	-r | --no-reboot)
+	    unset reboot
+	    ;;
+	-y | --assume-yes)
+	    unset interactive
+	    ;;
+	*)
+	    usage 1
+	    ;;
+    esac
+    shift
+done
+
+if ! tty; then
+    interactive=0
+fi
+	
+prompt "Factory reset device, restores /etc, /home, and /var,"
+echo "Preparing system for factory reset on next boot ..."
+touch $resetme
+sync
+echo "Done."
+echo 
+
+if [ $reboot ]; then
+    prompt "Reboot now to perform reset"
+    reboot
+fi

@@ -9,21 +9,48 @@
 # back to a tmpfs based RAM disk. This effectively brings up the
 # system with the default configuration, but obviously any subsequent
 # configuration is ephemeral.
+#
+# This script also performs the actual factory reset.  Before mounting
+# the overlays the worker and upper dirs are cleaned.  This is the safe
+# way to do it.
 
 set -e
 
-ident=`basename $0`
+opt="-c"
+ident=$(basename "$0")
+resetme=/mnt/factory-reset.now
 
-# If something is already setup, leave it be.
-mountpoint -q /mnt && exit 0
+mnt()
+{
+    # If something is already setup, leave it be.
+    mountpoint -q /mnt && return 0
 
-# Internal FLASH takes precedence over disks.
-mount   mtd:Config && exit 0
-mount LABEL=Config && exit 0
+    # Internal FLASH takes precedence over disks.
+    mount   mtd:Config && return 0
+    mount LABEL=Config && return 0
 
-logger -c -p user.crit -t $ident \
-       "/mnt was not properly mounted, falling back to tmpfs."
+    return 1
+}
 
-# Fall back to RAM disk.
-mount tmpfs-Config
-exit 1
+# fall back to console logging if sysklogd is too old
+if ! logger -? |grep -q "Log to kernel"; then
+    opt="-c"
+fi
+
+if ! mnt; then
+    logger $opt -p user.crit -t "$ident" \
+	   "/mnt was not properly mounted, falling back to tmpfs."
+
+    # Fall back to RAM disk.
+    mount tmpfs-Config
+    exit 1
+fi
+
+if [ -f "$resetme" ]; then
+   logger $opt -p user.crit -t "$ident" \
+	  "Resetting to factory default settings."
+   rm -rf /mnt/netbox/*.u /mnt/netbox/*.w
+   rm "$resetme"
+fi
+
+exit 0
