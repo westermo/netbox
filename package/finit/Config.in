@@ -12,6 +12,16 @@ config BR2_PACKAGE_FINIT
 
 if BR2_PACKAGE_FINIT
 
+config BR2_PACKAGE_FINIT_INITCTL_GROUP
+	string "Group for /run/finit/socket"
+	default "wheel"
+	help
+	  On systems with multiple administrators, set the group
+	  to their shared UNIX group, usually "wheel", to allow
+	  them to start/stop services and reboot the system.
+
+endif
+
 config BR2_PACKAGE_FINIT_KEVENTD
 	bool "finit-keventd"
 	default n

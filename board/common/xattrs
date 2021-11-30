@@ -1,2 +1,2 @@
-# Allow all users to do reboot
-/sbin/initctl f 4755 root root  - - - - -
+# Allow all users to do reboot via factory reset program
+/sbin/factory f 4755 root root  - - - - -

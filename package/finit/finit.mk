@@ -25,11 +25,12 @@ FINIT_D = $(TARGET_DIR)/etc/finit.d
 # /lib/finit/ and scripts in /libexec, both are set by --exec-prefix.
 # The localstatedir is set to the correct system path by Buildroot, so
 # no override necessary there.
-FINIT_CONF_OPTS =				\
-	--prefix=/usr				\
-	--exec-prefix=				\
-	--disable-doc				\
-	--disable-contrib
+FINIT_CONF_OPTS =					\
+	--prefix=/usr					\
+	--exec-prefix=					\
+	--disable-doc					\
+	--disable-contrib				\
+	--with-group=$(BR2_PACKAGE_FINIT_INITCTL_GROUP)
 
 # Disable/Enable features
 ifeq ($(BR2_PACKAGE_FINIT_KEVENTD),y)
