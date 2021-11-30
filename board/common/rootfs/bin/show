@@ -23,18 +23,24 @@ ports()
     else
 	ip -br link show
     fi
+    printf "\e[2m______________________________________________________________________________\e[0m\n"
+    printf "\e[2mUse: '[ip|bridge] --help' and '[ip|bridge] link help' for more details.\e[0m\n"
 }
 
 vlans()
 {
     printf "\e[7mINTERFACE         VLAN  FLAGS                                                 \e[0m\n"
     bridge vlan show |tail +2 | awk 'NF { iface=$1; vid=$2; printf("%-16s  %4d  ", iface, vid); for (i=3; i <= NF; i++) printf("%s ", $i); printf("\n"); }'
+    printf "\e[2m______________________________________________________________________________\e[0m\n"
+    printf "\e[2mSee: 'bridge --help' and 'bridge vlan help' for more details.\e[0m\n"
 }
 
 ifaces()
 {
     printf "\e[7mINTERFACE        STATE          ADDRESS                                       \e[0m\n"
-    ip -br addr show up
+    ip -br addr show |awk '{ if ($1 !~ /eth[0-9]*/ && $1 !~ /.*@NONE/) { print }}'
+    printf "\e[2m______________________________________________________________________________\e[0m\n"
+    printf "\e[2mSee: 'ip --help' and 'ip address help' for more details.\e[0m\n"
 }
 
 rmon()
@@ -46,6 +52,8 @@ rmon()
     for port in $*; do
 	ethtool -S "$port"
     done
+    printf "\e[2m______________________________________________________________________________\e[0m\n"
+    printf "\e[2mSee: 'ethtool --help' for more details.\e[0m\n"
 }
 
 routes()
