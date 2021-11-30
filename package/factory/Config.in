@@ -1,4 +1,4 @@
-config BR2_PACKAGE_WESTERMO_FACTORY
+config BR2_PACKAGE_FACTORY
 	bool "factory"
 	help
 	  Simple factory reset program/login-shell for instructing the
