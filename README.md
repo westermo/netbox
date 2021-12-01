@@ -3,6 +3,8 @@ NetBox - Like BusyBox but for Networking
 
 [Westermo][] NetBox is a toolbox for embedded systems based on [Buildroot][].
 
+![NetBox Zero/OS booting up in Qemu](screenshot.png)
+
 NetBox provides easy access to all Westermo specific custimizations made to
 Linux and other [Open Source][] projects used in WeOS.  You can use it as
 the base for any application, but is strongly recommended for all use cases
