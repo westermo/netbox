@@ -49,10 +49,16 @@ fi
 # Allow users in wheel group to write to /mnt
 chgrp wheel /mnt && chmod g+w   /mnt
 
+# Migrate from previous namespace for overlay
+if [ -d /mnt/netbox ]; then
+    mv /mnt/netbox /mnt/system
+fi
+
+# Perform factory reset before mounting overlay
 if [ -f "$resetme" ]; then
    logger $opt -p user.crit -t "$ident" \
 	  "Resetting to factory default settings."
-   rm -rf /mnt/netbox/*.u /mnt/netbox/*.w
+   rm -rf /mnt/system/*.u /mnt/system/*.w
    rm "$resetme"
 fi
 

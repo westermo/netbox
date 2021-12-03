@@ -1,5 +1,5 @@
 #!/bin/sh
-fn=$(mktemp /tmp/netbox-help.XXXXXX)
+fn=$(mktemp /tmp/system-help.XXXXXX)
 H1=$(printf '\e[7m')
 H2=$(printf '\e[1m')
 H0=$(printf '\e[0m')
