@@ -16,6 +16,23 @@ Date:   Mon Dec 6 21:38:20 2021 +0100
     
     Signed-off-by: Joachim Wiberg <troglobit@gmail.com>
 
+commit 4ca8256e18656bf547bb4825c0d248761018d121 (HEAD -> master, origin/master, origin/HEAD)
+Author: Joachim Wiberg <troglobit@gmail.com>
+Date:   Tue Dec 7 00:05:47 2021 +0100
+
+    Follow-up to 280d91b, fix conio.h namespace
+    
+    Signed-off-by: Joachim Wiberg <troglobit@gmail.com>
+
+commit 393834b253dc5bc9204aa6388c5e484778713fde (HEAD -> master, origin/master, origin/HEAD)
+Author: Joachim Wiberg <troglobit@gmail.com>
+Date:   Tue Dec 7 00:13:54 2021 +0100
+
+    Follow-up to 4ca8256: ordering mishap
+    
+    Signed-off-by: Joachim Wiberg <troglobit@gmail.com>
+
+
 diff --git a/plugins/alsa-utils.c b/plugins/alsa-utils.c
 index b465437..9024254 100644
 --- a/plugins/alsa-utils.c
@@ -689,19 +706,29 @@ diff --git a/src/util.h b/src/util.h
 index 45c6654..025a0c6 100644
 --- a/src/util.h
 +++ b/src/util.h
-@@ -32,7 +32,11 @@
+@@ -32,7 +32,6 @@
  #include <sys/reboot.h>
  #include <termios.h>
  #endif
 -#include <lite/lite.h>
-+#ifdef _LIBITE_LITE
-+# include <libite/lite.h>
-+#else
-+# include <lite/lite.h>
-+#endif
  
  #ifndef RB_SW_SUSPEND /* Since Linux 2.5.18, but not in GLIBC until 2.19 */
  #define RB_SW_SUSPEND	0xd000fce2
+@@ -45,7 +44,13 @@ extern char *prognm;
+ 
+ /* Define for printheader() from conio.h, used in initctl */
+ #define SCREEN_WIDTH ttcols
+-#include <lite/conio.h>
++#ifdef _LIBITE_LITE
++# include <libite/conio.h>
++# include <libite/lite.h>
++#else
++# include <lite/conio.h>
++# include <lite/lite.h>
++#endif
+
+ char *progname     (char *arg0);
+ 
 diff --git a/src/utmp-api.c b/src/utmp-api.c
 index 8b0ba19..a16fe1f 100644
 --- a/src/utmp-api.c
