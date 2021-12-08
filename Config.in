@@ -1,3 +1,5 @@
+menu "Branding"
+
 config NETBOX_PLAT
 	string
 	default "basis"   if BR2_arm926t
@@ -48,6 +50,8 @@ config NETBOX_VENDOR_VERSION
            generated filenames.
 
 	   Used for VERSION and VERSION_ID in /etc/os-release
+
+endmenu
 
 choice
 	bool "Type"
