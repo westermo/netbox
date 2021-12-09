@@ -1,7 +1,7 @@
-include([plat-zero.m4])dnl
-include([base.m4])dnl
-include([toolchain-bootlin.m4])dnl
-include([os.m4])dnl
+include([plat-zero.m4])
+include([base.m4])
+include([toolchain-bootlin.m4])
+include([os.m4])
 BR2_LINUX_KERNEL_NEEDS_HOST_LIBELF=y
 dnl Disable host openssl for now, fails in release builds
 dnl BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
