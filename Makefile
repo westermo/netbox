@@ -1,5 +1,6 @@
 export BR2_EXTERNAL := $(CURDIR)
 export PATH         := $(CURDIR)/utils:$(PATH)
+export M4FLAGS      := -I include $(M4FLAGS)
 
 ARCH ?= $(shell uname -m)
 O    ?= $(CURDIR)/output
@@ -20,10 +21,11 @@ $(config):
 
 netbox_%_defconfig: configs/netbox_%_defconfig | buildroot/Makefile
 	@+$(call bmake,$@)
+	@rm $<
 
 configs/netbox_%_defconfig: configs/netbox_%_defconfig.m4 configs/include/*.m4
-	@echo "Generating $(@F)"
-	@cd $(@D) && m4 -I include defs.m4 $(<F) >$(@F)
+	@echo "\e[7m>>>   Generating temporary $(@F) to bootstrap $O/.config\e[0m"
+	@gendefconfig -d $(@D) $(<F) >$@
 
 %: | buildroot/Makefile
 	@+$(call bmake,$@)
