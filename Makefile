@@ -14,8 +14,8 @@ all: $(config) | buildroot/Makefile
 $(config):
 	@+$(call bmake,list-defconfigs)
 	@echo "ERROR: No configuration selected."
-	@echo "Please choose a configuration from the list above by running"
-	@echo "'make <board>_defconfig' before building an image."
+	@echo "Please choose a configuration from the list above by first calling "
+	@echo "> make netbox_<os|app>_<platform>_defconfig"
 	@exit 1
 
 netbox_%_defconfig: configs/netbox_%_defconfig | buildroot/Makefile
