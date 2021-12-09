@@ -23,7 +23,7 @@ netbox_%_defconfig: configs/netbox_%_defconfig | buildroot/Makefile
 
 configs/netbox_%_defconfig: configs/netbox_%_defconfig.m4 configs/include/*.m4
 	@echo "Generating $(@F)"
-	@cd $(@D) && m4 -I include $(<F) >$(@F)
+	@cd $(@D) && m4 -I include defs.m4 $(<F) >$(@F)
 
 %: | buildroot/Makefile
 	@+$(call bmake,$@)

@@ -1,8 +1,8 @@
-include(`plat-envoy.m4')dnl
-include(`base.m4')dnl
-include(`toolchain-bootlin.m4')dnl
-define(`os_plat_overlay', `y')dnl
-include(`os.m4')dnl
+include([plat-envoy.m4])dnl
+include([base.m4])dnl
+include([toolchain-bootlin.m4])dnl
+define([os_plat_overlay], [y])dnl
+include([os.m4])dnl
 
 # Copy DTS files from kernel, keep vendor prefix directory
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
