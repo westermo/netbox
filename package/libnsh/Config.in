@@ -1,0 +1,15 @@
+config BR2_PACKAGE_LIBNSH
+	bool "libnsh"
+	select BR2_PACKAGE_NETSNMP
+	select BR2_PACKAGE_NETSNMP_SERVER
+	select BR2_PACKAGE_NETSNMP_ENABLE_MIBS
+	help
+	  This is libnsh, the "Net-SNMP helper C-library". It provides
+	  a slightly simpler and more user-friendly API wrapper around
+	  net-snmp.
+
+	  If developing a subagent, you probably want to enable the
+	  "agentx" module in BR2_PACKAGE_NETSNMP_WITH_MIB_MODULES
+	  as well.
+
+	  https://github.com/westermo/libnsh
