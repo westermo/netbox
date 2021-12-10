@@ -1,0 +1,46 @@
+#!/bin/sh
+# Helper script to show what settings have been removed, changed, or
+# added using menuconfig.  The idea is for it to serve as a guidance
+# to the manual update of the m4 includes.
+
+nm=$(basename "$0")
+cfg=$1
+
+if [ -z "$cfg" ] || [ ! -f "$cfg" ] || [ "$1" = "-h" ]; then
+    echo "Usage: $nm path/to/.config"
+    exit 1
+fi
+
+defcfg=$(grep BR2_DEFCONFIG "$cfg")
+eval "$defcfg"
+
+fn=$(basename "$BR2_DEFCONFIG")
+if [ -z "$BR2_DEFCONFIG" ]; then
+    echo "Cannot find your BR2_DEFCONFIG in $cfg, is this a new defconfig?"
+    echo "If it is, you need to compose the configs/$fn.m4 manually."
+    exit 1
+fi
+
+orig=$(mktemp /tmp/netbox-orig-defconfig.XXXXXX)
+next=$(mktemp /tmp/netbox-next-defconfig.XXXXXX)
+
+gendefconfig -d configs -i include "$fn.m4" | awk 'NF' | sort > "$orig"
+make --silent update-defconfig > /dev/null
+sort "configs/$fn" > "$next"
+
+# Redirecting to stderr in case the user wants to save the output to a
+# file without all the extra boilerplate.
+diff -u0 "$orig" "$next" | sed 's,'"$orig"','"$fn (current)"',; s,'"$next"','"$fn (new)"',; /@@.*/d' >&2
+rm -f "$orig" "$next" "configs/$fn"
+
+echo "_________________________________________________________________________"
+echo "\e[1mNOTE:\e[0m"
+echo "      The results are only indicative, not absolute.  E.g., even though"
+echo "      IPROUTE2, TCPDUMP, and SOCAT are deselected because of BRIST deps"
+echo "      these packages are core NetBox OS packages and should always be in"
+echo "      the default list in os.m4 -- we do *not* want them to be removed"
+echo "      if we one day disable BRIST"
+echo
+echo "      Also, be careful with toolchain settings, the Buildroot defaults"
+echo "      may change over time, so better be explicit here too."
+echo

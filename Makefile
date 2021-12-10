@@ -27,6 +27,10 @@ configs/netbox_%_defconfig: configs/netbox_%_defconfig.m4 configs/include/*.m4
 	@echo "\e[7m>>>   Generating temporary $(@F) to bootstrap $O/.config\e[0m"
 	@gendefconfig -d $(@D) $(<F) >$@
 
+diff-defconfig: $(config)
+	@echo "\e[7m>>>   Generating defconfig diff for manual update of configs/*.m4 files ...\e[0m"
+	@diffdefconfig $<
+
 %: | buildroot/Makefile
 	@+$(call bmake,$@)
 
