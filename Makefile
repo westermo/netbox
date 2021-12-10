@@ -14,7 +14,7 @@ all: $(config) | buildroot/Makefile
 
 $(config):
 	@+$(call bmake,list-defconfigs)
-	@echo "ERROR: No configuration selected."
+	@echo "\e[7mERROR: No configuration selected.\e[0m"
 	@echo "Please choose a configuration from the list above by first calling "
 	@echo "> make netbox_<os|app>_<platform>_defconfig"
 	@exit 1
