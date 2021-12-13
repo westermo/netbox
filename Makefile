@@ -1,9 +1,9 @@
 export BR2_EXTERNAL := $(CURDIR)
 export PATH         := $(CURDIR)/utils:$(PATH)
-export M4FLAGS      := -I include $(M4FLAGS)
+export M4PATH       := $(CURDIR)/configs:$(CURDIR)/configs/include:$(M4PATH)
 
-ARCH ?= $(shell uname -m)
-O    ?= $(CURDIR)/output
+ARCH   ?= $(shell uname -m)
+O      ?= $(CURDIR)/output
 
 config := $(O)/.config
 bmake   = $(MAKE) -C buildroot O=$(O) $1

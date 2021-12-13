@@ -1,22 +1,20 @@
 #!/bin/sh
-# This script assumes that the file 'defs.m4' exist somewhere in the
-# include path(s) given.  This file is used to set up defaults for m4
-# and possibly local variables.
-dir=.
-inc="-I ."
-def=defs.m4
-nm=$(basename "$0")
+# This script assumes the location of the file 'defs.m4', which is used
+# to set up defaults for m4 and possibly local variables.
+
+inc=""
+def=$(dirname "$0")/../configs/include/defs.m4
 
 usage()
 {
-    echo "Usage: $nm [opts] foo_defonfig.m4"
+    echo "Usage: $(basename "$0") [opts] foo_defonfig.m4"
     echo
     echo " -d dir  Base directory for foo_defconfig.m4 files"
     echo " -h      This help text"
     echo " -i dir  Include directory, multiple -i allowed"
     echo
     echo "M4FLAGS  Optional environment variable for extra m4 args."
-    echo "         Can be used to, e.g., define include paths."
+    echo "M4PATH   Instead of '-i dir' to define include paths."
 
     exit "$1"
 }
@@ -30,14 +28,13 @@ fail()
 # shellcheck disable=SC2086
 generate()
 {
-    cd "$dir" || fail "Failed changing to directory ${dir}!"
-    m4 $inc $M4FLAGS $def "$1"
+    cat $def "$1" | m4 $inc -
 }
 
 while [ "$1" != "" ]; do
     case $1 in
-	-d)			# output dir
-	    dir=$2
+	-d)
+	    cd "$2" || fail "Failed changing to directory $2!"
 	    shift
 	    ;;
 	-h)
