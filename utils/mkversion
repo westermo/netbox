@@ -41,7 +41,7 @@ fi
 
 # Are we are building an official release from master, do not print branchname.
 # Check if top commit is the tag, to support -betaXX etc.
-git describe --tags 2>/dev/null | grep "[0-9]\+\.[0-9]\+-r[0-9]\+" >/dev/null
+git describe --always --dirty --tags 2>/dev/null | grep "[0-9]\+\.[0-9]\+-r[0-9]\+" >/dev/null
 if [ $? -eq 0 -a -n "$RELEASE" ]; then
     print_version $VERSION
 else
