@@ -38,7 +38,6 @@ buildroot/Makefile:
 	@git submodule update --init
 
 run:
-	@echo "Starting Qemu  ::  Ctrl-a x -- exit | Ctrl-a c -- toggle console/monitor"
 	@qemu -f $(O)/images/qemu.cfg
 
 .PHONY: all defconfig run
