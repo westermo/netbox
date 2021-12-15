@@ -16,6 +16,7 @@
 
 set -e
 
+rc=0
 opt="-k"
 ident=$(basename "$0")
 resetme=/mnt/factory-reset.now
@@ -43,7 +44,7 @@ if ! mnt; then
 
     # Fall back to RAM disk.
     mount tmpfs-Config
-    exit 1
+    rc=1
 fi
 
 # Allow users in wheel group to write to /mnt
@@ -62,4 +63,4 @@ if [ -f "$resetme" ]; then
    rm "$resetme"
 fi
 
-exit 0
+exit $rc
