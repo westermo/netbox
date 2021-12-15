@@ -2,26 +2,42 @@
 # Displays basic information about the system, similar to WeOS CLI show command
 . /etc/os-release
 
+opt="-br"
+all=""
+
+TTY=$(resize)
+eval "$TTY"
+
 usage()
 {
     cat <<EOF
-  show ports           Show ports available for bridging
-  show vlans           Show port groups in bridge
-  show ifaces          Show interfaces and their addresses
-  show ip route        Show routing table
-  show rmon PORT       Show RMON counters for PORT (when applicable)
-  show system          Show OS details
-  show version         Show OS verson
+usage:
+  show [opt] cmd
+
+options:
+  -a            Show all, of something
+  -f            Show full output, not brief port/iface listings
+  -h            Show this help text
+
+commands:
+  ports         Show ports available for bridging
+  vlans         Show port groups in bridge
+  ifaces        Show interfaces and their addresses
+  ip route      Show routing table
+  log [FILE]    Show latest entries from syslog, or other FILE
+  rmon PORT     Show RMON counters for PORT (when applicable)
+  system        Show OS details
+  version       Show OS verson
 EOF
 }
 
 ports()
 {
     printf "\e[7mPORT             STATE          ADDRESS <FLAGS>                               \e[0m\n"
-    if grep -q port /etc/iproute2/group; then
-	ip -br link show group port
+    if grep -q port /etc/iproute2/group && [ -z "$all" ]; then
+	ip $opt link show group port
     else
-	ip -br link show
+	ip $opt link show
     fi
     printf "\e[2m______________________________________________________________________________\e[0m\n"
     printf "\e[2mUse: '[ip|bridge] --help' and '[ip|bridge] link help' for more details.\e[0m\n"
@@ -38,9 +54,29 @@ vlans()
 ifaces()
 {
     printf "\e[7mINTERFACE        STATE          ADDRESS                                       \e[0m\n"
-    ip -br addr show |awk '{ if ($1 !~ /eth[0-9]*/ && $1 !~ /.*@NONE/) { print }}'
+    if [ -n "$all" ]; then
+	ip $opt addr show
+    else
+	ip $opt addr show |awk '{ if ($1 !~ /eth[0-9]*/ && $1 !~ /.*@NONE/) { print }}'
+    fi
     printf "\e[2m______________________________________________________________________________\e[0m\n"
     printf "\e[2mSee: 'ip --help' and 'ip address help' for more details.\e[0m\n"
+}
+
+log()
+{
+    if [ -n "$1" ] && [ -r "/var/log/$1" ]; then
+	fn="/var/log/$1"
+    else
+	fn="/var/log/syslog"
+    fi
+    if [ -n "$all" ]; then
+	cat $fn
+    else
+	tail -$LINES $fn
+    fi
+    printf "\e[2m______________________________________________________________________________\e[0m\n"
+    printf "\e[2mSee: 'tail -25 /log/FILE', 'tail -F /log/FILE' to continuously monitor files.\e[0m\n"
 }
 
 rmon()
@@ -79,6 +115,24 @@ version()
     cat /etc/version
 }
 
+while [ "$1" != "" ]; do
+    case $1 in
+	-a)
+	    all=1
+	    ;;
+	-f)
+	    opt=""
+	    ;;
+	-h)
+	    usage
+	    exit 0
+	    ;;
+	*)
+	    break
+    esac
+    shift
+done
+
 cmd=$1
 if [ -n "$cmd" ]; then
    shift
@@ -112,6 +166,9 @@ case $cmd in
 		;;
 	esac
 	;;
+    log)
+	log "$1"
+	;;
     rmon)
 	rmon "$*"
 	;;
@@ -126,5 +183,6 @@ case $cmd in
 	;;
     *)
 	usage
+	exit 1
 	;;
 esac
