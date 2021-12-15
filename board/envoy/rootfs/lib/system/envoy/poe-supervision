@@ -1,6 +1,7 @@
 #!/bin/sh
 
-me=$(basename $0)
+opt="-k"
+ident=$(basename $0)
 
 gpiobyname() {
     gpioinfo | awk -v pin=$1 '
@@ -14,6 +15,11 @@ gpiobyname() {
     '
 }
 
+# fall back to console logging if sysklogd is too old
+if ! logger -? |grep -q "Log to kernel"; then
+    opt="-c"
+fi
+
 loop=1
 undervoltage=0
 
@@ -26,7 +32,8 @@ do
 
     if [ $voltagemV -lt 44000 ]; then
         if [ $undervoltage -eq 0 ]; then
-            logger -c -p user.info -t $me "PoE Undervoltage: $voltagemV"
+            logger $opt -p user.info -t "$ident" \
+		   "PoE Undervoltage: $voltagemV"
         fi
         undervoltage=1
 
@@ -35,7 +42,8 @@ do
         sleep 0.1
     elif [ $voltagemV -gt 45500 ]; then
         if [ $undervoltage -eq 1 ]; then
-            logger -c -p user.info -t $me "PoE voltage ok: $voltagemV"
+            logger $opt -p user.info -t "$ident" \
+		   "PoE voltage ok: $voltagemV"
 
             # Release PoE_RST
             gpioset $(gpiobyname exp-reset)=1
@@ -43,8 +51,8 @@ do
 
             Check for ID memory
             if ! i2cget -f -y 2 0x54 &>/dev/null; then
-                logger -c -p user.info -t $me \
-                "No expansion board connected"
+                logger $opt -p user.info -t "$ident" \
+                       "No expansion board connected"
 
                 exit 0
             fi

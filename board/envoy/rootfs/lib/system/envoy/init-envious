@@ -1,6 +1,7 @@
 #!/bin/sh
 
-me=$(basename $0)
+opt="-k"
+ident=$(basename $0)
 
 gpiobyname() {
     gpioinfo | awk -v pin=$1 '
@@ -14,20 +15,25 @@ gpiobyname() {
     '
 }
 
+# fall back to console logging if sysklogd is too old
+if ! logger -? |grep -q "Log to kernel"; then
+    opt="-c"
+fi
+
 # Release expansion board from reset
 gpioset $(gpiobyname exp-reset)=1
 sleep 0.1
 
 # Check for ID memory
 if ! i2cget -f -y 2 0x54 &>/dev/null; then
-    logger -c -p user.info -t $me \
+    logger $opt -p user.info -t "$ident" \
        "No expansion board connected"
 
     exit 0
 fi
 
 # TODO: Support multiple boards
-logger -c -p user.info -t $me \
+logger $opt -p user.info -t "$ident" \
        "Assuming PoE expansion board"
 
 ids="0x20 0x24"
@@ -35,7 +41,7 @@ ids="0x20 0x24"
 for id in $ids; do
     i2cget -y 2 $id &>/dev/null && continue
 
-    logger -c -p user.err -t $me \
+    logger $opt -p user.err -t "$ident" \
        "PoE Controller $id not present"
 
     exit 1

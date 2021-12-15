@@ -16,7 +16,7 @@
 
 set -e
 
-opt="-c"
+opt="-k"
 ident=$(basename "$0")
 resetme=/mnt/factory-reset.now
 

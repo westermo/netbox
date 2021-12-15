@@ -1,6 +1,9 @@
 #!/bin/sh
 
+opt="-k"
+ident=$(basename "$0")
 chans=0
+
 setup_chan() {
     ip link set dev $1 name chan$chans
 
@@ -11,6 +14,11 @@ setup_chan() {
 
     chans=$(($chans + 1))
 }
+
+# fall back to console logging if sysklogd is too old
+if ! logger -? |grep -q "Log to kernel"; then
+    opt="-c"
+fi
 
 # If any ethernet interface is being used as a channel between the CPU
 # and a switch managed by DSA, set it up early.
@@ -33,7 +41,7 @@ awk -F: '
     }' </proc/net/dev | ip -batch -
 
 if [ "$(ip -br link show group port | uniq -f 2 -d)" ]; then
-    logger -c -p user.warning -t $0 \
+    logger $opt -p user.warning -t "$ident" \
        "Port MAC addresses not unique, assigning from randomized base MAC."
 
     base=$(printf '%.2x:%.2x:%.2x:%.2x:%.2x' \
