@@ -11,7 +11,7 @@ Platform=`echo $platform | awk '{print toupper(substr($0,0,1))tolower(substr($0,
 # original Buildroot information.
 rm $TARGET_DIR/etc/os-release
 
-echo "NAME=${NETBOX_VENDOR_NAME}"             >$TARGET_DIR/etc/os-release
+echo "NAME=\"${NETBOX_VENDOR_NAME}\""         >$TARGET_DIR/etc/os-release
 echo "VERSION=${NETBOX_VENDOR_VERSION}"      >>$TARGET_DIR/etc/os-release
 echo "ID=${NETBOX_VENDOR_ID}"                >>$TARGET_DIR/etc/os-release
 echo "VERSION_ID=${NETBOX_VENDOR_VERSION}"   >>$TARGET_DIR/etc/os-release
