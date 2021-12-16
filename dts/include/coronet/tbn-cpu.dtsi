@@ -47,6 +47,17 @@
 	};
 };
 
+&soc {
+        relay-ctrl {
+                compatible = "wmo,relay-ctrl";
+                bypass-relay {
+                        relay-gpio = <&gpio1 5 GPIO_ACTIVE_LOW>;
+                        phy-handle = <&phy3>, <&phy4>, <&phy5>, <&phy6>;
+                        led-trigger-inverted;
+                };
+        };
+};
+
 &watchdog {
 	gpios = <&gpio1 8 0>;
 };
