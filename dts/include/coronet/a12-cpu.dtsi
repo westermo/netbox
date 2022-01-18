@@ -1,10 +1,6 @@
 #include <common/mv6.h>
 
-#include "base.dtsi"
-
-&fm1mac4 {
-	status = "okay";
-};
+#include "a-common.dtsi"
 
 &mdio0 {
 	agate: switch@4 {
@@ -118,8 +114,4 @@
 			ophy6: mv6_phy(6);
 		};
 	};
-};
-
-&watchdog {
-	gpios = <&gpio0 16 0>;
 };

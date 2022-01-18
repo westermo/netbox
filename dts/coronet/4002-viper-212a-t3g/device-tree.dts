@@ -1,4 +1,4 @@
-#include <coronet/a-cpu.dtsi>
+#include <coronet/a12-cpu.dtsi>
 
 / {
 	model = "wmo,Viper-212A-T3G";

@@ -1,0 +1,9 @@
+#include "base.dtsi"
+
+&fm1mac4 {
+	status = "okay";
+};
+
+&watchdog {
+	gpios = <&gpio0 16 0>;
+};
