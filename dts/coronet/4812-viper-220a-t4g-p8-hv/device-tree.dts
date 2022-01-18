@@ -1,0 +1,5 @@
+#include <coronet/a20-cpu.dtsi>
+
+/ {
+	model = "wmo,Viper-230A-T4G-P8-HV";
+};

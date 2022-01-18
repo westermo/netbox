@@ -1,0 +1,15 @@
+#include <coronet/a20-cpu.dtsi>
+
+/ {
+	model = "wmo,Viper-220A";
+};
+
+&agate {
+	ports {
+		/* All ports use two-pair M12 connectors */
+		port@0 { max-speed = <100>; };
+		port@1 { max-speed = <100>; };
+		port@2 { max-speed = <100>; };
+		port@3 { max-speed = <100>; };
+	};
+};
