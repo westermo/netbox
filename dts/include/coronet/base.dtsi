@@ -34,6 +34,7 @@
  */
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/clock/fsl,qoriq-clockgen.h>
 
 #include <t102xsi-pre.dtsi>
 
@@ -272,8 +273,10 @@
 				};
 			};
 
-
 			mdio0: mdio@fc000 {
+				clocks = <&clockgen QORIQ_CLK_FMAN 0>;
+				clock-frequency = <2500000>;
+				suppress-preamble;
 			};
 
 			mdio1: mdio@fd000 {
