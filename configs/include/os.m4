@@ -1,5 +1,7 @@
 dnl Include platform-specific overlay if plat_overlay is set
-format([BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/rootfs %s], ifdef([os_rootfs_overlay], os_rootfs_overlay", "))
+format([BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/rootfs %s %s"],
+	ifdef([os_rootfs_overlay], os_rootfs_overlay,),
+	ifdef([os_rootfs_overlay_extra], os_rootfs_overlay_extra,))
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="5.15.15"
