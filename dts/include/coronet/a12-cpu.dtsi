@@ -43,11 +43,51 @@
 				};
 			};
 
-			mv6_port(0, "ethX2" , &aphy0, "gmii");
+			agate_port0: port@0 {
+				phy-handle = <&aphy0>;
+				reg = <0>;
+				label = "ethX2";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "gmii";
+			};
+
+			agate_port1: port@1 {
+				phy-handle = <&aphy1>;
+				reg = <1>;
+				label = "ethX12";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "gmii";
+			};
+
+			agate_port2: port@2 {
+				phy-handle = <&aphy2>;
+				reg = <2>;
+				label = "ethX8";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "gmii";
+			};
+
+			agate_port3: port@3 {
+				phy-handle = <&aphy3>;
+				reg = <3>;
+				label = "ethX4";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "gmii";
+			};
+
+			agate_port4: port@4 {
+				phy-handle = <&aphy4>;
+				reg = <4>;
+				label = "ethX3";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "gmii";
+			};
+
+			/* mv6_port(0, "ethX2" , &aphy0, "gmii");
 			mv6_port(1, "ethX12", &aphy1, "gmii");
 			mv6_port(2, "ethX8" , &aphy2, "gmii");
 			mv6_port(3, "ethX4" , &aphy3, "gmii");
-			mv6_port(4, "ethX3" , &aphy4, "gmii");
+			mv6_port(4, "ethX3" , &aphy4, "gmii"); */
 		};
 
 		mdio {
@@ -91,13 +131,69 @@
 				};
 			};
 
-			mv6_port(0, "ethX1" , &ophy0, "mii");
+			opal_port0: port@0 {
+				phy-handle = <&ophy0>;
+				reg = <0>;
+				label = "ethX1";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "mii";
+			};
+
+			opal_port1: port@1 {
+				phy-handle = <&ophy1>;
+				reg = <1>;
+				label = "ethX5";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "mii";
+			};
+
+			opal_port2: port@2 {
+				phy-handle = <&ophy2>;
+				reg = <2>;
+				label = "ethX6";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "mii";
+			};
+
+			opal_port3: port@3 {
+				phy-handle = <&ophy3>;
+				reg = <3>;
+				label = "ethX7";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "mii";
+			};
+
+			opal_port4: port@4 {
+				phy-handle = <&ophy4>;
+				reg = <4>;
+				label = "ethX9";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "mii";
+			};
+
+			opal_port5: port@5 {
+				phy-handle = <&ophy5>;
+				reg = <5>;
+				label = "ethX10";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "mii";
+			};
+
+			opal_port6: port@6 {
+				phy-handle = <&ophy6>;
+				reg = <6>;
+				label = "ethX11";
+				local-mac-address = [00 00 00 00 00 00];
+				phy-mode = "mii";
+			};
+
+			/*	mv6_port(0, "ethX1" , &ophy0, "mii");
 			mv6_port(1, "ethX5" , &ophy1, "mii");
 			mv6_port(2, "ethX6" , &ophy2, "mii");
 			mv6_port(3, "ethX7" , &ophy3, "mii");
 			mv6_port(4, "ethX9" , &ophy4, "mii");
 			mv6_port(5, "ethX10", &ophy5, "mii");
-			mv6_port(6, "ethX11", &ophy6, "mii");
+			mv6_port(6, "ethX11", &ophy6, "mii"); */
 		};
 
 		mdio {

@@ -1,0 +1,14 @@
+#include <coronet/a12-cpu.dtsi>
+#include <coronet/viper-poe-80W.dtsi>
+
+/ {
+	model = "wmo,Viper-212A-T3G-P8-LV";
+};
+
+&agate {
+	ports {
+		/* ethX2/3 use two-pair M12 connector */
+		port@0 { max-speed = <100>; };
+		port@4 { max-speed = <100>; };
+	};
+};

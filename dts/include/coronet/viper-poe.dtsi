@@ -1,0 +1,83 @@
+&soc {
+	i2c3: i2c@119000 {
+		pd69104@20 {
+			compatible = "pd69104";
+			reg = <0x20>;
+		};
+		pd69104@24 {
+			compatible = "pd69104";
+			reg = <0x24>;
+		};
+	};
+
+	weos-poe {
+		compatible = "westermo,poe-ctrl";
+		interrupt-parent = <&gpio2>;
+		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+
+		port0 {
+			/* ethX6 */
+			ethport = < &opal_port2 >;
+			/* ethport = < &{/mdio0/switch@4} >; */
+			id = <0>;
+			prio = <4>;
+			device-address = <0x20>;
+		};
+
+		port1 {
+			/* ethX5 */
+			ethport = <&opal_port1>;
+			id = <1>;
+			prio = <3>;
+			device-address = <0x20>;
+		};
+
+		port2 {
+			/* ethX1 */
+			ethport = <&opal_port0>;
+			id = <2>;
+			prio = <0>;
+			device-address = <0x20>;
+		};
+
+		port3 {
+			/* ethX2 */
+			ethport = <&agate_port0>;
+			id = <3>;
+			prio = <1>;
+			device-address = <0x20>;
+		};
+
+		port4 {
+			/* ethX10 */
+			ethport = <&opal_port5>;
+			id = <4>;
+			prio = <7>;
+			device-address = <0x24>;
+		};
+
+		port5 {
+			/* ethX9 */
+			ethport = <&opal_port4>;
+			id = <5>;
+			prio = <6>;
+			device-address = <0x24>;
+		};
+
+		port6 {
+			/* ethX3 */
+			ethport = <&agate_port4>; 
+			id = <6>;
+			prio = <2>;
+			device-address = <0x24>;
+		};
+
+		port7 {
+			/* ethX7 */
+			ethport = <&opal_port3>;
+			id = <7>;
+			prio = <5>;
+			device-address = <0x24>;
+		};
+	};
+};

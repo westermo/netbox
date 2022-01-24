@@ -1,0 +1,7 @@
+#include "viper-poe.dtsi"
+
+&soc {
+	weos-poe {
+		power-capacity = <80000>;
+	};
+};
