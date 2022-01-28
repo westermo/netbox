@@ -1,0 +1,40 @@
+commit cb934ca39f8d20bad591379bc8e88aed385f165b
+Author: Joachim Wiberg <troglobit@gmail.com>
+Date:   Thu Jan 27 18:27:30 2022 +0100
+
+    Fix issue with "reboot doesn't work on 32-bit targets"
+    
+    With the introduction of GLIBC v2.34, all 32-bit devices running Linux
+    get the option of having a 64-bit time_t to survice the UNIX 2038
+    apocalypse.
+    
+    Support for 64-bit time_t was added to libuev in v2.4.0.  The build
+    flags for linking against libuev are defined in the library's .pc
+    files, which basically gives you -D_TIME_BITS=64 for your CPPFLAGS.
+    
+    However, it turns out the $(uev_CFLAGS) from pkg-config were only used
+    when building the main finit binary -- not for the plugins, causing
+    some really wacky behavior as a result.  All plugins and Finit itself
+    had some very different opinions on what `struct plugin` looked like,
+    including offsets and size.  This led to all I/O plugins initializing
+    their sockets at the wrong offset -- little-endian 32-bit targets set
+    the HOOK_SHUTDOWN callback hook to address 0x1 -- which the reboot
+    code then tried to execute, of course leading to a segfault.
+    
+    This is quite possibly the root cause of issue #216
+    
+    Signed-off-by: Joachim Wiberg <troglobit@gmail.com>
+
+diff --git a/plugins/Makefile.am b/plugins/Makefile.am
+index bd50c59..4f2c719 100644
+--- a/plugins/Makefile.am
++++ b/plugins/Makefile.am
+@@ -3,7 +3,7 @@ AM_LDFLAGS          = -module -avoid-version -shared
+ AM_CFLAGS           = -W -Wall -Wextra -Wno-unused-parameter -std=gnu99
+ AM_CPPFLAGS         = -I$(top_srcdir)/src -U_FORTIFY_SOURCE
+ AM_CPPFLAGS        += -D_XOPEN_SOURCE=600 -D_BSD_SOURCE -D_GNU_SOURCE -D_DEFAULT_SOURCE
+-AM_CPPFLAGS        += $(lite_CFLAGS)
++AM_CPPFLAGS        += $(lite_CFLAGS) $(uev_CFLAGS)
+ 
+ if STATIC
+ noinst_LTLIBRARIES  = libplug.la

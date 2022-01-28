@@ -15,7 +15,7 @@ FINIT_D = $(TARGET_DIR)/etc/finit.d
 # Create configure script using autoreconf when building from git
 #FINIT_VERSION = 099672f
 #FINIT_SITE = git://github.com/troglobit/finit.git
-#FINIT_AUTORECONF = YES
+FINIT_AUTORECONF = YES
 #FINIT_DEPENDENCIES += host-automake host-autoconf host-libtool
 
 # Buildroot defaults to /usr for both prefix and exec-prefix, this we
