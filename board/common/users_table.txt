@@ -1,1 +1,3 @@
 factory -1 wheel -1 =reset - /sbin/factory - Reset to factory configuration
+frr -1 frr -1 * /run/frr /usr/sbin/nologin - FRRouting suite
+- -1 frrvty -1 * - - -
