@@ -10,4 +10,13 @@ QUERIERD_SITE    = \
 QUERIERD_LICENSE = BSD-3-Clause
 QUERIERD_LICENSE_FILES = LICENSE
 
+define QUERIERD_INSTALL_FINIT_SVC
+	$(INSTALL) -D -m 0644 $(BR2_EXTERNAL_NETBOX_PATH)/package/querierd/querierd.svc \
+		$(FINIT_D)/available/querierd.conf
+	$(INSTALL) -d -m 0755 $(FINIT_D)/enabled
+	ln -sf ../available/querierd.conf $(FINIT_D)/enabled/querierd.conf
+endef
+
+QUERIERD_POST_INSTALL_TARGET_HOOKS += QUERIERD_INSTALL_FINIT_SVC
+
 $(eval $(autotools-package))
