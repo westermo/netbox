@@ -40,6 +40,14 @@ awk -F: '
         print("link set dev", $1, " group port");
     }' </proc/net/dev | ip -batch -
 
+# Default to auto-edge in mstpd
+if [ -e /etc/bridge-stp.conf ]; then
+    tmp="$(ip -br link show group port | cut -d' ' -f1 |sed 's/$/=yes /g' |tr -d '\n')"
+    grep -qE '^IF_MSTPCTL_PORTAUTOEDGE.*' /etc/bridge-stp.conf || \
+	echo  "IF_MSTPCTL_PORTAUTOEDGE='$tmp'" >> /etc/bridge-stp.conf
+fi
+
+# Check for and fix duplicate MAC addresses
 if [ "$(ip -br link show group port | uniq -f 2 -d)" ]; then
     logger $opt -p user.warning -t "$ident" \
        "Port MAC addresses not unique, assigning from randomized base MAC."
