@@ -6,7 +6,8 @@ iface lo inet loopback
 # as untagged members in the same VLAN (VID 1).
 auto br0
 iface br0 inet manual
-	pre-up    ip link add dev br0 type bridge stp_state 0 vlan_filtering 1
+	pre-up    ip link add dev br0 type bridge stp_state 0 \
+			vlan_filtering 1 mcast_vlan_snooping 1
 	pre-up    ip link set group port master br0
 	pre-up    ip link set group port up
 	pre-up    ip link set dev br0 up
@@ -15,32 +16,34 @@ iface br0 inet manual
 # DHCP address, or comment out and enable static below
 auto vlan1
 iface vlan1 inet dhcp
-	pre-up bridge vlan add dev br0 vid 1 self
-	pre-up ip link add link br0 dev vlan1 type vlan id 1
+	pre-up    bridge vlan global set vid 1 dev br0 mcast_snooping 1 \
+			mcast_querier 1 mcast_igmp_version 3 mcast_mld_version 2
+	pre-up    bridge vlan add dev br0 vid 1 self
+	pre-up    ip link add link br0 dev vlan1 type vlan id 1
 	post-down ip link del vlan1
 	post-down bridge vlan del vid 1 dev br0 self
 
 # DHCP with one (or more) static IP addresses
 #auto vlan1
 #iface vlan1 inet dhcp
-#	pre-up bridge vlan add dev br0 vid 1 self
-#	pre-up ip link add link br0 dev vlan1 type vlan id 1
-#	up ip link set vlan1 up
-#	up ip address add 192.168.2.200/24 dev vlan1
-#	up ip route add default via 192.168.2.1
+#	pre-up    bridge vlan add dev br0 vid 1 self
+#	pre-up    ip link add link br0 dev vlan1 type vlan id 1
+#	up        ip link set vlan1 up
+#	up        ip address add 192.168.2.200/24 dev vlan1
+#	up        ip route add default via 192.168.2.1
 #	post-down ip link del vlan1
 #	post-down bridge vlan del vid 1 dev br0 self
 
 # Static IP, notice ifupdown in BusyBox doesn't support 192.168.2.200/24
 #auto vlan1
 #iface vlan1 inet static
-#	pre-up bridge vlan add dev br0 vid 1 self
-#	pre-up ip link add link br0 dev vlan1 type vlan id 1
+#	pre-up    bridge vlan add dev br0 vid 1 self
+#	pre-up    ip link add link br0 dev vlan1 type vlan id 1
+#	post-down ip link del vlan1
+#	post-down bridge vlan del vid 1 dev br0 self
 #	address 192.168.2.200
 #	netmask 255.255.255.0
 #	gateway 192.168.2.1
-#	post-down ip link del vlan1
-#	post-down bridge vlan del vid 1 dev br0 self
 
 # Include files from /etc/network/interfaces.d:
 source-directory /etc/network/interfaces.d
