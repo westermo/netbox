@@ -33,6 +33,12 @@ General guidelines:
 
 And ... to add new packages, please follow the [Buildroot Guidelines][].
 
+Reviewers:
+
+   1. Check general guidelines (above)
+   2. Add your `Reviewed-by: First Last <first.last@example.com>` in a comment
+   3. The assignee copies all `Reviewd-by:` and other tags to the merge commit
+
 
 Kernel Upgrade
 --------------
