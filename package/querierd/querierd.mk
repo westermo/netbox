@@ -9,6 +9,7 @@ QUERIERD_SITE    = \
 	https://github.com/westermo/querierd/releases/download/v$(QUERIERD_VERSION)
 QUERIERD_LICENSE = BSD-3-Clause
 QUERIERD_LICENSE_FILES = LICENSE
+QUERIERD_INSTALL_STAGING = YES
 
 define QUERIERD_INSTALL_CONFIG
 	$(INSTALL) -D -m 0644 $(BR2_EXTERNAL_NETBOX_PATH)/package/querierd/querierd.conf \
