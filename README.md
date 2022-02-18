@@ -117,6 +117,11 @@ available.  We select the defconfig for Zero (x86-64) NetBox app flavor:
 ~/src/netbox$ make netbox_app_zero_defconfig
 ```
 
+> **Note:** if you want to use the `gdbserver` on target, *this* is the
+> point where you have to enable it in `make menuconfig`.  The setting
+> you want is under Toolchain --> "Copy gdb server to the Target".  You
+> also want "Build options" --> "build packages with debugging symbols"
+
 Third, type make and fetch a cup of coffee because the first time you
 build it will take some time:
 
@@ -231,6 +236,47 @@ named `~/.cache/netbox-config-zero.img`:
 > capabilities, above.
 
 
+### Debugging with `gdbserver`
+
+if you remembered "Copy gdb server to the target", above, we can debug
+failing programs on our target (Qemu) system.  You also need to have the
+`gdb-multiarch` program installed on your host system, the regular `gdb`
+only supports your host's architecture:
+
+    sudo apt install gdb-multiarch
+
+To open the debug port in Qemu we start NetBox with `QEMU_GDB=1`, this
+opens `localhost:4712` as your debug port (4711 is used for kgdb):
+
+    $ make run QEMU_GDB=1
+
+When logged in, start the `gdbserver` service:
+
+    # initctl enable gdbserver
+    # initctl reload
+
+From your host, in another terminal (with the same `$O` set!) from the
+same NetBox directory, you can now connect to your target and the attach
+to, or remotely start the program you want to debug.  NetBox has a few
+extra tricks up its sleeve when it comes to remote debugging.  The below
+commands are defined in the [.gdbinit][] file:
+
+    $ make debug
+    GNU gdb (Ubuntu 9.2-0ubuntu1~20.04.1) 9.2
+    Copyright (C) 2020 Free Software Foundation, Inc.
+    
+    For help, type "help".
+    (gdb) user-connect
+    (gdb) user-attach usr/sbin/querierd 488
+    0x00007f5812afc425 in select () from ./lib64/libc.so.6
+    (gdb) cont
+    Continuing.
+
+For more information on how to use GDB, see the manual, or if you want
+to know a little bit more behind the scenes, see the blog post about
+[Debugging an embedded system][debug].
+
+
 ### Running in LXC or LXD
 
 The NetBox app builds can be run in LXC, or LXD, on your PC but this is
@@ -241,7 +287,6 @@ all binaries are run through `qemu-aarch64`.  It both feels and really
 encourage all newbies to try out the Zero app builds in LXC first.
 
 For an example, see https://github.com/myrootfs/myrootfs#lxd
-
 
 
 [Westermo]:      https://www.westermo.com/
@@ -259,3 +304,5 @@ For an example, see https://github.com/myrootfs/myrootfs#lxd
 [dagger.os]:     https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-dagger.zip
 [envoy.os]:      https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-envoy.zip
 [zero.os]:       https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-zero.zip
+[.gdbinit]:      https://github.com/westermo/netbox/blob/master/.gdbinit
+[debug]:         https://westermo.github.io/2022/02/18/debugging-embedded-systems/
