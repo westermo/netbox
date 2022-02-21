@@ -45,6 +45,14 @@ endef
 SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_DROPBEAR
 endif
 
+# mstpd provides RSTP on the default bridge
+ifeq ($(BR2_PACKAGE_MSTPD),y)
+define SKELETON_INIT_FINIT_SET_MSTPD
+	ln -sf ../available/mstpd.conf $(FINIT_D)/enabled/mstpd.conf
+endef
+SKELETON_INIT_FINIT_TARGET_FINALIZE_HOOKS += SKELETON_INIT_FINIT_SET_MSTPD
+endif
+
 # Enable Busybox syslogd unless sysklogd is enabled
 ifeq ($(BR2_PACKAGE_SYSKLOGD),y)
 define SKELETON_INIT_FINIT_SET_SYSLOGD

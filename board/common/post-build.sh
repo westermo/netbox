@@ -31,6 +31,15 @@ printf "Type: 'help' for help with commands, 'exit' to log out.\n\n" >> $TARGET_
 rm    $TARGET_DIR/etc/dropbear
 mkdir $TARGET_DIR/etc/dropbear
 
+# Make sure we have /sbin/bridge-stp and /etc/default/mstpd set up
+if [ "$BR2_PACKAGE_MSTPD" = "y" ]; then
+    [ -e "$TARGET_DIR/sbin/bridge-stp" ]   || ln -s ../usr/sbin/bridge-stp "$TARGET_DIR/sbin/"
+    [ -e "$TARGET_DIR/etc/default/mstpd" ] || ln -s ../bridge-stp.conf "$TARGET_DIR/etc/default/mstpd"
+
+    grep -qE "^MSTP_BRIDGES=.*" "$TARGET_DIR/etc/bridge-stp.conf" || \
+	echo "MSTP_BRIDGES=br0" >> "$TARGET_DIR/etc/bridge-stp.conf"
+fi
+
 if [ "$NETBOX_PLAT" != "app" ]; then
     kernel=$(basename $TARGET_DIR/boot/*Image)
 

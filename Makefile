@@ -40,4 +40,9 @@ buildroot/Makefile:
 run:
 	@qemu -f $(O)/images/qemu.cfg
 
+debug:
+	@[ -f $(O)/staging/.gdbinit ]    || cp $(CURDIR)/.gdbinit $(O)/staging/.gdbinit
+	@[ -f $(O)/staging/.gdbinit.py ] || cp $(CURDIR)/.gdbinit.py $(O)/staging/.gdbinit.py
+	@(cd $(O)/staging/ && gdb-multiarch)
+
 .PHONY: all defconfig run
