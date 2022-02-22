@@ -92,9 +92,21 @@ rmon()
     printf "\e[2mSee: 'ethtool --help' for more details.\e[0m\n"
 }
 
+rstp()
+{
+    mstpctl showbridge
+    echo "br0 port info"
+    mstpctl showport br0
+}
+
 routes()
 {
     ip route show
+}
+
+igmp()
+{
+    querierctl $@
 }
 
 system()
@@ -161,6 +173,9 @@ case $cmd in
 	    route*)
 		routes
 		;;
+	    igmp*)
+		igmp "$*"
+		;;
 	    *)
 		usage
 		;;
@@ -174,6 +189,9 @@ case $cmd in
 	;;
     route*)
 	routes
+	;;
+    span*)
+	rstp
 	;;
     sys*)
 	system
