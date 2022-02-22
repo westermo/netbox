@@ -1,0 +1,22 @@
+#
+# eth1:switch1:eth0 <--> eth0:querier:eth1 <--> eth0:switch2:eth1
+#  ^                                                          ^
+#  |                                                          |
+#  '---------------------> sw1:host:sw2 <---------------------'
+#
+graph "my-network" {
+        node [shape=record];
+        qn_template="netbox-os-zero";
+        qn_append="quiet";
+
+        querier [label="querier | { <eth0> eth0 | <eth1> eth1 }"];
+        switch1 [label="switch  | { <eth0> eth0 | <eth1> eth1 }"];
+        switch2 [label="switch  | { <eth0> eth0 | <eth1> eth1 }"];
+
+        querier:eth0 -- switch1:eth0;
+        querier:eth1 -- switch2:eth0;
+
+	host:"sw1"   -- switch1:eth1;
+	host:"sw2"   -- switch2:eth1;
+}
+
