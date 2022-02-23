@@ -9,6 +9,14 @@ dnl Additional users and their permiossions
 BR2_ROOTFS_USERS_TABLES="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/users_table.txt"
 BR2_ROOTFS_DEVICE_TABLE="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/xattrs"
 
+dnl OS profile requires the following extra Finit plugins, which make no sense for apps
+BR2_PACKAGE_FINIT_PLUGIN_HOTPLUG=y
+BR2_PACKAGE_FINIT_PLUGIN_MODULES_LOAD=y
+BR2_PACKAGE_FINIT_PLUGIN_MODPROBE=y
+BR2_PACKAGE_FINIT_PLUGIN_HOTPLUG=y
+BR2_PACKAGE_FINIT_PLUGIN_RTC=y
+BR2_PACKAGE_FINIT_PLUGIN_URANDOM=y
+
 dnl OS profile selects the following packages
 NETBOX_TYPE_OS=y
 BR2_PACKAGE_BRIST=y
