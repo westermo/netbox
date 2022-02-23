@@ -6,6 +6,10 @@ BR2_GLOBAL_PATCH_DIR="$(BR2_EXTERNAL_NETBOX_PATH)/patches"
 BR2_TARGET_GENERIC_HOSTNAME="$(NETBOX_PLAT)"
 BR2_TARGET_GENERIC_ISSUE="NetBox - The Networking Toolbox"
 BR2_INIT_FINIT=y
+dnl Include platform-specific overlay if plat_overlay is set
+format([BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/rootfs %s %s"],
+	ifdef([os_rootfs_overlay], os_rootfs_overlay,),
+	ifdef([os_rootfs_overlay_extra], os_rootfs_overlay_extra,))
 BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/post-build.sh"
 BR2_ROOTFS_POST_IMAGE_SCRIPT="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/post-image.sh $(BR2_EXTERNAL_NETBOX_PATH)/board/$(NETBOX_PLAT)/post-image.sh "
 BR2_PACKAGE_BUSYBOX_CONFIG="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/busybox.config"
