@@ -28,8 +28,10 @@ printf "Type: 'help' for help with commands, 'exit' to log out.\n\n" >> $TARGET_
 #  1. the /var/run/dropbear directory must be created at boot
 #  2. the host key will be regenerated every boot == annoying
 # NetBox has writable overlayfs for /etc, so let's use that.
-rm    $TARGET_DIR/etc/dropbear
-mkdir $TARGET_DIR/etc/dropbear
+if [ -h $TARGET_DIR/etc/dropbear ]; then
+    rm    $TARGET_DIR/etc/dropbear
+    mkdir $TARGET_DIR/etc/dropbear
+fi
 
 # Make sure we have /sbin/bridge-stp and /etc/default/mstpd set up
 if [ "$BR2_PACKAGE_MSTPD" = "y" ]; then
