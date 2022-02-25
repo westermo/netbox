@@ -52,4 +52,9 @@ if [ "$NETBOX_PLAT" != "app" ]; then
 
 	ln -s ../$kernel $board/kernel
     done
+
+    # If we've enabled kselftests, add writable forwarding.config symlink
+    if [ -d $TARGET_DIR/usr/lib/kselftests/net/forwarding/ ]; then
+	ln -sf /tmp/forwarding.config $TARGET_DIR/usr/lib/kselftests/net/forwarding/
+    fi
 fi
