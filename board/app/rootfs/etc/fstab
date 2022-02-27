@@ -1,0 +1,23 @@
+# Virtual filesystems
+tmpfs		/tmp		tmpfs		mode=1777,nosuid,nodev	0	0
+#tmpfs		/run		tmpfs		mode=0755,nosuid,nodev	0	0
+mkdir#-p	/run/dropbear	helper		none			0	0
+
+# Ensure that all overlay directories are available
+mkdir#-p#-m0755	/tmp/system/var.u	helper	none	0	0
+mkdir#-p#-m0755	/tmp/system/var.w	helper	none	0	0
+mkdir#-p#-m0755	/mnt/system/varlib.u	helper	none	0	0
+mkdir#-p#-m0755	/mnt/system/varlib.w	helper	none	0	0
+mkdir#-p#-m0755	/mnt/system/etc.u	helper	none	0	0
+mkdir#-p#-m0755	/mnt/system/etc.w	helper	none	0	0
+mkdir#-p#-m0700	/mnt/system/root.u	helper	none	0	0
+mkdir#-p#-m0700	/mnt/system/root.w	helper	none	0	0
+mkdir#-p#-m0700	/mnt/system/home.u	helper	none	0	0
+mkdir#-p#-m0700	/mnt/system/home.w	helper	none	0	0
+
+# Overlay selected parts of the filesystem with persistent storage
+rw-var	/var		overlay	lowerdir=/var,upperdir=/tmp/system/var.u,workdir=/tmp/system/var.w		0	0
+rw-vlib	/var/lib	overlay	lowerdir=/var/lib,upperdir=/mnt/system/varlib.u,workdir=/mnt/system/varlib.w	0	0
+rw-etc	/etc		overlay	lowerdir=/etc,upperdir=/mnt/system/etc.u,workdir=/mnt/system/etc.w		0	0
+rw-root	/root		overlay	lowerdir=/root,upperdir=/mnt/system/root.u,workdir=/mnt/system/root.w		0	0
+rw-home	/home		overlay	lowerdir=/home,upperdir=/mnt/system/home.u,workdir=/mnt/system/home.w		0	0
