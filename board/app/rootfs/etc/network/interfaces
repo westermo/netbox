@@ -1,0 +1,22 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+# DHCP address, or comment out and enable static below
+auto eth0
+iface eth0 inet dhcp
+
+# DHCP with one (or more) static IP addresses
+#auto eth0
+#iface eth0 inet dhcp
+#	up ip address add 192.168.2.200/24 dev eth0
+
+# Static IP, notice ifupdown in BusyBox doesn't support 192.168.2.200/24
+#auto eth0
+#iface eth0 inet static
+#	address 192.168.2.200
+#	netmask 255.255.255.0
+#	gateway 192.168.2.1
+
+# Include files from /etc/network/interfaces.d:
+source-directory /etc/network/interfaces.d

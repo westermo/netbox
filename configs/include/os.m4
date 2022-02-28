@@ -1,7 +1,3 @@
-dnl Include platform-specific overlay if plat_overlay is set
-format([BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/rootfs %s %s"],
-	ifdef([os_rootfs_overlay], os_rootfs_overlay,),
-	ifdef([os_rootfs_overlay_extra], os_rootfs_overlay_extra,))
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="5.16.8"
@@ -12,6 +8,14 @@ BR2_LINUX_KERNEL_INSTALL_TARGET=y
 dnl Additional users and their permiossions
 BR2_ROOTFS_USERS_TABLES="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/users_table.txt"
 BR2_ROOTFS_DEVICE_TABLE="$(BR2_EXTERNAL_NETBOX_PATH)/board/common/xattrs"
+
+dnl OS profile requires the following extra Finit plugins, which make no sense for apps
+BR2_PACKAGE_FINIT_PLUGIN_HOTPLUG=y
+BR2_PACKAGE_FINIT_PLUGIN_MODULES_LOAD=y
+BR2_PACKAGE_FINIT_PLUGIN_MODPROBE=y
+BR2_PACKAGE_FINIT_PLUGIN_HOTPLUG=y
+BR2_PACKAGE_FINIT_PLUGIN_RTC=y
+BR2_PACKAGE_FINIT_PLUGIN_URANDOM=y
 
 dnl OS profile selects the following packages
 NETBOX_TYPE_OS=y

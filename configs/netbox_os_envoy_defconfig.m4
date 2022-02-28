@@ -1,7 +1,7 @@
+define([os_rootfs_overlay], $(BR2_EXTERNAL_NETBOX_PATH)/board/$(NETBOX_PLAT)/rootfs)
 include([plat-envoy.m4])
 include([base.m4])
 include([toolchain-bootlin.m4])
-define([os_rootfs_overlay], $(BR2_EXTERNAL_NETBOX_PATH)/board/$(NETBOX_PLAT)/rootfs)
 include([os.m4])
 
 dnl Copy DTS files from kernel, keep vendor prefix directory
