@@ -279,14 +279,86 @@ to know a little bit more behind the scenes, see the blog post about
 
 ### Running in LXC or LXD
 
-The NetBox app builds can be run in LXC, or LXD, on your PC but this is
-not yet documented here.  It is even possible to run non-native archs,
-like Arm64, on your PC using Linux "binfmt misc" support, in which case
-all binaries are run through `qemu-aarch64`.  It both feels and really
-*is* a very weird thing.  This is not documented yet and we instead
-encourage all newbies to try out the Zero app builds in LXC first.
+The NetBox app builds can be run in LXC, or LXD, on your PC.  With LXD
+it is even possible to run non-native archs, like Arm64 using the Linux
+"binfmt misc" mechanism, which runs all binaries through `qemu-aarch64`.
+This is only documented in the predecessor to NetBox, [myrootfs]][].
 
-For an example, see https://github.com/myrootfs/myrootfs#lxd
+To run a NetBox app in LXC, first install all dependencies (lxc-utils,
+libvirt, etc.) and create the necessary directories:
+
+```sh
+$ sudo mkdir -p /var/lib/lxc/images/
+$ sudo mkdir -p /var/lib/lxc/foo
+```
+
+Since we are playing it safe, we've built the Zero (x86_64) NetBox app,
+image, so let's install it in the `images/` directory.  Images can be
+shared with multiple LXC container apps:
+
+```sh
+$ sudo cp output/images/netbox-app-zero.img /var/lib/lxc/images/foo.img
+```
+
+The LXC `config` file might need some tweaking, in particular if you use
+different path to the `.img` file.  The host bridge you probably want to
+change as well.  Here we have used `lxcbr0` only because it's the
+default in libvirt installs in Debian/Ubuntu and gives us NAT:ed access
+to the Internet from our app(s) via the host.  All this is already set
+up by libvirt, so we can focus on the LXC container `config`:
+
+```sh
+$ sudo sh -c "cat >>/var/lib/lxc/foo/config" <<-EOF
+	lxc.uts.name = foo
+	lxc.tty.max = 4
+	lxc.pty.max=1024
+	#lxc.hook.pre-mount = pre-mount.sh /var/lib/lxc/images/foo.img /var/lib/lxc/foo/rootfs
+	#lxc.rootfs.path    = overlayfs:/var/lib/lxc/foo/rootfs:/var/lib/lxc/foo/delta0
+	#lxc.rootfs.options = -t squashfs
+	lxc.rootfs.path = loop:/var/lib/lxc/images/netbox-app-zero.img
+	lxc.mount.auto = cgroup:mixed proc:mixed sys:mixed
+	#lxc.mount.entry=run run tmpfs rw,nodev,relatime,mode=755 0 0
+	#lxc.mount.entry=shm dev/shm tmpfs rw,nodev,noexec,nosuid,relatime,mode=1777,create=dir 0 0
+	lxc.mount.entry=/var/lib/lxc/foo/mnt mnt none bind 0 0
+	lxc.net.0.type = veth
+	lxc.net.0.flags = up
+	lxc.net.0.link = lxcbr0
+	#lxc.init.cmd = /sbin/init finit.debug
+	
+	#lxc.seccomp.profile = /usr/share/lxc/config/common.seccomp
+	lxc.apparmor.profile = lxc-container-default-with-mounting
+EOF
+```
+
+The last two lines are needed on systems with Seccomp and/or AppArmor.
+Uncomment the one you need, see the host's dmesg when `lxc-start` fails
+with mysterious error messages.  For convenience the Debian/Ubuntu is
+uncommented already.
+
+> **Note:** you may have to add the following two lines to your AppArmor
+> profile to enable writable /etc, /var, /home, and /root directories.
+> The file is in `/etc/apparmor.d/lxc/lxc-default-with-mounting`:
+> ```
+> mount fstype=tmpfs,
+> mount fstype=overlay,
+> ```
+
+Reload AppArmor, or restart your system to activate the changes, then we
+can start the container with:
+
+```sh
+$ sudo lxc-start -n foo
+```
+
+To see what actually happens when it starts up, append `-F`.  Attach to
+the container's `/dev/console` with:
+
+```sh
+$ sudo lxc-console -n foo -t 0 -e '^p'
+```
+
+The last `-e '^p` remaps the control key sequence to detach from your
+container and return to your host: Ctrl-p q
 
 
 [Westermo]:      https://www.westermo.com/
@@ -306,3 +378,4 @@ For an example, see https://github.com/myrootfs/myrootfs#lxd
 [zero.os]:       https://nightly.link/westermo/netbox/workflows/build/master/netbox-os-zero.zip
 [.gdbinit]:      https://github.com/westermo/netbox/blob/master/.gdbinit
 [debug]:         https://westermo.github.io/2022/02/18/debugging-embedded-systems/
+[myrootfs]:      https://github.com/myrootfs/myrootfs#lxd
