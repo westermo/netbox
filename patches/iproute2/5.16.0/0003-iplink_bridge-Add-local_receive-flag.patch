@@ -1,0 +1,68 @@
+From 77167de11a1ae3cb1df967a67b061d5ded5c5020 Mon Sep 17 00:00:00 2001
+From: Mattias Forsblad <mattias.forsblad@westermo.com>
+Date: Mon, 28 Feb 2022 08:07:52 +0100
+Subject: [PATCH 3/3] iplink_bridge: Add local_receive flag
+
+The local_receive bridge flag constrols if ingressing packets
+will traverse up or not in the bridge.
+
+Signed-off-by: Mattias Forsblad <mattias.forsblad@westermo.com>
+---
+ include/uapi/linux/if_link.h |  1 +
+ ip/iplink_bridge.c           | 14 ++++++++++++++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/include/uapi/linux/if_link.h b/include/uapi/linux/if_link.h
+index 1d4ed60b..ee4dc74c 100644
+--- a/include/uapi/linux/if_link.h
++++ b/include/uapi/linux/if_link.h
+@@ -479,6 +479,7 @@ enum {
+ 	IFLA_BR_VLAN_STATS_PER_PORT,
+ 	IFLA_BR_MULTI_BOOLOPT,
+ 	IFLA_BR_MCAST_QUERIER_STATE,
++	IFLA_BR_LOCAL_RECEIVE,
+ 	__IFLA_BR_MAX,
+ };
+ 
+diff --git a/ip/iplink_bridge.c b/ip/iplink_bridge.c
+index c2e63f6e..d2c09dbb 100644
+--- a/ip/iplink_bridge.c
++++ b/ip/iplink_bridge.c
+@@ -30,6 +30,7 @@ static void print_explain(FILE *f)
+ 	fprintf(f,
+ 		"Usage: ... bridge [ fdb_flush ]\n"
+ 		"		  [ forward_delay FORWARD_DELAY ]\n"
++		"		  [ local_receive LOCAL_RECEIVE ]\n"
+ 		"		  [ hello_time HELLO_TIME ]\n"
+ 		"		  [ max_age MAX_AGE ]\n"
+ 		"		  [ ageing_time AGEING_TIME ]\n"
+@@ -382,6 +383,14 @@ static int bridge_parse_opt(struct link_util *lu, int argc, char **argv,
+ 
+ 			addattr8(n, 1024, IFLA_BR_NF_CALL_ARPTABLES,
+ 				 nf_call_arpt);
++		} else if (matches(*argv, "local_receive") == 0) {
++			__u8 local_receive;
++
++			NEXT_ARG();
++			if (get_u8(&local_receive, *argv, 0))
++				invarg("invalid local_receive", *argv);
++
++			addattr8(n, 1024, IFLA_BR_LOCAL_RECEIVE, local_receive);
+ 		} else if (matches(*argv, "help") == 0) {
+ 			explain();
+ 			return -1;
+@@ -430,6 +439,11 @@ static void bridge_print_opt(struct link_util *lu, FILE *f, struct rtattr *tb[])
+ 			   "forward_delay %u ",
+ 			   rta_getattr_u32(tb[IFLA_BR_FORWARD_DELAY]));
+ 
++	if (tb[IFLA_BR_LOCAL_RECEIVE])
++		print_uint(PRINT_ANY, "local_receive",
++			   "local_receive %u ",
++			   rta_getattr_u8(tb[IFLA_BR_LOCAL_RECEIVE]));
++
+ 	if (tb[IFLA_BR_HELLO_TIME])
+ 		print_uint(PRINT_ANY,
+ 			   "hello_time",
+-- 
+2.25.1
+
