@@ -1,0 +1,242 @@
+From 672b92ca2947dbd0e748de809d350f7d968afb72 Mon Sep 17 00:00:00 2001
+From: Jacques de Laval <Jacques.De.Laval@westermo.com>
+Date: Thu, 3 Feb 2022 11:45:00 +0100
+Subject: [PATCH 2/3] ip: Add ability to set address protocol when adding
+ addresses
+
+Signed-off-by: Jacques de Laval <Jacques.De.Laval@westermo.com>
+---
+ etc/iproute2/ifa_protos      |  7 ++++
+ include/rt_names.h           |  2 ++
+ include/uapi/linux/if_addr.h |  8 +++++
+ ip/ip_common.h               |  1 +
+ ip/ipaddress.c               | 37 +++++++++++++++++++++
+ lib/rt_names.c               | 62 ++++++++++++++++++++++++++++++++++++
+ 6 files changed, 117 insertions(+)
+ create mode 100644 etc/iproute2/ifa_protos
+
+diff --git a/etc/iproute2/ifa_protos b/etc/iproute2/ifa_protos
+new file mode 100644
+index 00000000..78d4f3f6
+--- /dev/null
++++ b/etc/iproute2/ifa_protos
+@@ -0,0 +1,7 @@
++#
++# Reserved protocols.
++#
++0	unspec
++1	loopback
++2	router-announcement
++3	link-local
+diff --git a/include/rt_names.h b/include/rt_names.h
+index 1835f3be..b34e3600 100644
+--- a/include/rt_names.h
++++ b/include/rt_names.h
+@@ -11,6 +11,7 @@ const char *rtnl_rtrealm_n2a(int id, char *buf, int len);
+ const char *rtnl_dsfield_n2a(int id, char *buf, int len);
+ const char *rtnl_dsfield_get_name(int id);
+ const char *rtnl_group_n2a(int id, char *buf, int len);
++const char *rtnl_ifaprot_n2a(int id, char *buf, int len);
+ 
+ int rtnl_rtprot_a2n(__u32 *id, const char *arg);
+ int rtnl_rtscope_a2n(__u32 *id, const char *arg);
+@@ -18,6 +19,7 @@ int rtnl_rttable_a2n(__u32 *id, const char *arg);
+ int rtnl_rtrealm_a2n(__u32 *id, const char *arg);
+ int rtnl_dsfield_a2n(__u32 *id, const char *arg);
+ int rtnl_group_a2n(int *id, const char *arg);
++int rtnl_ifaprot_a2n(__u32 *id, const char *arg);
+ 
+ const char *inet_proto_n2a(int proto, char *buf, int len);
+ int inet_proto_a2n(const char *buf);
+diff --git a/include/uapi/linux/if_addr.h b/include/uapi/linux/if_addr.h
+index c4dd87f9..c86bb7ba 100644
+--- a/include/uapi/linux/if_addr.h
++++ b/include/uapi/linux/if_addr.h
+@@ -35,6 +35,7 @@ enum {
+ 	IFA_FLAGS,
+ 	IFA_RT_PRIORITY,  /* u32, priority/metric for prefix route */
+ 	IFA_TARGET_NETNSID,
++	IFA_PROTO,
+ 	__IFA_MAX,
+ };
+ 
+@@ -67,4 +68,11 @@ struct ifa_cacheinfo {
+ #define IFA_RTA(r)  ((struct rtattr*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
+ #define IFA_PAYLOAD(n) NLMSG_PAYLOAD(n,sizeof(struct ifaddrmsg))
+ 
++/* ifa_protocol */
++#define IFAPROT_UNSPEC          0
++#define IFAPROT_KERNEL_LO	1       /* loopback */
++#define IFAPROT_KERNEL_RA	2       /* auto assigned by kernel from router
++					   announcement */
++#define IFAPROT_KERNEL_LL	3       /* link-local set by kernel*/
++
+ #endif
+diff --git a/ip/ip_common.h b/ip/ip_common.h
+index ea04c8ff..b7ee64d6 100644
+--- a/ip/ip_common.h
++++ b/ip/ip_common.h
+@@ -16,6 +16,7 @@ struct link_filter {
+ 	inet_prefix pfx;
+ 	int scope, scopemask;
+ 	int flags, flagmask;
++	int proto, protomask;
+ 	int up;
+ 	char *label;
+ 	int flushed;
+diff --git a/ip/ipaddress.c b/ip/ipaddress.c
+index 4109d8bd..dc934c4d 100644
+--- a/ip/ipaddress.c
++++ b/ip/ipaddress.c
+@@ -67,6 +67,7 @@ static void usage(void)
+ 		"IFADDR := PREFIX | ADDR peer PREFIX\n"
+ 		"          [ broadcast ADDR ] [ anycast ADDR ]\n"
+ 		"          [ label IFNAME ] [ scope SCOPE-ID ] [ metric METRIC ]\n"
++		"          [ proto IFAPROTO ]\n"
+ 		"SCOPE-ID := [ host | link | global | NUMBER ]\n"
+ 		"FLAG-LIST := [ FLAG-LIST ] FLAG\n"
+ 		"FLAG  := [ permanent | dynamic | secondary | primary |\n"
+@@ -1508,6 +1509,9 @@ int print_addrinfo(struct nlmsghdr *n, void *arg)
+ 		return 0;
+ 	if ((filter.flags ^ ifa_flags) & filter.flagmask)
+ 		return 0;
++	if (rta_tb[IFA_PROTO])
++		if ((filter.proto ^ rta_getattr_u32(rta_tb[IFA_PROTO])) & filter.protomask)
++			return 0;
+ 
+ 	if (filter.family && filter.family != ifa->ifa_family)
+ 		return 0;
+@@ -1618,6 +1622,16 @@ int print_addrinfo(struct nlmsghdr *n, void *arg)
+ 
+ 	print_ifa_flags(fp, ifa, ifa_flags);
+ 
++	if (rta_tb[IFA_PROTO]) {
++		__u8 prot = rta_getattr_u8(rta_tb[IFA_PROTO]);
++
++		if (prot != IFAPROT_UNSPEC)
++			print_string(PRINT_ANY,
++				     "protocol",
++				     "proto %s ",
++				     rtnl_ifaprot_n2a(prot, b1, sizeof(b1)));
++	}
++
+ 	if (rta_tb[IFA_LABEL])
+ 		print_string(PRINT_ANY,
+ 			     "label",
+@@ -1872,6 +1886,10 @@ static void ipaddr_filter(struct nlmsg_chain *linfo, struct nlmsg_chain *ainfo)
+ 			if ((filter.flags ^ ifa_flags) & filter.flagmask)
+ 				continue;
+ 
++			if (tb[IFA_PROTO])
++				if ((filter.proto ^ rta_getattr_u32(tb[IFA_PROTO])) & filter.protomask)
++					continue;
++
+ 			if (ifa_label_match_rta(ifa->ifa_index, tb[IFA_LABEL]))
+ 				continue;
+ 
+@@ -2137,6 +2155,18 @@ static int ipaddr_list_flush_or_save(int argc, char **argv, int action)
+ 			} else {
+ 				filter.kind = *argv;
+ 			}
++		} else if (strcmp(*argv, "proto") == 0) {
++			unsigned int proto = 0;
++
++			NEXT_ARG();
++			filter.protomask = -1;
++			if (rtnl_ifaprot_a2n(&proto, *argv)) {
++				if (strcmp(*argv, "all") != 0)
++					invarg("invalid \"proto\"\n", *argv);
++				proto = 0;
++				filter.protomask = 0;
++			}
++			filter.proto = proto;
+ 		} else {
+ 			if (strcmp(*argv, "dev") == 0)
+ 				NEXT_ARG();
+@@ -2434,6 +2464,13 @@ static int ipaddr_modify(int cmd, int flags, int argc, char **argv)
+ 		} else if (strcmp(*argv, "dev") == 0) {
+ 			NEXT_ARG();
+ 			d = *argv;
++		} else if (strcmp(*argv, "proto") == 0) {
++			__u32 prot;
++
++			NEXT_ARG();
++			if (rtnl_ifaprot_a2n(&prot, *argv))
++				invarg("Invalid \"protocol\" value\n", *argv);
++			addattr8(&req.n, sizeof(req), IFA_PROTO, prot);
+ 		} else if (strcmp(*argv, "label") == 0) {
+ 			NEXT_ARG();
+ 			l = *argv;
+diff --git a/lib/rt_names.c b/lib/rt_names.c
+index b976471d..70696035 100644
+--- a/lib/rt_names.c
++++ b/lib/rt_names.c
+@@ -786,3 +786,65 @@ int protodown_reason_a2n(__u32 *id, const char *arg)
+ 	*id = res;
+ 	return 0;
+ }
++
++static char *rtnl_ifaprot_tab[256] = {
++	[IFAPROT_UNSPEC]	= "unspec",
++	[IFAPROT_KERNEL_LO]	= "loopback",
++	[IFAPROT_KERNEL_RA]	= "router-announcement",
++	[IFAPROT_KERNEL_LL]	= "link-local",
++};
++
++static int rtnl_ifaprot_init;
++
++static void rtnl_ifaprot_initialize(void)
++{
++	rtnl_ifaprot_init = 1;
++	rtnl_tab_initialize(CONFDIR "/ifa_protos",
++			    rtnl_ifaprot_tab, 256);
++}
++
++const char *rtnl_ifaprot_n2a(int id, char *buf, int len) {
++	if (id < 0 || id >= 256) {
++		snprintf(buf, len, "%d", id);
++		return buf;
++	}
++	if (!rtnl_ifaprot_tab[id]) {
++		if (!rtnl_ifaprot_init)
++			rtnl_ifaprot_initialize();
++	}
++	if (rtnl_ifaprot_tab[id])
++		return rtnl_ifaprot_tab[id];
++	snprintf(buf, len, "0x%02x", id);
++	return buf;
++}
++
++int rtnl_ifaprot_a2n(__u32 *id, const char *arg) {
++	static char *cache;
++	static unsigned long res;
++	char *end;
++	int i;
++
++	if (cache && strcmp(cache, arg) == 0) {
++		*id = res;
++		return 0;
++	}
++
++	if (!rtnl_ifaprot_init)
++		rtnl_ifaprot_initialize();
++
++	for (i = 0; i < 256; i++) {
++		if (rtnl_ifaprot_tab[i] &&
++		    strcmp(rtnl_ifaprot_tab[i], arg) == 0) {
++			cache = rtnl_ifaprot_tab[i];
++			res = i;
++			*id = res;
++			return 0;
++		}
++	}
++
++	res = strtoul(arg, &end, 0);
++	if (!end || end == arg || *end || res > 255)
++		return -1;
++	*id = res;
++	return 0;
++}
+-- 
+2.25.1
+

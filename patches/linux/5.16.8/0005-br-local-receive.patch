@@ -1,0 +1,412 @@
+diff --git a/drivers/net/dsa/mv88e6xxx/chip.c b/drivers/net/dsa/mv88e6xxx/chip.c
+index cd8462d1e27c..88a258e5a1d7 100644
+--- a/drivers/net/dsa/mv88e6xxx/chip.c
++++ b/drivers/net/dsa/mv88e6xxx/chip.c
+@@ -1242,6 +1242,7 @@ static u16 mv88e6xxx_port_vlan(struct mv88e6xxx_chip *chip, int dev, int port)
+ 	struct dsa_switch *ds = chip->ds;
+ 	struct dsa_switch_tree *dst = ds->dst;
+ 	struct net_device *br;
++	int local_receive = 1;
+ 	struct dsa_port *dp;
+ 	bool found = false;
+ 	u16 pvlan;
+@@ -1285,12 +1286,16 @@ static u16 mv88e6xxx_port_vlan(struct mv88e6xxx_chip *chip, int dev, int port)
+ 
+ 	pvlan = 0;
+ 
++	if (br)
++		local_receive = br_local_receive_enabled(dp->bridge_dev);
++
+ 	/* Frames from user ports can egress any local DSA links and CPU ports,
+-	 * as well as any local member of their bridge group.
++	 * as well as any local member of their bridge group. However, CPU ports
++	 * are omitted if local_receive is reset.
+ 	 */
+ 	list_for_each_entry(dp, &dst->ports, list)
+ 		if (dp->ds == ds &&
+-		    (dp->type == DSA_PORT_TYPE_CPU ||
++		    ((dp->type == DSA_PORT_TYPE_CPU && local_receive) ||
+ 		     dp->type == DSA_PORT_TYPE_DSA ||
+ 		     (br && dp->bridge_dev == br)))
+ 			pvlan |= BIT(dp->index);
+@@ -2573,6 +2578,41 @@ static void mv88e6xxx_bridge_tx_fwd_unoffload(struct dsa_switch *ds, int port,
+ 	}
+ }
+ 
++static int mv88e6xxx_set_local_receive(struct dsa_switch *ds, int port, struct net_device *br,
++				       bool enable)
++{
++	struct mv88e6xxx_chip *chip = ds->priv;
++	struct net_device *bridge;
++	struct dsa_port *dp;
++	bool found = false;
++	int err;
++
++	if (!netif_is_bridge_master(br))
++		return 0;
++
++	list_for_each_entry(dp, &ds->dst->ports, list) {
++		if (dp->ds == ds && dp->index == port) {
++			found = true;
++			break;
++		}
++	}
++
++	if (!found)
++		return 0;
++
++	bridge = dp->bridge_dev;
++	if (!bridge)
++		return 0;
++
++	mv88e6xxx_reg_lock(chip);
++
++	err = mv88e6xxx_bridge_map(chip, bridge);
++
++	mv88e6xxx_reg_unlock(chip);
++
++	return err;
++}
++
+ static int mv88e6xxx_software_reset(struct mv88e6xxx_chip *chip)
+ {
+ 	if (chip->info->ops->reset)
+@@ -6257,6 +6297,7 @@ static const struct dsa_switch_ops mv88e6xxx_switch_ops = {
+ 	.set_eeprom		= mv88e6xxx_set_eeprom,
+ 	.get_regs_len		= mv88e6xxx_get_regs_len,
+ 	.get_regs		= mv88e6xxx_get_regs,
++	.set_local_receive      = mv88e6xxx_set_local_receive,
+ 	.get_rxnfc		= mv88e6xxx_get_rxnfc,
+ 	.set_rxnfc		= mv88e6xxx_set_rxnfc,
+ 	.set_ageing_time	= mv88e6xxx_set_ageing_time,
+diff --git a/include/linux/if_bridge.h b/include/linux/if_bridge.h
+index 509e18c7e740..8846b3b1223b 100644
+--- a/include/linux/if_bridge.h
++++ b/include/linux/if_bridge.h
+@@ -156,6 +156,7 @@ static inline int br_vlan_get_info_rcu(const struct net_device *dev, u16 vid,
+ struct net_device *br_fdb_find_port(const struct net_device *br_dev,
+ 				    const unsigned char *addr,
+ 				    __u16 vid);
++bool br_local_receive_enabled(const struct net_device *dev);
+ void br_fdb_clear_offload(const struct net_device *dev, u16 vid);
+ bool br_port_flag_is_set(const struct net_device *dev, unsigned long flag);
+ u8 br_port_get_stp_state(const struct net_device *dev);
+@@ -169,6 +170,11 @@ br_fdb_find_port(const struct net_device *br_dev,
+ 	return NULL;
+ }
+ 
++static inline bool br_local_receive_enabled(const struct net_device *dev)
++{
++	return true;
++}
++
+ static inline void br_fdb_clear_offload(const struct net_device *dev, u16 vid)
+ {
+ }
+diff --git a/include/net/dsa.h b/include/net/dsa.h
+index eff5c44ba377..21650719e4a3 100644
+--- a/include/net/dsa.h
++++ b/include/net/dsa.h
+@@ -737,6 +737,12 @@ struct dsa_switch_ops {
+ 	void	(*get_regs)(struct dsa_switch *ds, int port,
+ 			    struct ethtool_regs *regs, void *p);
+ 
++	/*
++	 * Local receive
++	 */
++	int	(*set_local_receive)(struct dsa_switch *ds, int port,
++				     struct net_device *bridge, bool enable);
++
+ 	/*
+ 	 * Upper device tracking.
+ 	 */
+diff --git a/include/net/switchdev.h b/include/net/switchdev.h
+index d353793dfeb5..0d14416a7848 100644
+--- a/include/net/switchdev.h
++++ b/include/net/switchdev.h
+@@ -25,6 +25,7 @@ enum switchdev_attr_id {
+ 	SWITCHDEV_ATTR_ID_BRIDGE_AGEING_TIME,
+ 	SWITCHDEV_ATTR_ID_BRIDGE_VLAN_FILTERING,
+ 	SWITCHDEV_ATTR_ID_BRIDGE_VLAN_PROTOCOL,
++	SWITCHDEV_ATTR_ID_BRIDGE_LOCAL_RECEIVE,
+ 	SWITCHDEV_ATTR_ID_BRIDGE_MC_DISABLED,
+ 	SWITCHDEV_ATTR_ID_BRIDGE_MROUTER,
+ 	SWITCHDEV_ATTR_ID_MRP_PORT_ROLE,
+@@ -50,6 +51,7 @@ struct switchdev_attr {
+ 		u16 vlan_protocol;			/* BRIDGE_VLAN_PROTOCOL */
+ 		bool mc_disabled;			/* MC_DISABLED */
+ 		u8 mrp_port_role;			/* MRP_PORT_ROLE */
++		bool local_receive;			/* BRIDGE_LOCAL_RECEIVE */
+ 	} u;
+ };
+ 
+diff --git a/include/uapi/linux/if_bridge.h b/include/uapi/linux/if_bridge.h
+index 2711c3522010..fc889b5ccd69 100644
+--- a/include/uapi/linux/if_bridge.h
++++ b/include/uapi/linux/if_bridge.h
+@@ -72,6 +72,7 @@ struct __bridge_info {
+ 	__u32 tcn_timer_value;
+ 	__u32 topology_change_timer_value;
+ 	__u32 gc_timer_value;
++	__u8 local_receive;
+ };
+ 
+ struct __port_info {
+diff --git a/include/uapi/linux/if_link.h b/include/uapi/linux/if_link.h
+index eebd3894fe89..9dc022009e7f 100644
+--- a/include/uapi/linux/if_link.h
++++ b/include/uapi/linux/if_link.h
+@@ -481,6 +481,7 @@ enum {
+ 	IFLA_BR_VLAN_STATS_PER_PORT,
+ 	IFLA_BR_MULTI_BOOLOPT,
+ 	IFLA_BR_MCAST_QUERIER_STATE,
++	IFLA_BR_LOCAL_RECEIVE,
+ 	__IFLA_BR_MAX,
+ };
+ 
+diff --git a/net/bridge/br.c b/net/bridge/br.c
+index 1fac72cc617f..85e56f06c679 100644
+--- a/net/bridge/br.c
++++ b/net/bridge/br.c
+@@ -325,6 +325,24 @@ void br_boolopt_multi_get(const struct net_bridge *br,
+ 	bm->optmask = GENMASK((BR_BOOLOPT_MAX - 1), 0);
+ }
+ 
++int br_local_receive_change(struct net_bridge *p,
++			    bool local_receive)
++{
++	struct switchdev_attr attr = {
++		.orig_dev = p->dev,
++		.id = SWITCHDEV_ATTR_ID_BRIDGE_LOCAL_RECEIVE,
++		.flags = SWITCHDEV_F_DEFER,
++		.u.local_receive = local_receive,
++	};
++	int ret;
++
++	ret = switchdev_port_attr_set(p->dev, &attr, NULL);
++	if (!ret)
++		br_opt_toggle(p, BROPT_LOCAL_RECEIVE, local_receive);
++
++	return ret;
++}
++
+ /* private bridge options, controlled by the kernel */
+ void br_opt_toggle(struct net_bridge *br, enum net_bridge_opts opt, bool on)
+ {
+diff --git a/net/bridge/br_device.c b/net/bridge/br_device.c
+index 8d6bab244c4a..7cd9c5880d18 100644
+--- a/net/bridge/br_device.c
++++ b/net/bridge/br_device.c
+@@ -524,6 +524,7 @@ void br_dev_setup(struct net_device *dev)
+ 	br->bridge_hello_time = br->hello_time = 2 * HZ;
+ 	br->bridge_forward_delay = br->forward_delay = 15 * HZ;
+ 	br->bridge_ageing_time = br->ageing_time = BR_DEFAULT_AGEING_TIME;
++	br_opt_toggle(br, BROPT_LOCAL_RECEIVE, true);
+ 	dev->max_mtu = ETH_MAX_MTU;
+ 
+ 	br_netfilter_rtable_init(br);
+diff --git a/net/bridge/br_input.c b/net/bridge/br_input.c
+index b50382f957c1..365068b109ee 100644
+--- a/net/bridge/br_input.c
++++ b/net/bridge/br_input.c
+@@ -154,6 +154,9 @@ int br_handle_frame_finish(struct net *net, struct sock *sk, struct sk_buff *skb
+ 		break;
+ 	}
+ 
++	if (local_rcv && !br_opt_get(br, BROPT_LOCAL_RECEIVE))
++		local_rcv = false;
++
+ 	if (dst) {
+ 		unsigned long now = jiffies;
+ 
+diff --git a/net/bridge/br_ioctl.c b/net/bridge/br_ioctl.c
+index 891cfcf45644..e04c8f4e0929 100644
+--- a/net/bridge/br_ioctl.c
++++ b/net/bridge/br_ioctl.c
+@@ -157,6 +157,7 @@ int br_dev_siocdevprivate(struct net_device *dev, struct ifreq *rq, void __user
+ 		b.topology_change = br->topology_change;
+ 		b.topology_change_detected = br->topology_change_detected;
+ 		b.root_port = br->root_port;
++		b.local_receive = br_opt_get(br, BROPT_LOCAL_RECEIVE) ? 1 : 0;
+ 
+ 		b.stp_enabled = (br->stp_enabled != BR_NO_STP);
+ 		b.ageing_time = jiffies_to_clock_t(br->ageing_time);
+diff --git a/net/bridge/br_netlink.c b/net/bridge/br_netlink.c
+index 2ff83d84230d..5004c47f75ea 100644
+--- a/net/bridge/br_netlink.c
++++ b/net/bridge/br_netlink.c
+@@ -1159,6 +1159,7 @@ static const struct nla_policy br_policy[IFLA_BR_MAX + 1] = {
+ 	[IFLA_BR_MCAST_IGMP_VERSION] = { .type = NLA_U8 },
+ 	[IFLA_BR_MCAST_MLD_VERSION] = { .type = NLA_U8 },
+ 	[IFLA_BR_VLAN_STATS_PER_PORT] = { .type = NLA_U8 },
++	[IFLA_BR_LOCAL_RECEIVE] = { .type = NLA_U8 },
+ 	[IFLA_BR_MULTI_BOOLOPT] =
+ 		NLA_POLICY_EXACT_LEN(sizeof(struct br_boolopt_multi)),
+ };
+@@ -1430,6 +1431,14 @@ static int br_changelink(struct net_device *brdev, struct nlattr *tb[],
+ 			return err;
+ 	}
+ 
++	if (data[IFLA_BR_LOCAL_RECEIVE]) {
++		u8 val = nla_get_u8(data[IFLA_BR_LOCAL_RECEIVE]);
++
++		err = br_local_receive_change(br, !!val);
++		if (err)
++			return err;
++	}
++
+ 	return 0;
+ }
+ 
+@@ -1510,6 +1519,7 @@ static size_t br_get_size(const struct net_device *brdev)
+ 	       nla_total_size(sizeof(u8)) +     /* IFLA_BR_NF_CALL_ARPTABLES */
+ #endif
+ 	       nla_total_size(sizeof(struct br_boolopt_multi)) + /* IFLA_BR_MULTI_BOOLOPT */
++	       nla_total_size(sizeof(u8)) +     /* IFLA_BR_LOCAL_RECEIVE */
+ 	       0;
+ }
+ 
+@@ -1523,6 +1533,7 @@ static int br_fill_info(struct sk_buff *skb, const struct net_device *brdev)
+ 	u32 stp_enabled = br->stp_enabled;
+ 	u16 priority = (br->bridge_id.prio[0] << 8) | br->bridge_id.prio[1];
+ 	u8 vlan_enabled = br_vlan_enabled(br->dev);
++	u8 local_receive = br_opt_get(br, BROPT_LOCAL_RECEIVE) ? 1 : 0;
+ 	struct br_boolopt_multi bm;
+ 	u64 clockval;
+ 
+@@ -1559,7 +1570,8 @@ static int br_fill_info(struct sk_buff *skb, const struct net_device *brdev)
+ 	    nla_put_u8(skb, IFLA_BR_TOPOLOGY_CHANGE_DETECTED,
+ 		       br->topology_change_detected) ||
+ 	    nla_put(skb, IFLA_BR_GROUP_ADDR, ETH_ALEN, br->group_addr) ||
+-	    nla_put(skb, IFLA_BR_MULTI_BOOLOPT, sizeof(bm), &bm))
++	    nla_put(skb, IFLA_BR_MULTI_BOOLOPT, sizeof(bm), &bm) ||
++	    nla_put_u8(skb, IFLA_BR_LOCAL_RECEIVE, local_receive))
+ 		return -EMSGSIZE;
+ 
+ #ifdef CONFIG_BRIDGE_VLAN_FILTERING
+diff --git a/net/bridge/br_private.h b/net/bridge/br_private.h
+index e8c6ee322c71..a5f2c3dc03ec 100644
+--- a/net/bridge/br_private.h
++++ b/net/bridge/br_private.h
+@@ -444,6 +444,7 @@ enum net_bridge_opts {
+ 	BROPT_NO_LL_LEARN,
+ 	BROPT_VLAN_BRIDGE_BINDING,
+ 	BROPT_MCAST_VLAN_SNOOPING_ENABLED,
++	BROPT_LOCAL_RECEIVE,
+ };
+ 
+ struct net_bridge {
+@@ -719,6 +720,7 @@ int br_boolopt_multi_toggle(struct net_bridge *br,
+ void br_boolopt_multi_get(const struct net_bridge *br,
+ 			  struct br_boolopt_multi *bm);
+ void br_opt_toggle(struct net_bridge *br, enum net_bridge_opts opt, bool on);
++int br_local_receive_change(struct net_bridge *p, bool local_receive);
+ 
+ /* br_device.c */
+ void br_dev_setup(struct net_device *dev);
+diff --git a/net/bridge/br_sysfs_br.c b/net/bridge/br_sysfs_br.c
+index 7b0c19772111..9509085a9090 100644
+--- a/net/bridge/br_sysfs_br.c
++++ b/net/bridge/br_sysfs_br.c
+@@ -85,6 +85,28 @@ static ssize_t forward_delay_store(struct device *d,
+ }
+ static DEVICE_ATTR_RW(forward_delay);
+ 
++static ssize_t local_receive_show(struct device *d,
++				  struct device_attribute *attr, char *buf)
++{
++	struct net_bridge *br = to_bridge(d);
++
++	return sprintf(buf, "%u\n", br_opt_get(br, BROPT_LOCAL_RECEIVE));
++}
++
++static int set_local_receive(struct net_bridge *br, unsigned long val,
++			     struct netlink_ext_ack *extack)
++{
++	return br_local_receive_change(br, !!val);
++}
++
++static ssize_t local_receive_store(struct device *d,
++				   struct device_attribute *attr,
++				   const char *buf, size_t len)
++{
++	return store_bridge_parm(d, buf, len, set_local_receive);
++}
++static DEVICE_ATTR_RW(local_receive);
++
+ static ssize_t hello_time_show(struct device *d, struct device_attribute *attr,
+ 			       char *buf)
+ {
+@@ -951,6 +973,7 @@ static struct attribute *bridge_attrs[] = {
+ 	&dev_attr_group_addr.attr,
+ 	&dev_attr_flush.attr,
+ 	&dev_attr_no_linklocal_learn.attr,
++	&dev_attr_local_receive.attr,
+ #ifdef CONFIG_BRIDGE_IGMP_SNOOPING
+ 	&dev_attr_multicast_router.attr,
+ 	&dev_attr_multicast_snooping.attr,
+diff --git a/net/bridge/br_vlan.c b/net/bridge/br_vlan.c
+index f02351b4acac..6ec2ca0087ab 100644
+--- a/net/bridge/br_vlan.c
++++ b/net/bridge/br_vlan.c
+@@ -867,6 +867,14 @@ bool br_vlan_enabled(const struct net_device *dev)
+ }
+ EXPORT_SYMBOL_GPL(br_vlan_enabled);
+ 
++bool br_local_receive_enabled(const struct net_device *dev)
++{
++	struct net_bridge *br = netdev_priv(dev);
++
++	return br_opt_get(br, BROPT_LOCAL_RECEIVE);
++}
++EXPORT_SYMBOL_GPL(br_local_receive_enabled);
++
+ int br_vlan_get_proto(const struct net_device *dev, u16 *p_proto)
+ {
+ 	struct net_bridge *br = netdev_priv(dev);
+diff --git a/net/dsa/dsa_priv.h b/net/dsa/dsa_priv.h
+index a5c9bc7b66c6..438d75b0b765 100644
+--- a/net/dsa/dsa_priv.h
++++ b/net/dsa/dsa_priv.h
+@@ -220,6 +220,7 @@ int dsa_port_vlan_filtering(struct dsa_port *dp, bool vlan_filtering,
+ 			    struct netlink_ext_ack *extack);
+ bool dsa_port_skip_vlan_configuration(struct dsa_port *dp);
+ int dsa_port_ageing_time(struct dsa_port *dp, clock_t ageing_clock);
++int dsa_port_set_local_receive(struct dsa_port *dp, struct net_device *br, bool enable);
+ int dsa_port_mtu_change(struct dsa_port *dp, int new_mtu,
+ 			bool targeted_match);
+ int dsa_port_fdb_add(struct dsa_port *dp, const unsigned char *addr,
+diff --git a/net/dsa/slave.c b/net/dsa/slave.c
+index ad61f6bc8886..21705da29441 100644
+--- a/net/dsa/slave.c
++++ b/net/dsa/slave.c
+@@ -295,6 +295,12 @@ static int dsa_slave_port_attr_set(struct net_device *dev, const void *ctx,
+ 		ret = dsa_port_vlan_filtering(dp, attr->u.vlan_filtering,
+ 					      extack);
+ 		break;
++	case SWITCHDEV_ATTR_ID_BRIDGE_LOCAL_RECEIVE:
++		if (!dsa_port_offloads_bridge(dp, attr->orig_dev))
++			return -EOPNOTSUPP;
++
++		ret = dsa_port_set_local_receive(dp, attr->orig_dev, attr->u.local_receive);
++		break;
+ 	case SWITCHDEV_ATTR_ID_BRIDGE_AGEING_TIME:
+ 		if (!dsa_port_offloads_bridge(dp, attr->orig_dev))
+ 			return -EOPNOTSUPP;
+@@ -670,6 +676,16 @@ dsa_slave_get_regs(struct net_device *dev, struct ethtool_regs *regs, void *_p)
+ 		ds->ops->get_regs(ds, dp->index, regs, _p);
+ }
+ 
++int dsa_port_set_local_receive(struct dsa_port *dp, struct net_device *br, bool enable)
++{
++	struct dsa_switch *ds = dp->ds;
++
++	if (ds->ops->set_local_receive)
++		return ds->ops->set_local_receive(ds, dp->index, br, enable);
++
++	return 0;
++}
++
+ static int dsa_slave_nway_reset(struct net_device *dev)
+ {
+ 	struct dsa_port *dp = dsa_slave_to_port(dev);

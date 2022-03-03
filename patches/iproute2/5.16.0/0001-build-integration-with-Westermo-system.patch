@@ -1,0 +1,31 @@
+From af6870437159423d01c69b8ba5b84ac0a2213a76 Mon Sep 17 00:00:00 2001
+From: Joachim Wiberg <troglobit@gmail.com>
+Date: Wed, 23 Feb 2022 11:01:00 +0100
+Subject: [PATCH 1/3] build: integration with Westermo system
+
+Drop rdma and manuals from default build:
+
+  - rdma doesn't build in v5.16.0, and Westermo doesn't need it atm
+  - manuals require tool not in Docker build image, and not needed on target
+
+Signed-off-by: Joachim Wiberg <troglobit@gmail.com>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index f6214534..c89ec4f1 100644
+--- a/Makefile
++++ b/Makefile
+@@ -65,7 +65,7 @@ WFLAGS += -Wmissing-declarations -Wold-style-definition -Wformat=2
+ CFLAGS := $(WFLAGS) $(CCOPTS) -I../include -I../include/uapi $(DEFINES) $(CFLAGS)
+ YACCFLAGS = -d -t -v
+ 
+-SUBDIRS=lib ip tc bridge misc netem genl tipc devlink rdma dcb man vdpa
++SUBDIRS=lib ip tc bridge misc netem genl tipc devlink dcb vdpa
+ 
+ LIBNETLINK=../lib/libutil.a ../lib/libnetlink.a
+ LDLIBS += $(LIBNETLINK)
+-- 
+2.25.1
+
