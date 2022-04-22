@@ -26,6 +26,10 @@ case $plat in
 	arch="arm64"
 	load="0x40000000"
 	;;
+    ember)
+	arch="arm64"
+	load="0x40000000"
+	;;
     zero)
 	arch="x86_64"
 	;;

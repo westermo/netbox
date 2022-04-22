@@ -39,6 +39,7 @@ be able to easily match what container image works on a Westermo device:
 | powerpc          | Coronet           | [coronet.app][] | [coronet.os][] |
 | arm pj4          | Dagger            | [dagger.app][]  | [dagger.os][]  |
 | aarch64          | Envoy             | [envoy.app][]   | [envoy.os][]   |
+| aarch64          | Ember             | [ember.app][]   | [ember.os][]   |
 | x86\_64          | Zero              | [zero.app][]    | [zero.os][]    |
 
 > **Note:** the *Envoy* platform includes support also for the Marvell
