@@ -14,6 +14,13 @@
 };
 
 / {
+	model = "Sparx5 PCB135 Reference Board (NAND)";
+	compatible = "microchip,sparx5-pcb135", "microchip,sparx5";
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x00000000 0x00000000 0x10000000>;
+	};
 	gpio-restart {
 		compatible = "gpio-restart";
 		gpios = <&gpio 37 GPIO_ACTIVE_LOW>;
@@ -25,24 +32,52 @@
 	};
 };
 
+&gpio {
+	emmc_pins: emmc-pins {
+		/* NB: No "GPIO_35", "GPIO_36", "GPIO_37"
+		 * (N/A: CARD_nDETECT, CARD_WP, CARD_LED)
+		 */
+		pins = "GPIO_34", "GPIO_38", "GPIO_39",
+			"GPIO_40", "GPIO_41", "GPIO_42",
+			"GPIO_43", "GPIO_44", "GPIO_45",
+			"GPIO_46", "GPIO_47";
+		drive-strength = <3>;
+		function = "emmc";
+	};
+};
+
+&sdhci0 {
+	status = "okay";
+	pinctrl-0 = <&emmc_pins>;
+	non-removable;
+	max-frequency = <52000000>;
+	bus-width = <8>;
+	microchip,clock-delay = <10>;
+};
+
+&gpio {
+	cs14_pins: cs14-pins {
+		pins = "GPIO_44";
+		function = "si";
+	};
+};
+
 &spi0 {
 	pinctrl-0 = <&si2_pins>;
 	pinctrl-names = "default";
-	status = "okay";
-	spi@0 {
+	spi@e {
 		compatible = "spi-mux";
 		mux-controls = <&mux>;
 		#address-cells = <1>;
 		#size-cells = <0>;
-		reg = <0>; /* CS0 */
-		system_flash: spi-flash@9 {
-			compatible = "jedec,spi-nor";
-			spi-max-frequency = <8000000>;
-			reg = <0x9>; /* SPI */
-			spi-tx-bus-width = <4>;
-			spi-rx-bus-width = <4>;
-			#address-cells = <1>;
-			#size-cells = <1>;
+		reg = <14>; /* CS14 */
+		spi-flash@6 {
+			compatible = "spi-nand";
+			pinctrl-0 = <&cs14_pins>;
+			pinctrl-names = "default";
+			reg = <0x6>; /* SPI2 */
+			spi-max-frequency = <42000000>;
+			rx-sample-delay-ns = <7>;  /* Tune for speed */
 		};
 	};
 };
@@ -57,6 +92,15 @@
 
 &i2c0 {
 	status = "okay";
+};
+
+&spi0 {
+	status = "okay";
+	spi-flash@0 {
+		compatible = "jedec,spi-nor";
+		spi-max-frequency = <8000000>;
+		reg = <0>;
+	};
 };
 
 &gpio {
@@ -85,6 +129,22 @@
 		pins = "GPIO_51";
 		function = "twi_scl_m";
 		output-high;
+	};
+};
+
+&spi0 {
+	status = "okay";
+	spi@0 {
+		compatible = "spi-mux";
+		mux-controls = <&mux>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0>; /* CS0 */
+		spi-flash@9 {
+			compatible = "jedec,spi-nor";
+			spi-max-frequency = <8000000>;
+			reg = <0x9>; /* SPI */
+		};
 	};
 };
 
@@ -242,5 +302,3 @@
 		};
 	};
 };
-
-#include <common/system-flash/128M-dual.dtsi>
