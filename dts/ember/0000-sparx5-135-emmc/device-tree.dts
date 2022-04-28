@@ -59,6 +59,7 @@
 	status = "okay";
 };
 
+
 &gpio {
 	i2cmux_pins_i: i2cmux-pins-i {
 	       pins = "GPIO_35", "GPIO_36",

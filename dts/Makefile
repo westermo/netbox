@@ -7,6 +7,7 @@ karch-basis   := arm
 karch-coronet := powerpc
 karch-dagger  := arm
 karch-envoy   := arm64
+karch-ember   := arm64
 karch-zero    := x86_64
 karch := $(karch-$(PLAT))
 
