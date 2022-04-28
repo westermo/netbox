@@ -1,7 +1,7 @@
 menu "Branding"
 
 config NETBOX_PLAT
-	string
+	string "Single word lower-case identifier for the platform"
 	default "basis"   if BR2_arm926t
 	default "coronet" if BR2_powerpc
 	default "dagger"  if BR2_arm
