@@ -18,6 +18,7 @@ set -e
 
 rc=0
 opt="-k"
+tab=""
 ident=$(basename "$0")
 resetme=/mnt/factory-reset.now
 
@@ -27,8 +28,8 @@ mnt()
     mountpoint -q /mnt && return 0
 
     # Internal FLASH takes precedence over disks.
-    mount   mtd:Config && return 0
-    mount LABEL=Config && return 0
+    mount $tab   mtd:Config && return 0
+    mount $tab LABEL=Config && return 0
 
     return 1
 }
@@ -38,12 +39,16 @@ if ! logger -? |grep -q "Log to kernel"; then
     opt="-c"
 fi
 
+if [ -n "$FSTAB_FILE" ]; then
+    tab="-T $FSTAB_FILE"
+fi
+
 if ! mnt; then
     logger $opt -p user.crit -t "$ident" \
 	   "/mnt was not properly mounted, falling back to tmpfs."
 
     # Fall back to RAM disk.
-    mount tmpfs-Config
+    mount $tab tmpfs-Config
     rc=1
 fi
 
