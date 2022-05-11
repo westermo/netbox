@@ -42,7 +42,7 @@ jobs:
     strategy:
       matrix:
         profile: [app, os]
-        platform: [basis, coronet, dagger, envoy, zero]
+        platform: [basis, coronet, dagger, envoy, ember, zero]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
