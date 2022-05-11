@@ -244,4 +244,13 @@
 	};
 };
 
+&axi {
+	uio0: vcoreiii_switch@600000000 {
+		compatible = "microchip,uio_sparx5_irqmux";
+		reg = <0x6 0x00000000 0x12000000>;
+		reg-names = "origin1_2";
+		status = "okay";
+	};
+};
+
 #include <common/system-flash/128M-dual.dtsi>
