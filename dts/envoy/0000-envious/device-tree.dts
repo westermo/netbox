@@ -38,6 +38,17 @@
 		device_type = "memory";
 		reg = <0x0 0x40000000 0 0x20000000>;
 	};
+
+	reg_usdhc2_vmmc: regulator-usdhc2 {
+		compatible = "regulator-fixed";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_reg_usdhc2_vmmc>;
+		regulator-name = "VSD_3V3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
 };
 
 &A53_0 { cpu-supply = <&buck2>; };
@@ -379,7 +390,8 @@ poe_i2c: &i2c3 {
 	pinctrl-1 = <&pinctrl_usdhc2_100mhz>;
 	pinctrl-2 = <&pinctrl_usdhc2_200mhz>;
 	bus-width = <4>;
-	no-1-8-v;
+	cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
+	vmmc-supply = <&reg_usdhc2_vmmc>;
 	#address-cells = <1>;
 	#size-cells = <0>;
 };
@@ -422,7 +434,7 @@ poe_i2c: &i2c3 {
 			debounce-interval = <100>;
 			linux,code = <BTN_MISC>;
 			gpio-key,wakeup;
-			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio5 3 GPIO_ACTIVE_HIGH>;
 		};
 	};
 
@@ -493,10 +505,9 @@ poe_i2c: &i2c3 {
 
 &gpio1 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_io>;
 	gpio-line-names =
 	"dc1", "dc2", "", "",
-	"din", "dout", "", "",
+	"sd-vsel", "dout", "", "",
 	"", "", "led-on-red", "led-on-green",
 	"led-ring-red", "led-ring-green", "led-sgn-red", "led-sgn-green",
 	"", "", "", "",
@@ -505,9 +516,21 @@ poe_i2c: &i2c3 {
 	"", "", "", "";
 };
 
+&gpio2 {
+	pinctrl-names = "default";
+	gpio-line-names =
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "",
+	"sd-cdp", "", "", "",
+	"", "", "", "sd-pwr-en",
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "";
+};
+
 &gpio3 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_exp>;
 	gpio-line-names =
 	"", "", "", "",
 	"", "", "", "",
@@ -515,6 +538,19 @@ poe_i2c: &i2c3 {
 	"", "", "", "",
 	"", "", "", "",
 	"", "exp-reset", "", "",
+	"", "", "", "",
+	"", "", "", "";
+};
+
+&gpio5 {
+	pinctrl-names = "default";
+	gpio-line-names =
+	"", "", "", "din",
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "",
+	"", "", "", "",
 	"", "", "", "",
 	"", "", "", "";
 };
@@ -536,7 +572,7 @@ poe_i2c: &i2c3 {
 
 	pinctrl_din: dingrp {
 		fsl,pins = <
-		MX8MN_IOMUXC_GPIO1_IO04_GPIO1_IO4	0
+		MX8MN_IOMUXC_SPDIF_TX_GPIO5_IO3	0
 		>;
 	};
 
@@ -661,6 +697,12 @@ poe_i2c: &i2c3 {
 		>;
 	};
 
+	pinctrl_reg_usdhc2_vmmc: regusdhc2vmmcgrp {
+		fsl,pins = <
+			MX8MN_IOMUXC_SD2_RESET_B_GPIO2_IO19	0x41
+		>;
+	};
+
 	pinctrl_usdhc2: usdhc2grp {
 		fsl,pins = <
 		MX8MN_IOMUXC_SD2_CLK_USDHC2_CLK		0x190
@@ -670,6 +712,7 @@ poe_i2c: &i2c3 {
 		MX8MN_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d0
 		MX8MN_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d0
 		MX8MN_IOMUXC_SD2_WP_USDHC2_WP		0x1d0
+		MX8MN_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0xc1
 		>;
 	};
 
@@ -682,6 +725,7 @@ poe_i2c: &i2c3 {
 		MX8MN_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d4
 		MX8MN_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d4
 		MX8MN_IOMUXC_SD2_WP_USDHC2_WP		0x1d4
+		MX8MN_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0xc1
 		>;
 	};
 
@@ -694,6 +738,7 @@ poe_i2c: &i2c3 {
 		MX8MN_IOMUXC_SD2_DATA2_USDHC2_DATA2	0x1d6
 		MX8MN_IOMUXC_SD2_DATA3_USDHC2_DATA3	0x1d6
 		MX8MN_IOMUXC_SD2_WP_USDHC2_WP		0x1d6
+		MX8MN_IOMUXC_GPIO1_IO04_USDHC2_VSELECT	0xc1
 		>;
 	};
 
