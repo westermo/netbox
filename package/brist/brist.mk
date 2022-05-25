@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-BRIST_VERSION = 1.0
+BRIST_VERSION = 1.1
 BRIST_SOURCE = brist-$(BRIST_VERSION).tar.gz
 BRIST_SITE = https://github.com/westermo/brist/releases/download/$(BRIST_VERSION)
 BRIST_LICENSE = MIT

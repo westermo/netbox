@@ -1,5 +1,6 @@
 # From https://github.com/westermo/brist/releases/
-sha256 5c2e936de7fa2b7b60fd6dbd06f03bbc4fb86724e4694bf3a255625887ca3d58  brist-1.0.tar.gz
+sha256 71da960a8e30507573dd07f9ff802a3b4094113dfc84177e2ee0d040a5db8990  brist-1.1.tar.gz
 
 # Locally calculated
 sha256 01814c5406d6365c8da6ec3f3c67055f1adbf4a67e2852bf6ea9068ea28df2f0  LICENSE
+
