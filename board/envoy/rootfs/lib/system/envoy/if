@@ -1,0 +1,13 @@
+#!/bin/sh
+
+case $(ethtool -i chan0 | awk '/driver: / { print($2); }') in
+    fec)
+	# Driver has an idiosyncratic default setting where IRQs are
+	# coalesced up to 1ms, or until at least 200 packets are
+	# pending. Latency is thus awful in low rate scenarios
+	# (e.g. pinging an idle system). Turn it down to a level where
+	# a sudden spike in ingress traffic will still directly switch
+	# to polled NAPI mode, yet keeps latency within reason.
+	ethtool -C chan0 rx-usecs 40 rx-frames 64
+	;;
+esac
