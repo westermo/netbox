@@ -290,7 +290,7 @@ libvirt, etc.) and create the necessary directories:
 
 ```sh
 $ sudo mkdir -p /var/lib/lxc/images/
-$ sudo mkdir -p /var/lib/lxc/foo
+$ sudo mkdir -p /var/lib/lxc/foo/mnt
 ```
 
 Since we are playing it safe, we've built the Zero (x86_64) NetBox app,
@@ -316,7 +316,7 @@ $ sudo sh -c "cat >>/var/lib/lxc/foo/config" <<-EOF
 	#lxc.hook.pre-mount = pre-mount.sh /var/lib/lxc/images/foo.img /var/lib/lxc/foo/rootfs
 	#lxc.rootfs.path    = overlayfs:/var/lib/lxc/foo/rootfs:/var/lib/lxc/foo/delta0
 	#lxc.rootfs.options = -t squashfs
-	lxc.rootfs.path = loop:/var/lib/lxc/images/netbox-app-zero.img
+	lxc.rootfs.path = loop:/var/lib/lxc/images/foo.img
 	lxc.mount.auto = cgroup:mixed proc:mixed sys:mixed
 	#lxc.mount.entry=run run tmpfs rw,nodev,relatime,mode=755 0 0
 	#lxc.mount.entry=shm dev/shm tmpfs rw,nodev,noexec,nosuid,relatime,mode=1777,create=dir 0 0
