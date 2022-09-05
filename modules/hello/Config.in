@@ -1,0 +1,4 @@
+config MODULE_HELLO
+	bool "hello"
+	help
+	  Example Hello World kernel module.
