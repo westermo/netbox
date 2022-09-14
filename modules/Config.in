@@ -1,5 +1,0 @@
-menu "Westermo Kernel Modules"
-
-	source "kernel/modules/hello/Config.in"
-
-endmenu

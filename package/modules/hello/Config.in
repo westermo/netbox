@@ -1,4 +1,5 @@
 config MODULE_HELLO
 	bool "hello"
+	depends on BR2_LINUX_KERNEL
 	help
 	  Example Hello World kernel module.
