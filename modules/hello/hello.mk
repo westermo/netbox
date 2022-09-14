@@ -1,7 +1,7 @@
 HELLO_VERSION = local
 HELLO_LICENSE = MIT
 HELLO_SITE_METHOD = local
-HELLO_SITE = $(BR2_EXTERNAL_NETBOX_PATH)/package/modules/hello
+HELLO_SITE = $(BR2_EXTERNAL_NETBOX_PATH)/modules/hello
 
 
 

@@ -1,5 +1,5 @@
 menu "Westermo Kernel Modules"
 
-	source "$BR2_EXTERNAL_NETBOX_PATH/package/modules/hello/Config.in"
+	source "$BR2_EXTERNAL_NETBOX_PATH/modules/hello/Config.in"
 
 endmenu
