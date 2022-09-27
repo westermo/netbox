@@ -1,0 +1,155 @@
+#!/bin/sh
+
+TMP_UPGRADE="/tmp/upgrade/"
+filename=""
+
+usage()
+{
+    cat <<EOF
+usage:
+  upgrade <pri|sec|boot> <[URI://][ADDRESS[:PORT]/]FILE | ADDRESS FILE>
+
+  Upgrade primary (main), secondary (backup) or bootloader firmware.
+
+examples:
+  > upgrade pri ftp://192.0.2.1/netbox-os.img
+  > upgrade sec http://myfancywebsite.com/downloads/netbox-os.img
+  > upgrade boot 192.0.2.1 netbox-os.img
+EOF
+}
+
+test_ping()
+{
+    timeout 1s ping $1 -c 1 &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Could not reach host with ping, Terminating.";
+        exit 1;
+    fi
+}
+
+use_wget()
+{
+    host=$(echo $1 | awk -F"/" '{ print $3 }')
+    test_ping $host
+    filename=$(echo $1 | awk -F"/" '{ print $NF }')
+    wget -P $TMP_UPGADE $1
+}
+
+use_tftp()
+{
+    tftp -g -r $2 -l $TMP_UPGRADE$filename $1
+    echo "Dowload finished."
+    return $?
+}
+
+use_ftp()
+{
+    test_ping $1
+    filename=$(echo "$2" | awk -F"/" '{ print $NF }');
+    ftpget $1 $TMP_UPGRADE$filename $2
+    if [ $? -ne 0 ]; then
+        echo "Could not get file via FTP, trying TFTP next."
+        use_tftp $1 $2;
+        return $?
+    fi
+}
+
+get_file()
+{
+    remloc=$(echo "$1" | awk '/ftp/{print}')
+        
+    # If not ftp or tftp then try http
+    if [ -z "$remloc" ]; then
+        remloc=$(echo "$1" | awk '/http/{print}');
+        # If still not found, wrong input from user
+        if [ -z "$remloc" ]; then
+            echo "Incorrect search path";
+            usage
+            exit 1;
+        fi
+        use_wget $remloc
+    # Try get the file via ftp/tftp
+    else
+        host=$(echo "$remloc" | awk -F"/" '{ print $3 }');
+        filepath=$(echo "$remloc" | awk -F"/" '{ print substr($0, index($0,$4)) }');
+        use_ftp $host $filepath
+    fi
+}
+
+upgrade()
+{
+    partition=$1
+    printf "Upgrading partition %s ...... " "$partition"
+    flash_unlock $partition 2> /dev/null
+    flashcp -v $TMP_UPGRADE$filename $partition
+    flash_lock $partition 0 -1 2> /dev/null
+    printf "[Done]\n"
+}
+
+find_mtd()
+{
+    local partname="None"
+    inp=$(echo $1 | awk '{print tolower(substr($0,0,3))}')
+
+    grep "Primary" /proc/mtd > /dev/null
+    if [ $? -eq 1 ]; then
+        if [ "$inp" = "pri" ]; then
+            partname="Linux_main";
+        elif [ "$inp" = "sec" ]; then
+            partname="Linux_backup";
+        elif [ "$inp" = "boo" ]; then
+            partname="Barebox";
+        else
+            exit;
+        fi
+    else
+        if [ "$inp" = "pri" ]; then
+            partname="Primary";
+        elif [ "$inp" = "sec" ]; then
+            partname="Secondary";
+        elif [ "$inp" = "boo" ]; then
+            partname="Bootloader";
+        else
+            exit;
+        fi
+    fi
+
+    if [ "$partname" = "None" ]; then
+        echo "Bad partition name."
+        usage
+        return 1;
+    fi
+
+    mtd=$(awk -v part="$partname" -F":" '$0 ~ part { print $1 }' /proc/mtd)
+
+    if [ -z "$mtd" ]; then
+        echo "Could not find mtd partition '$partname' in /proc/mtd"
+        usage
+        return 1
+    fi
+
+    echo "/dev/$mtd"
+}
+
+if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    usage;
+    exit 0;
+fi
+
+partname="$(find_mtd $1)"
+if [ $? -ne 0 ]; then
+    echo $partname;
+    exit 1;
+fi
+
+if [ $# -eq 2 ]; then
+    get_file $2 
+elif [ $# -eq 3 ]; then
+    use_ftp $2 $3
+else
+    echo "Wrong number of arguments"
+    usage
+    exit 1
+fi
+
+upgrade "$partname"
