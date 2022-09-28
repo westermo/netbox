@@ -32,6 +32,9 @@ mkdir#-p#-m0700	/mnt/system/root.w	helper	none	0	0
 mkdir#-p#-m0700	/mnt/system/home.u	helper	none	0	0
 mkdir#-p#-m0700	/mnt/system/home.w	helper	none	0	0
 
+# Upgrade partition
+mkdir#-p#-m0755	/tmp/upgrade		helper	none	0	0
+
 # Overlay selected parts of the filesystem with persistent storage
 rw-var	/var		overlay	lowerdir=/var,upperdir=/tmp/system/var.u,workdir=/tmp/system/var.w		0	0
 rw-vlib	/var/lib	overlay	lowerdir=/var/lib,upperdir=/mnt/system/varlib.u,workdir=/mnt/system/varlib.w	0	0
