@@ -4,6 +4,7 @@ endif
 
 # Unfortunately this is not always the same as ARCH
 karch-basis   := arm
+karch-byron   := arm
 karch-coronet := powerpc
 karch-dagger  := arm
 karch-envoy   := arm64
