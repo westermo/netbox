@@ -16,6 +16,10 @@ case $plat in
 	arch="arm"
 	load="0x20000000"
 	;;
+    byron)
+	arch="arm"
+	load="0x20000000"
+	;;
     coronet)
 	arch="powerpc"
 	;;
