@@ -1,5 +1,0 @@
-#include <coronet/tbn-cpu.dtsi>
-
-/ {
-	model = "wmo,Viper-208-T8G";
-};

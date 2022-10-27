@@ -1,7 +1,7 @@
 #include <coronet/a12-cpu.dtsi>
 
 / {
-	model = "wmo,Viper-212A-T3G-PoE";
+	model = "wmo,Viper-212A";
 };
 
 &agate {
