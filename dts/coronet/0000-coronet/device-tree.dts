@@ -1,0 +1,5 @@
+#include <coronet/tbn-cpu.dtsi>
+
+/ {
+	model = "wmo,coronet";
+};
