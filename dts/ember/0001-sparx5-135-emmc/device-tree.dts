@@ -1,0 +1,256 @@
+/dts-v1/;
+
+#include "microchip/sparx5.dtsi"
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+
+&cpu0 {
+	enable-method = "spin-table";
+	cpu-release-addr = <0x0 0x0000fff8>;
+};
+
+&cpu1 {
+	enable-method = "spin-table";
+	cpu-release-addr = <0x0 0x0000fff8>;
+};
+
+/ {
+	gpio-restart {
+		compatible = "gpio-restart";
+		gpios = <&gpio 37 GPIO_ACTIVE_LOW>;
+		priority = <200>;
+	};
+
+	psci {
+		status = "disabled";
+	};
+};
+
+&spi0 {
+	pinctrl-0 = <&si2_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+	spi@0 {
+		compatible = "spi-mux";
+		mux-controls = <&mux>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0>; /* CS0 */
+		system_flash: spi-flash@9 {
+			compatible = "jedec,spi-nor";
+			spi-max-frequency = <8000000>;
+			reg = <0x9>; /* SPI */
+			spi-tx-bus-width = <4>;
+			spi-rx-bus-width = <4>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+		};
+	};
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&uart1 {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+};
+
+
+&gpio {
+	i2cmux_pins_i: i2cmux-pins-i {
+	       pins = "GPIO_35", "GPIO_36",
+		      "GPIO_50", "GPIO_51";
+		function = "twi_scl_m";
+		output-low;
+	};
+	i2cmux_s29: i2cmux-0 {
+		pins = "GPIO_35";
+		function = "twi_scl_m";
+		output-high;
+	};
+	i2cmux_s30: i2cmux-1 {
+		pins = "GPIO_36";
+		function = "twi_scl_m";
+		output-high;
+	};
+	i2cmux_s31: i2cmux-2 {
+		pins = "GPIO_50";
+		function = "twi_scl_m";
+		output-high;
+	};
+	i2cmux_s32: i2cmux-3 {
+		pins = "GPIO_51";
+		function = "twi_scl_m";
+		output-high;
+	};
+};
+
+&sgpio1 {
+	status = "okay";
+	microchip,sgpio-port-ranges = <24 31>;
+	gpio@0 {
+		ngpios = <64>;
+	};
+	gpio@1 {
+		ngpios = <64>;
+	};
+};
+
+&mdio0 {
+	status = "ok";
+	phy0: ethernet-phy@0 {
+		reg = <0>;
+	};
+	phy1: ethernet-phy@1 {
+		reg = <1>;
+	};
+	phy2: ethernet-phy@2 {
+		reg = <2>;
+	};
+	phy3: ethernet-phy@3 {
+		reg = <3>;
+	};
+	phy4: ethernet-phy@4 {
+		reg = <4>;
+	};
+	phy5: ethernet-phy@5 {
+		reg = <5>;
+	};
+	phy6: ethernet-phy@6 {
+		reg = <6>;
+	};
+	phy7: ethernet-phy@7 {
+		reg = <7>;
+	};
+	phy8: ethernet-phy@8 {
+		reg = <8>;
+	};
+	phy9: ethernet-phy@9 {
+		reg = <9>;
+	};
+	phy10: ethernet-phy@10 {
+		reg = <10>;
+	};
+	phy11: ethernet-phy@11 {
+		reg = <11>;
+	};
+};
+
+&switch {
+	ethernet-ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port1: port@0 {
+			reg = <0>;
+			label = "eth1";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 13>;
+			phy-handle = <&phy0>;
+			phy-mode = "qsgmii";
+		};
+		port2: port@1 {
+			reg = <1>;
+			label = "eth2";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 13>;
+			phy-handle = <&phy1>;
+			phy-mode = "qsgmii";
+		};
+		port3: port@2 {
+			reg = <2>;
+			label = "eth3";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 13>;
+			phy-handle = <&phy2>;
+			phy-mode = "qsgmii";
+		};
+		port4: port@3 {
+			reg = <3>;
+			label = "eth4";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 13>;
+			phy-handle = <&phy3>;
+			phy-mode = "qsgmii";
+		};
+		port5: port@4 {
+			reg = <4>;
+			label = "eth5";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 14>;
+			phy-handle = <&phy4>;
+			phy-mode = "qsgmii";
+		};
+		port6: port@5 {
+			reg = <5>;
+			label = "eth6";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 14>;
+			phy-handle = <&phy5>;
+			phy-mode = "qsgmii";
+		};
+		port7: port@6 {
+			reg = <6>;
+			label = "eth7";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 14>;
+			phy-handle = <&phy6>;
+			phy-mode = "qsgmii";
+		};
+		port8: port@7 {
+			reg = <7>;
+			label = "eth8";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 14>;
+			phy-handle = <&phy7>;
+			phy-mode = "qsgmii";
+		};
+		port9: port@8 {
+			reg = <8>;
+			label = "eth9";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 15>;
+			phy-handle = <&phy8>;
+			phy-mode = "qsgmii";
+		};
+		port10: port@9 {
+			reg = <9>;
+			label = "eth10";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 15>;
+			phy-handle = <&phy9>;
+			phy-mode = "qsgmii";
+		};
+		port11: port@10 {
+			reg = <10>;
+			label = "eth11";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 15>;
+			phy-handle = <&phy10>;
+			phy-mode = "qsgmii";
+		};
+		port12: port@11 {
+			reg = <11>;
+			label = "eth12";
+			microchip,bandwidth = <1000>;
+			phys = <&serdes 15>;
+			phy-handle = <&phy11>;
+			phy-mode = "qsgmii";
+		};
+	};
+};
+
+&axi {
+	uio0: vcoreiii_switch@600000000 {
+		compatible = "microchip,uio_sparx5_irqmux";
+		reg = <0x6 0x00000000 0x12000000>;
+		reg-names = "origin1_2";
+		status = "okay";
+	};
+};
+
+#include <common/system-flash/128M-dual.dtsi>
