@@ -336,7 +336,15 @@ Uncomment the one you need, see the host's dmesg when `lxc-start` fails
 with mysterious error messages.  For convenience the Debian/Ubuntu is
 uncommented already.
 
-> **Note:** you may have to add the following two lines to your AppArmor
+
+> **Note1:**
+> You may have to create the directory where to mount the container rootfs
+> as it is configured in /var/lib/lxc/foo/config on line 11
+> ```sh
+> $ sudo mkdir -p /var/lib/lxc/foo/mnt
+> ```
+
+> **Note2:** you may have to add the following two lines to your AppArmor
 > profile to enable writable /etc, /var, /home, and /root directories.
 > The file is in `/etc/apparmor.d/lxc/lxc-default-with-mounting`:
 > ```
