@@ -60,7 +60,7 @@ stop_zcip() {
 }
 
 wait_for_ipv6_default_route() {
-	logger -it "$tag" -p daemon.info "$interface: waiting for IPv6 default route to appear ..."
+	logger -t "$tag" -p daemon.info "$interface: waiting for IPv6 default route to appear ..."
 	while [ $IF_WAIT_DELAY -gt 0 ]; do
 		if ip -6 route list 2>/dev/null | grep -q default; then
 			return
@@ -68,12 +68,12 @@ wait_for_ipv6_default_route() {
 		sleep 1
 		: $((IF_WAIT_DELAY -= 1))
 	done
-	logger -it "$tag" -p daemon.info "$interface: IPv6 default route timeout!"
+	logger -t "$tag" -p daemon.info "$interface: IPv6 default route timeout!"
 }
 
 case "$ACTION" in
 	deconfig)
-		logger -it "$tag" -p daemon.debug "$interface: initializing ..."
+		logger -t "$tag" -p daemon.debug "$interface: initializing ..."
 	 	/sbin/ifconfig $interface up
 		/sbin/ifconfig $interface 0.0.0.0
 
@@ -88,14 +88,14 @@ case "$ACTION" in
 		;;
 
 	leasefail|nak)
-		logger -it "$tag" -p daemon.info "$interface: no response from DHCP server"
+		logger -t "$tag" -p daemon.info "$interface: no response from DHCP server"
 		start_zcip
 		;;
 
 	renew|bound)
 		stop_zcip
 
-		logger -it "$tag" -p daemon.info "$interface: got DHCP lease $ip"
+		logger -t "$tag" -p daemon.info "$interface: got DHCP lease $ip"
 		/sbin/ifconfig $interface $ip $BROADCAST $NETMASK
 		if [ -n "$ipv6" ] ; then
 			wait_for_ipv6_default_route
@@ -105,7 +105,7 @@ case "$ACTION" in
 		# Static Routes option and a Router option, the DHCP
 		# client MUST ignore the Router option.
 		if [ -n "$staticroutes" ]; then
-			logger -it "$tag" -p daemon.debug "$interface: deleting routers"
+			logger -t "$tag" -p daemon.debug "$interface: deleting routers"
 			route -n | while read dest gw mask flags metric ref use iface; do
 				[ "$iface" != "$interface" -o "$gw" = "0.0.0.0" ] || \
 					route del -net "$dest" netmask "$mask" gw "$gw" dev "$interface"
@@ -118,7 +118,7 @@ case "$ACTION" in
 				shift 2
 			done
 		elif [ -n "$router" ] ; then
-			logger -it "$tag" -p daemon.debug "$interface: deleting routers"
+			logger -t "$tag" -p daemon.debug "$interface: deleting routers"
 			while route del default gw 0.0.0.0 dev $interface 2> /dev/null; do
 				:
 			done
@@ -146,7 +146,7 @@ case "$ACTION" in
 			echo "search $search_list # $interface" >> $RESOLV_CONF
 
 		for i in $dns ; do
-			logger -it "$tag" -p daemon.debug "$interface: adding dns $i"
+			logger -t "$tag" -p daemon.debug "$interface: adding dns $i"
 			echo "nameserver $i # $interface" >> $RESOLV_CONF
 		done
 		;;
