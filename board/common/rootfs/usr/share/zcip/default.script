@@ -16,7 +16,7 @@ cache="/var/cache/zcip-$interface.cache"
 # zcip should start on boot/resume and various media changes
 case "$1" in
 init)
-	logger -it "$tag" -p daemon.debug "$interface: initializing ..."
+	logger -t "$tag" -p daemon.debug "$interface: initializing ..."
 	/sbin/ifconfig "$interface" up
 	exit 0
 	;;
@@ -27,19 +27,19 @@ config)
 	# remember $ip for $interface, to use on restart
 	echo "$ip" > "$cache"
 
-	logger -it "$tag" -p daemon.info "$interface: setting address $ip"
+	logger -t "$tag" -p daemon.info "$interface: setting address $ip"
 	exec ip address add dev "$interface" \
 		scope link local "$ip/16" broadcast +
 	;;
 
 deconfig)
 	[ "x$ip" = "x" ] && exit 1
-	logger -it "$tag" -p daemon.info "$interface: removing address $ip"
+	logger -t "$tag" -p daemon.info "$interface: removing address $ip"
 	exec ip address del dev "$interface" local "$ip"
 	;;
 
 *)
-	logger -it "$tag" -p daemon.warn "$interface: uknown action $1"
+	logger -t "$tag" -p daemon.warn "$interface: uknown action $1"
 	;;
 esac
 
