@@ -34,6 +34,10 @@ case $plat in
 	arch="arm64"
 	load="0x40000000"
 	;;
+    viper408)
+	arch="arm"
+	load="0x20000000"
+	;;
     zero)
 	arch="x86_64"
 	;;

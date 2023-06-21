@@ -3,9 +3,11 @@ menu "Branding"
 config NETBOX_PLAT
 	string "Single word lower-case identifier for the platform"
 	default "basis"   if BR2_arm926t
+	default "byron"   if BR2_arm926t
 	default "coronet" if BR2_powerpc
 	default "dagger"  if BR2_arm
 	default "envoy"   if BR2_aarch64
+	default "viper408"   if BR2_arm926t
 	default "zero"    if BR2_x86_64
 	default BR2_ARCH
 
