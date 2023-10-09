@@ -3,7 +3,7 @@
 # mdnsd
 #
 ################################################################################
-MDNSD_VERSION = 0.11
+MDNSD_VERSION = 0.12
 MDNSD_SITE = https://github.com/troglobit/mdnsd/releases/download/v$(MDNSD_VERSION)
 MDNSD_LICENSE = BSD-3-Clause
 MDNSD_LICENSE_FILES = LICENSE
