@@ -3,6 +3,7 @@
 
 imagesh=$BR2_EXTERNAL_NETBOX_PATH/support/scripts/image.sh
 fitimagesh=$BR2_EXTERNAL_NETBOX_PATH/support/scripts/fitimage.sh
+fitimagesh_legacy=$BR2_EXTERNAL_NETBOX_PATH/support/scripts/fitimage_legacy.sh
 
 md5()
 {
@@ -62,6 +63,12 @@ if [ "$BR2_TARGET_ROOTFS_SQUASHFS" = "y" ]; then
     if [ "$BR2_LINUX_KERNEL" = "y" ]; then
 	$imagesh "$squash" "$img"
 	md5 "$img"
+
+	if [ "$NETBOX_IMAGE_FIT_LEGACY" ]; then
+	    itb=$(dirname "${img}")/$(basename "${img}" .img).itb
+	    $fitimagesh_legacy "$NETBOX_PLAT" "$squash" "$itb"
+	    md5 "$itb"
+	fi
 
 	if [ "$NETBOX_IMAGE_FIT" ]; then
 	    itb=$(dirname "${img}")/$(basename "${img}" .img).itb
