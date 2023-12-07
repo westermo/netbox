@@ -157,20 +157,20 @@
 					};
 				};
 
-				mv6_port(1, "eth10", &phy1, "gmii");
-				mv6_port(2, "eth9",  &phy2, "gmii");
-				mv6_port(3, "eth8",  &phy3, "gmii");
-				mv6_port(4, "eth7",  &phy4, "gmii");
-				mv6_port(5, "eth6",  &phy5, "gmii");
-				mv6_port(6, "eth5",  &phy6, "gmii");
-				mv6_port(7, "eth4",  &phy7, "gmii");
-				mv6_port(8, "eth3",  &phy8, "gmii");
+				mv6_port(1, 1, "eth10", &phy1, "gmii");
+				mv6_port(2, 2, "eth9",  &phy2, "gmii");
+				mv6_port(3, 3, "eth8",  &phy3, "gmii");
+				mv6_port(4, 4, "eth7",  &phy4, "gmii");
+				mv6_port(5, 5, "eth6",  &phy5, "gmii");
+				mv6_port(6, 6, "eth5",  &phy6, "gmii");
+				mv6_port(7, 7, "eth4",  &phy7, "gmii");
+				mv6_port(8, 8, "eth3",  &phy8, "gmii");
 
 				/* "SFP1" on schematic is connected to
 				 eth2 and vice versa but in the DT we
 				 map eth1<->sfp1. */
-				mv6_port_sfp( 9, "eth2", &sfp2, "1000base-x");
-				mv6_port_sfp(10, "eth1", &sfp1, "1000base-x");
+				mv6_port_sfp( 9, 9, "eth2", &sfp2, "1000base-x");
+				mv6_port_sfp(10, 10, "eth1", &sfp1, "1000base-x");
 			};
 
 			mdio {
@@ -178,14 +178,14 @@
 				#size-cells = <0x0>;
 				interrupt-parent = <&peridot>;
 
-				phy1: mv6_phy(1);
-				phy2: mv6_phy(2);
-				phy3: mv6_phy(3);
-				phy4: mv6_phy(4);
-				phy5: mv6_phy(5);
-				phy6: mv6_phy(6);
-				phy7: mv6_phy(7);
-				phy8: mv6_phy(8);
+				phy1: mv6_phy(1, 1000);
+				phy2: mv6_phy(2, 1000);
+				phy3: mv6_phy(3, 1000);
+				phy4: mv6_phy(4, 1000);
+				phy5: mv6_phy(5, 1000);
+				phy6: mv6_phy(6, 1000);
+				phy7: mv6_phy(7, 1000);
+				phy8: mv6_phy(8, 1000);
 			};
 		};
 	};
