@@ -43,11 +43,11 @@
 				};
 			};
 
-			mv6_port(0, "ethX2" , &aphy0, "gmii");
-			mv6_port(1, "ethX12", &aphy1, "gmii");
-			mv6_port(2, "ethX8" , &aphy2, "gmii");
-			mv6_port(3, "ethX4" , &aphy3, "gmii");
-			mv6_port(4, "ethX3" , &aphy4, "gmii");
+			mv6_port(0, 0, "ethX2" , &aphy0, "gmii");
+			mv6_port(1, 1, "ethX12", &aphy1, "gmii");
+			mv6_port(2, 2, "ethX8" , &aphy2, "gmii");
+			mv6_port(3, 3, "ethX4" , &aphy3, "gmii");
+			mv6_port(4, 4, "ethX3" , &aphy4, "gmii");
 		};
 
 		mdio {
@@ -55,11 +55,11 @@
 			#size-cells = <0x0>;
 			interrupt-parent = <&agate>;
 
-			aphy0: mv6_phy(0);
-			aphy1: mv6_phy(1);
-			aphy2: mv6_phy(2);
-			aphy3: mv6_phy(3);
-			aphy4: mv6_phy(4);
+			aphy0: mv6_phy(0, 1000);
+			aphy1: mv6_phy(1, 1000);
+			aphy2: mv6_phy(2, 1000);
+			aphy3: mv6_phy(3, 1000);
+			aphy4: mv6_phy(4, 1000);
 		};
 	};
 
@@ -91,13 +91,13 @@
 				};
 			};
 
-			mv6_port(0, "ethX1" , &ophy0, "mii");
-			mv6_port(1, "ethX5" , &ophy1, "mii");
-			mv6_port(2, "ethX6" , &ophy2, "mii");
-			mv6_port(3, "ethX7" , &ophy3, "mii");
-			mv6_port(4, "ethX9" , &ophy4, "mii");
-			mv6_port(5, "ethX10", &ophy5, "mii");
-			mv6_port(6, "ethX11", &ophy6, "mii");
+			mv6_port(0, 0, "ethX1" , &ophy0, "mii");
+			mv6_port(1, 1, "ethX5" , &ophy1, "mii");
+			mv6_port(2, 2, "ethX6" , &ophy2, "mii");
+			mv6_port(3, 3, "ethX7" , &ophy3, "mii");
+			mv6_port(4, 4, "ethX9" , &ophy4, "mii");
+			mv6_port(5, 5, "ethX10", &ophy5, "mii");
+			mv6_port(6, 6, "ethX11", &ophy6, "mii");
 		};
 
 		mdio {
@@ -105,13 +105,13 @@
 			#size-cells = <0>;
 			interrupt-parent = <&opal>;
 
-			ophy0: mv6_phy(0);
-			ophy1: mv6_phy(1);
-			ophy2: mv6_phy(2);
-			ophy3: mv6_phy(3);
-			ophy4: mv6_phy(4);
-			ophy5: mv6_phy(5);
-			ophy6: mv6_phy(6);
+			ophy0: mv6_phy(0, 100);
+			ophy1: mv6_phy(1, 100);
+			ophy2: mv6_phy(2, 100);
+			ophy3: mv6_phy(3, 100);
+			ophy4: mv6_phy(4, 100);
+			ophy5: mv6_phy(5, 100);
+			ophy6: mv6_phy(6, 100);
 		};
 	};
 };

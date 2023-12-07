@@ -20,14 +20,14 @@
 			#address-cells = <0x1>;
 			#size-cells = <0x0>;
 
-			mv6_port(1, "ethX3", &phy1, "gmii");
-			mv6_port(2, "ethX4", &phy2, "gmii");
-			mv6_port(3, "ethX8", &phy3, "gmii");
-			mv6_port(4, "ethX6", &phy4, "gmii");
-			mv6_port(5, "ethX7", &phy5, "gmii");
-			mv6_port(6, "ethX5", &phy6, "gmii");
-			mv6_port(7, "ethX2", &phy7, "gmii");
-			mv6_port(8, "ethX1", &phy8, "gmii");
+			mv6_port(1, 1, "ethX3", &phy1, "gmii");
+			mv6_port(2, 2, "ethX4", &phy2, "gmii");
+			mv6_port(3, 3, "ethX8", &phy3, "gmii");
+			mv6_port(4, 4, "ethX6", &phy4, "gmii");
+			mv6_port(5, 5, "ethX7", &phy5, "gmii");
+			mv6_port(6, 6, "ethX5", &phy6, "gmii");
+			mv6_port(7, 7, "ethX2", &phy7, "gmii");
+			mv6_port(8, 8, "ethX1", &phy8, "gmii");
 		};
 
 		mdio {
@@ -35,14 +35,14 @@
 			#size-cells = <0x0>;
 			interrupt-parent = <&peridot>;
 
-			phy1: mv6_phy(1);
-			phy2: mv6_phy(2);
-			phy3: mv6_phy(3);
-			phy4: mv6_phy(4);
-			phy5: mv6_phy(5);
-			phy6: mv6_phy(6);
-			phy7: mv6_phy(7);
-			phy8: mv6_phy(8);
+			phy1: mv6_phy(1, 1000);
+			phy2: mv6_phy(2, 1000);
+			phy3: mv6_phy(3, 1000);
+			phy4: mv6_phy(4, 1000);
+			phy5: mv6_phy(5, 1000);
+			phy6: mv6_phy(6, 1000);
+			phy7: mv6_phy(7, 1000);
+			phy8: mv6_phy(8, 1000);
 		};
 	};
 };
