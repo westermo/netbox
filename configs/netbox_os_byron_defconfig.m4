@@ -8,5 +8,3 @@ BR2_LINUX_KERNEL_INTREE_DTS_NAME="versatile-pb"
 dnl Build FIT image for U-Boot, useful on all Byron builds
 NETBOX_IMAGE_FIT=y
 
-NETBOX_PLAT_byron=y
-
