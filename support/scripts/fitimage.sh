@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 die() {
     echo "$1" >&2
@@ -9,42 +9,46 @@ die() {
 plat=$1
 squash=$2
 out=$3
-kernelcomp="none";
-dtbcomp="none";
 opts=""
+kernelcomp="gzip"
+dtbcomp="gzip"
 
 case $plat in
     basis)
 	arch="arm"
 	load="0x20000000"
 	opts="-E -p 0x1000"
+	kernelcomp="none"
+	dtbcomp="none"
 	;;
     byron)
 	arch="arm"
-	kernelcomp="gzip"
 	;;
     coronet)
 	arch="powerpc"
-	kernelcomp="xz"
 	;;
     dagger)
 	arch="arm"
-	kernelcomp="xz"
 	;;
     envoy)
 	arch="arm64"
-	kernelcomp="xz"
 	;;
     ember)
 	arch="arm64"
 	load="0x40000000"
 	opts="-E -p 0x1000"
+	kernelcomp="none"
+	dtbcomp="none"
 	;;
     zero)
 	arch="x86_64"
+	kernelcomp="none"
+	dtbcomp="none"
 	;;
     *)
 	arch="$plat"
+	kernelcomp="none"
+	dtbcomp="none"
 	;;
 esac
 
@@ -74,7 +78,7 @@ if [ "${kernelcomp}" != "none" ]; then
 fi
 
 dtbs=$workdir/boot/*/device-tree.dtb
-dtbs_default=$(echo ${dtbs} | cut -d " " -f1 | cut -d "/" -f5)
+dtbs_default=$(echo ${dtbs} | cut -d "-" -f1 | cut -d "/" -f5)
 
 # If not specified, set dtbcomp to same method as kernelcomp.
 if [ -z "${dtbcomp}" ]; then
@@ -89,13 +93,27 @@ truncate -s %4k $kernel $dtbs
 for dtb in $dtbs; do
     name=$(basename $(dirname $dtb) | cut -d "-" -f1)
 
+    case ${dtbcomp} in
+        "gzip")
+            gzip -c -9 ${dtb} > ${workdir}/boot/$(basename ${dtb}).${dtbcomp}
+            ;;
+        "xz")
+            xz --check=crc32 -c ${dtb} > ${workdir}/boot/$(basename ${dtb}).${dtbcomp}
+            ;;
+        "zstd")
+            zstd -19 --stdout ${dtb} > ${workdir}/boot/$(basename ${dtb}).${dtbcomp}
+            ;;
+        "none")
+            ;;
+    esac
+
     cat <<EOF >>$workdir/netbox-dtbs.itsi
 		fdt-$name {
 			description = "dtb";
 			type = "flat_dt";
 			arch = "$arch";
 			compression = "$dtbcomp";
-			data = /incbin/("$dtb");
+			data = /incbin/("${workdir}/boot/$(basename ${dtb}).${dtbcomp}");
 			hash {
 				algo = "sha256";
 			};
@@ -104,6 +122,7 @@ EOF
     cat <<EOF >>$workdir/netbox-cfgs.itsi
 		$name {
 			description = "$name";
+			compatible = "$name";
 			kernel = "kernel-1";
 			ramdisk = "ramdisk-1";
 			fdt = "fdt-$name";
@@ -119,7 +138,7 @@ cat <<EOF >$workdir/netbox.its
 
 / {
 	timestamp = <$(date +%s)>;
-	description = "Netbox ($plat)";
+	description = "${plat^}/Standard";
 	creator = "netbox";
 	#address-cells = <0x1>;
 
