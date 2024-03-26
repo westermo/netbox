@@ -92,16 +92,18 @@ truncate -s %4k $kernel $dtbs
 
 for dtb in $dtbs; do
     name=$(basename $(dirname $dtb) | cut -d "-" -f1)
+    fullname=$(basename $(dirname $dtb))
+    filename=$(basename ${dtb}).${dtbcomp}
 
     case ${dtbcomp} in
         "gzip")
-            gzip -c -9 ${dtb} > ${workdir}/boot/$(basename ${dtb}).${dtbcomp}
+	    gzip -c -9 ${dtb} > ${workdir}/boot/$fullname/$filename
             ;;
         "xz")
-            xz --check=crc32 -c ${dtb} > ${workdir}/boot/$(basename ${dtb}).${dtbcomp}
+            xz --check=crc32 -c ${dtb} > ${workdir}/boot/$fullname/$filename
             ;;
         "zstd")
-            zstd -19 --stdout ${dtb} > ${workdir}/boot/$(basename ${dtb}).${dtbcomp}
+            zstd -19 --stdout ${dtb} > ${workdir}/boot/$fullname/$filename
             ;;
         "none")
             ;;
@@ -113,7 +115,7 @@ for dtb in $dtbs; do
 			type = "flat_dt";
 			arch = "$arch";
 			compression = "$dtbcomp";
-			data = /incbin/("${workdir}/boot/$(basename ${dtb}).${dtbcomp}");
+			data = /incbin/("${workdir}/boot/$fullname/$filename");
 			hash {
 				algo = "sha256";
 			};
