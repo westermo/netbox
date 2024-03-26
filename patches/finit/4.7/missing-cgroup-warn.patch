@@ -1,0 +1,23 @@
+--- a/src/cgroup.c
++++ b/src/cgroup.c
+@@ -61,6 +61,7 @@
+ 
+ static void cgset(const char *path, char *ctrl, char *prop)
+ {
++	char fpath[PATH_MAX];
+ 	char *val;
+ 
+ 	dbg("path %s, ctrl %s, prop %s", path ?: "NIL", ctrl ?: "NIL", prop ?: "NIL");
+@@ -92,6 +93,12 @@
+ 		return;
+ 	}
+ 
++	snprintf(fpath, sizeof(fpath), "%s/%s.%s", path, ctrl, prop);
++	if (!fexist(fpath)) {
++		_w("Missing cgroup setting: %s", fpath);
++		return;
++	}
++
+ 	dbg("%s/%s.%s <= %s", path, ctrl, prop, val);
+ 	if (fnwrite(val, "%s/%s.%s", path, ctrl, prop))
+ 		err(1, "Failed setting %s/%s.%s = %s", path, ctrl, prop, val);
