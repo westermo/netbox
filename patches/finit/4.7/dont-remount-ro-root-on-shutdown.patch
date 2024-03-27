@@ -1,0 +1,12 @@
+--- a/src/sig.c
++++ b/src/sig.c
+@@ -371,7 +371,8 @@
+ 	sync();
+ 	run("mount -n -o remount,ro -t dummytype dummydev /", NULL);
+ 	run("mount -n -o remount,ro dummydev /", NULL);
+-	run("mount -n -o remount,ro /", "mount");
++	if (!ismnt("/proc/mounts", "/", "ro"))
++		run("mount -n -o remount,ro /", "mount");
+ 
+ 	/* Call mdadm to mark any RAID array(s) as clean before halting. */
+ 	mdadm_wait();
