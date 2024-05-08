@@ -1,0 +1,5 @@
+config BR2_PACKAGE_MDNSD_FINIT
+	bool mdnsd-finit
+	select BR2_PACKAGE_AVAHI
+	help
+	  Advertises the initial $(HOSTNAME).local and network.local with Avahi.
