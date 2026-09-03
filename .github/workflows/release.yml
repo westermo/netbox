@@ -45,7 +45,7 @@ jobs:
         platform: [basis, coronet, dagger, envoy, ember, zero]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set Build Variables
         id: vars
         run: |
@@ -54,7 +54,7 @@ jobs:
           echo ::set-output name=tag::${NETBOX_VER}
           echo ::set-output name=dir::netbox-${NETBOX_TUPLE}-${NETBOX_VER}
           echo ::set-output name=tgz::netbox-${NETBOX_TUPLE}-${NETBOX_VER}.tar.gz
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: dl/
           key: dl-${{ matrix.platform }}-${{ matrix.profile }}-${{ hashFiles('.git/modules/buildroot/HEAD', 'configs/*', 'package/*/*.hash') }}
